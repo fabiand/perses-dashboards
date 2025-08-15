@@ -391,7 +391,7 @@
             {
               "x": 14,
               "y": 0,
-              "width": 7,
+              "width": 4,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/OverCommitLevel"
@@ -400,7 +400,7 @@
             {
               "x": 14,
               "y": 7,
-              "width": 7,
+              "width": 4,
               "height": 5,
               "content": {
                 "$ref": "#/spec/panels/UtilizationOverCommitLevel"
