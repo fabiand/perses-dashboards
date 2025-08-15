@@ -1,0 +1,105 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "oc",
+    "createdAt": "2025-08-04T14:00:41.955226593Z",
+    "updatedAt": "2025-08-04T14:00:41.955226593Z",
+    "version": 0,
+    "project": "fabiand-test"
+  },
+  "spec": {
+    "display": {
+      "name": "OC"
+    },
+    "panels": {
+      "Memoryutilization": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Memory utilization",
+            "description": "Utilization Fraction of allocatable memory (to workloads) that is not utilized.  0 means all memory is free, no utilization. 1 means all memory is used, full utilization."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "1 - (label_replace(node_memory_MemAvailable_bytes, \"node\",  \"$1\", \"instance\", \"(.+)\")\n / \non (node) kube_node_status_allocatable{resource=\"memory\"})"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "Memoryreservation": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Memory reservation",
+            "description": "Reservation Fraction of allocatable memory (to workloads) that has been requested.  0 means all memory is not reserved, no memory is requested. 1 means all memory is reserved, all memory is requested."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum by (node) (kube_pod_resource_request{resource=\"memory\"})\n / \nsum by (node) (kube_node_status_allocatable{resource=\"memory\"})"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Memory",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/Memoryutilization"
+              }
+            },
+            {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/Memoryreservation"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "variables": [],
+    "duration": "1h",
+    "refreshInterval": "0s"
+  }
+}
