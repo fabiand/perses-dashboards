@@ -40,8 +40,7 @@
                 "show": true,
                 "label": "",
                 "format": {
-                  "unit": "decimal",
-                  "shortValues": true
+                  "unit": "bytes"
                 },
                 "min": 0
               }
@@ -100,8 +99,7 @@
                 "show": true,
                 "label": "",
                 "format": {
-                  "unit": "decimal",
-                  "shortValues": true
+                  "unit": "bytes"
                 },
                 "min": 0
               }
@@ -157,8 +155,7 @@
                 "show": true,
                 "label": "",
                 "format": {
-                  "unit": "decimal",
-                  "shortValues": true
+                  "unit": "bytes"
                 },
                 "min": 0
               }
@@ -208,7 +205,18 @@
           },
           "plugin": {
             "kind": "TimeSeriesChart",
-            "spec": {}
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "yAxis": {
+                "show": true,
+                "label": "",
+                "format": {
+                  "unit": "decimal"
+                }
+              }
+            }
           },
           "queries": [
             {
@@ -217,11 +225,12 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(node_pressure_memory_waiting_seconds_total{instance=~\"$node\"})",
+                    "query": "sum(rate(node_pressure_memory_waiting_seconds_total{instance=~\"$node\"}[1m]))",
                     "datasource": {
                       "kind": "PrometheusDatasource",
                       "name": "globalbleeding"
-                    }
+                    },
+                    "seriesNameFormat": "Pressure - Waiting seconds"
                   }
                 }
               }
@@ -272,7 +281,7 @@
               "x": 0,
               "y": 17,
               "width": 24,
-              "height": 4,
+              "height": 5,
               "content": {
                 "$ref": "#/spec/panels/Pressure"
               }
