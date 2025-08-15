@@ -1,27 +1,51 @@
 {
   "kind": "Dashboard",
   "metadata": {
-    "name": "oc",
-    "createdAt": "2025-08-04T14:00:41.955226593Z",
-    "updatedAt": "2025-08-04T14:00:41.955226593Z",
-    "version": 0,
-    "project": "fabiand-test"
+    "name": "test",
+    "createdAt": "2025-08-15T09:25:39.50457563Z",
+    "updatedAt": "2025-08-15T09:38:29.170220969Z",
+    "version": 2,
+    "project": "test"
   },
   "spec": {
     "display": {
-      "name": "OC"
+      "name": "test"
     },
     "panels": {
-      "Memoryutilization": {
+      "Virtualmemoryallocation": {
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Memory utilization",
-            "description": "Utilization Fraction of allocatable memory (to workloads) that is not utilized.  0 means all memory is free, no utilization. 1 means all memory is used, full utilization."
+            "name": "Virtual"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
-            "spec": {}
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "visual": {
+                "lineWidth": 1.25,
+                "areaOpacity": 0,
+                "pointRadius": 2.75,
+                "connectNulls": false,
+                "display": "line"
+              },
+              "thresholds": {
+                "mode": "percent",
+                "steps": []
+              },
+              "querySettings": [],
+              "yAxis": {
+                "show": true,
+                "label": "",
+                "format": {
+                  "unit": "decimal",
+                  "shortValues": true
+                },
+                "min": 0
+              }
+            }
           },
           "queries": [
             {
@@ -30,7 +54,28 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "1 - (label_replace(node_memory_MemAvailable_bytes, \"node\",  \"$1\", \"instance\", \"(.+)\")\n / \non (node) kube_node_status_allocatable{resource=\"memory\"})"
+                    "query": "sum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "globalbleeding"
+                    },
+                    "seriesNameFormat": "Sum of virtual memory allocatoins"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"})",
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "globalbleeding"
+                    },
+                    "seriesNameFormat": "Allocatable memory"
                   }
                 }
               }
@@ -42,8 +87,124 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Memory reservation",
-            "description": "Reservation Fraction of allocatable memory (to workloads) that has been requested.  0 means all memory is not reserved, no memory is requested. 1 means all memory is reserved, all memory is requested."
+            "name": "Reservation (requests)"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "thresholds": {
+                "steps": [],
+                "mode": "percent"
+              },
+              "yAxis": {
+                "show": true,
+                "label": "",
+                "format": {
+                  "unit": "decimal",
+                  "shortValues": true
+                },
+                "min": 0
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(kube_pod_resource_request{resource=\"memory\", node=~\"$node\"})",
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "globalbleeding"
+                    },
+                    "seriesNameFormat": "Amount of reserved memory"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"})",
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "globalbleeding"
+                    },
+                    "seriesNameFormat": "Allocatable memory"
+                  }
+                }
+              }
+            }
+          ],
+          "links": []
+        }
+      },
+      "Utilization": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Utilization"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "show": true,
+                "label": "",
+                "format": {
+                  "unit": "decimal",
+                  "shortValues": true
+                },
+                "min": 0
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})",
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "globalbleeding"
+                    },
+                    "seriesNameFormat": "Utilization"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"})",
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "globalbleeding"
+                    },
+                    "seriesNameFormat": "Allocatable"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "Pressure": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Pressure"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -56,7 +217,11 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum by (node) (kube_pod_resource_request{resource=\"memory\"})\n / \nsum by (node) (kube_node_status_allocatable{resource=\"memory\"})"
+                    "query": "sum(node_pressure_memory_waiting_seconds_total{instance=~\"$node\"})",
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "globalbleeding"
+                    }
                   }
                 }
               }
@@ -79,27 +244,117 @@
             {
               "x": 0,
               "y": 0,
-              "width": 12,
+              "width": 24,
               "height": 6,
               "content": {
-                "$ref": "#/spec/panels/Memoryutilization"
+                "$ref": "#/spec/panels/Virtualmemoryallocation"
               }
             },
             {
               "x": 0,
               "y": 6,
-              "width": 12,
-              "height": 6,
+              "width": 24,
+              "height": 5,
               "content": {
                 "$ref": "#/spec/panels/Memoryreservation"
+              }
+            },
+            {
+              "x": 0,
+              "y": 11,
+              "width": 24,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/Utilization"
+              }
+            },
+            {
+              "x": 0,
+              "y": 17,
+              "width": 24,
+              "height": 4,
+              "content": {
+                "$ref": "#/spec/panels/Pressure"
               }
             }
           ]
         }
       }
     ],
-    "variables": [],
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "node",
+          "display": {
+            "name": "Node"
+          },
+          "defaultValue": "$__all",
+          "allowAllValue": true,
+          "allowMultiple": false,
+          "customAllValue": ".*",
+          "sort": "alphabetical-ci-asc",
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "labelName": "node",
+              "datasource": {
+                "kind": "PrometheusDatasource",
+                "name": "globalbleeding"
+              }
+            }
+          }
+        }
+      }
+    ],
     "duration": "1h",
-    "refreshInterval": "0s"
+    "refreshInterval": "0s",
+    "datasources": {
+      "bleeding": {
+        "default": true,
+        "plugin": {
+          "kind": "PrometheusDatasource",
+          "spec": {
+            "proxy": {
+              "kind": "HTTPProxy",
+              "spec": {
+                "allowedEndpoints": [
+                  {
+                    "endpointPattern": "/api/v1/labels",
+                    "method": "POST"
+                  },
+                  {
+                    "endpointPattern": "/api/v1/series",
+                    "method": "POST"
+                  },
+                  {
+                    "endpointPattern": "/api/v1/metadata",
+                    "method": "GET"
+                  },
+                  {
+                    "endpointPattern": "/api/v1/query",
+                    "method": "POST"
+                  },
+                  {
+                    "endpointPattern": "/api/v1/query_range",
+                    "method": "POST"
+                  },
+                  {
+                    "endpointPattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
+                    "method": "GET"
+                  },
+                  {
+                    "endpointPattern": "/api/v1/parse_query",
+                    "method": "POST"
+                  }
+                ],
+                "secret": "bleeding",
+                "url": "https://prometheus-k8s-openshift-monitoring.apps.bleeding.cnv.engineering.redhat.com/"
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
