@@ -193,6 +193,22 @@
                   }
                 }
               }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(node_memory_MemAvailable_bytes{instance=~\"$node\"})",
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "globalbleeding"
+                    },
+                    "seriesNameFormat": "Available"
+                  }
+                }
+              }
             }
           ]
         }
@@ -204,18 +220,13 @@
             "name": "Pressure"
           },
           "plugin": {
-            "kind": "TimeSeriesChart",
+            "kind": "StatChart",
             "spec": {
-              "legend": {
-                "position": "bottom"
+              "calculation": "last-number",
+              "format": {
+                "unit": "decimal"
               },
-              "yAxis": {
-                "show": true,
-                "label": "",
-                "format": {
-                  "unit": "decimal"
-                }
-              }
+              "sparkline": {}
             }
           },
           "queries": [
@@ -231,6 +242,97 @@
                       "name": "globalbleeding"
                     },
                     "seriesNameFormat": "Pressure - Waiting seconds"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "OverCommitLevel": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Virtual Over Commit Level"
+          },
+          "plugin": {
+            "kind": "GaugeChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "unit": "percent-decimal"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 0.8
+                  },
+                  {
+                    "value": 1.2,
+                    "color": "#EE6C6C"
+                  }
+                ]
+              },
+              "max": 2
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n/\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"})",
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "globalbleeding"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "UtilizationOverCommitLevel": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Utilization Over Commit Level"
+          },
+          "plugin": {
+            "kind": "GaugeChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "unit": "percent-decimal"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 0.8
+                  },
+                  {
+                    "value": 0.9,
+                    "color": "#EE6C6C"
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})\n/\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"})",
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "globalbleeding"
+                    }
                   }
                 }
               }
@@ -253,16 +355,16 @@
             {
               "x": 0,
               "y": 0,
-              "width": 24,
-              "height": 6,
+              "width": 14,
+              "height": 7,
               "content": {
                 "$ref": "#/spec/panels/Virtualmemoryallocation"
               }
             },
             {
               "x": 0,
-              "y": 6,
-              "width": 24,
+              "y": 12,
+              "width": 14,
               "height": 5,
               "content": {
                 "$ref": "#/spec/panels/Memoryreservation"
@@ -270,9 +372,9 @@
             },
             {
               "x": 0,
-              "y": 11,
-              "width": 24,
-              "height": 6,
+              "y": 7,
+              "width": 14,
+              "height": 5,
               "content": {
                 "$ref": "#/spec/panels/Utilization"
               }
@@ -280,10 +382,28 @@
             {
               "x": 0,
               "y": 17,
-              "width": 24,
-              "height": 5,
+              "width": 14,
+              "height": 3,
               "content": {
                 "$ref": "#/spec/panels/Pressure"
+              }
+            },
+            {
+              "x": 14,
+              "y": 0,
+              "width": 7,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/OverCommitLevel"
+              }
+            },
+            {
+              "x": 14,
+              "y": 7,
+              "width": 7,
+              "height": 5,
+              "content": {
+                "$ref": "#/spec/panels/UtilizationOverCommitLevel"
               }
             }
           ]
