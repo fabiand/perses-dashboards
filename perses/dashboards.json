@@ -3,8 +3,8 @@
   "metadata": {
     "name": "test",
     "createdAt": "2025-08-15T09:25:39.50457563Z",
-    "updatedAt": "2025-08-15T16:14:18.431597785Z",
-    "version": 19,
+    "updatedAt": "2025-08-16T20:46:02.28706731Z",
+    "version": 25,
     "project": "test"
   },
   "spec": {
@@ -54,7 +54,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"})",
+                    "query": "sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})",
                     "seriesNameFormat": "Allocatable memory"
                   }
                 }
@@ -67,7 +67,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Virtual Overcommit Level"
+            "name": "Virtual Overcommit Level",
+            "description": "Overcommit ratio based on the allocated virtual memory to VMs"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -97,7 +98,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n/\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"})"
+                    "query": "sum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n/\n(sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"}))"
                   }
                 }
               }
@@ -118,7 +119,48 @@
               "format": {
                 "unit": "decimal"
               },
-              "sparkline": {}
+              "mappings": [
+                {
+                  "kind": "Range",
+                  "spec": {
+                    "from": 1,
+                    "result": {
+                      "color": "#FFCC00",
+                      "value": ""
+                    },
+                    "to": 5
+                  }
+                },
+                {
+                  "kind": "Range",
+                  "spec": {
+                    "from": 5,
+                    "result": {
+                      "color": "#FF9F1C",
+                      "value": ""
+                    },
+                    "to": 7
+                  }
+                },
+                {
+                  "kind": "Range",
+                  "spec": {
+                    "from": 7,
+                    "result": {
+                      "color": "#EA4747",
+                      "value": ""
+                    }
+                  }
+                }
+              ],
+              "sparkline": {},
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 1
+                  }
+                ]
+              }
             }
           },
           "queries": [
@@ -129,7 +171,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(rate(node_pressure_memory_waiting_seconds_total{instance=~\"$node\"}[1m]))",
-                    "seriesNameFormat": "Pressure - Waiting seconds"
+                    "seriesNameFormat": "Waiting"
                   }
                 }
               }
@@ -164,7 +206,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})",
-                    "seriesNameFormat": "Utilization"
+                    "seriesNameFormat": "Virtualization Utilization"
                   }
                 }
               }
@@ -175,7 +217,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"})",
+                    "query": "sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})",
                     "seriesNameFormat": "Allocatable"
                   }
                 }
@@ -187,8 +229,8 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(node_memory_MemAvailable_bytes{instance=~\"$node\"})",
-                    "seriesNameFormat": "Available"
+                    "query": "sum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})",
+                    "seriesNameFormat": "In use and committed"
                   }
                 }
               }
@@ -199,7 +241,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(container_memory_working_set_bytes) - sum(container_memory_working_set_bytes{pod=~\"virt-launcher.*\"})",
+                    "query": "sum(container_memory_rss)\n-\nsum(container_memory_rss{pod=~\"virt-launcher.*\"})",
                     "seriesNameFormat": "Container usage (without virt)"
                   }
                 }
@@ -262,7 +304,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Actual Overcommit Level"
+            "name": "Actual Overcommit Level",
+            "description": "Overcommit level based on the current utilization of the cluster"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -291,7 +334,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})\n/\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"})"
+                    "query": "sum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})\n/\n(sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"}))"
                   }
                 }
               }
@@ -352,7 +395,8 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"})",
+                    "minStep": "",
+                    "query": "sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})",
                     "seriesNameFormat": "Allocatable memory"
                   }
                 }
@@ -481,6 +525,7 @@
       }
     ],
     "duration": "1h",
-    "refreshInterval": "0s"
+    "refreshInterval": "0s",
+    "datasources": {}
   }
 }
