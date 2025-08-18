@@ -294,7 +294,8 @@
                             position: bottom
                         thresholds:
                             steps:
-                                - value: 0.9
+                                - color: '#EE6C6C'
+                                  value: 0.9
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
