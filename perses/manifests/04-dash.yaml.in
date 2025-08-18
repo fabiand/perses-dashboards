@@ -149,15 +149,18 @@
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
-                                query: sum(kubevirt_vmi_memory_used_bytes{node=~"$node"})
-                                seriesNameFormat: Virtualization Utilization
+                                query: |-
+                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
+                                seriesNameFormat: Node memory utilization (with virt)
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
-                                query: sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                seriesNameFormat: Allocatable
+                                query: sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                seriesNameFormat: Node memory capacity
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
@@ -167,17 +170,9 @@
                                     sum(node_memory_MemTotal_bytes{instance=~"$node"})
                                     -
                                     sum(node_memory_MemAvailable_bytes{instance=~"$node"})
-                                seriesNameFormat: In use and committed
-                    - kind: TimeSeriesQuery
-                      spec:
-                        plugin:
-                            kind: PrometheusTimeSeriesQuery
-                            spec:
-                                query: |-
-                                    sum(container_memory_rss)
                                     -
-                                    sum(container_memory_rss{pod=~"virt-launcher.*"})
-                                seriesNameFormat: Container usage (without virt)
+                                    sum(kubevirt_vmi_memory_used_bytes{node=~"$node"})
+                                seriesNameFormat: Node memory utilization (without virt)
         UtilizationDsitribution:
             kind: Panel
             spec:
@@ -269,14 +264,37 @@
                             spec:
                                 minStep: ""
                                 query: sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                seriesNameFormat: Allocatable memory
+                                seriesNameFormat: Node allocatable
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
-                                query: sum(kubevirt_vmi_memory_domain_bytes{node=~"$node"})
-                                seriesNameFormat: Sum of virtual memory allocatoins
+                                query: |-
+                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    -
+                                    (
+                                    sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    +
+                                    sum(kubevirt_vmi_memory_domain_bytes{node=~"$node"})
+                                seriesNameFormat: VM assigned virtual memory
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    -
+                                    sum(kubevirt_vmi_memory_used_bytes{node=~"$node"})
+                                seriesNameFormat: Node memory utilization (without virt)
     layouts:
         - kind: Grid
           spec:
