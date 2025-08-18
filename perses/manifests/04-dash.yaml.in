@@ -70,6 +70,7 @@
                                     (
                                     sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
                                     )
+                                seriesNameFormat: Virtual Overcomit Level
         Pressure:
             kind: Panel
             spec:
@@ -120,7 +121,7 @@
             kind: Panel
             spec:
                 display:
-                    name: Utilization & Requests
+                    name: Physical memory utilization & requests
                     description: This is showing the total system utilization (split between virt and non virt workloads). In addition the current plan (requests) are shown in order to to show how much available memory the scheduler is seeing.
                 plugin:
                     kind: TimeSeriesChart
@@ -254,11 +255,12 @@
                                     (
                                     sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
                                     )
+                                seriesNameFormat: Actual Overcommit Level
         Virtualmemoryallocation:
             kind: Panel
             spec:
                 display:
-                    name: Virtual
+                    name: Virtual Memory assignment
                     description: The virtual memory assignment is showing the worst-case scenario if all virtual memory was used right now. The assigned virtual memory is shown on top of the non virtualization related memory utilization. The current utiliztaion plus worst-case virtual memory utilization is indiacting the worst case memor overcommittment.
                 plugin:
                     kind: TimeSeriesChart
