@@ -21,42 +21,10 @@
                 spec:
                     datasource:
                         kind: PrometheusDatasource
-                        name: globalbleeding
+                        name: default
                     labelName: node
             name: node
     panels:
-        Memoryreservation:
-            kind: Panel
-            spec:
-                display:
-                    name: Reservation (requests)
-                plugin:
-                    kind: TimeSeriesChart
-                    spec:
-                        thresholds:
-                            mode: percent
-                            steps: []
-                        yAxis:
-                            format:
-                                unit: bytes
-                            label: ""
-                            min: 0
-                            show: true
-                queries:
-                    - kind: TimeSeriesQuery
-                      spec:
-                        plugin:
-                            kind: PrometheusTimeSeriesQuery
-                            spec:
-                                query: sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                seriesNameFormat: Allocatable memory
-                    - kind: TimeSeriesQuery
-                      spec:
-                        plugin:
-                            kind: PrometheusTimeSeriesQuery
-                            spec:
-                                query: sum(kube_pod_resource_request{resource="memory", node=~"$node"})
-                                seriesNameFormat: Amount of reserved memory
         OverCommitLevel:
             kind: Panel
             spec:
@@ -90,11 +58,13 @@
             spec:
                 display:
                     name: Pressure
+                    description: The pressure is indicating if workloads are waiting for memory.
                 plugin:
                     kind: StatChart
                     spec:
                         calculation: last-number
                         format:
+                            shortValues: true
                             unit: decimal
                         mappings:
                             - kind: Range
@@ -133,10 +103,24 @@
             kind: Panel
             spec:
                 display:
-                    name: Utilization
+                    name: Utilization & Requests
+                    description: This is showing the total system utilization (split between virt and non virt workloads). In addition the current plan (requests) are shown in order to to show how much available memory the scheduler is seeing.
                 plugin:
                     kind: TimeSeriesChart
                     spec:
+                        querySettings:
+                            - colorMode: fixed
+                              colorValue: '#555'
+                              queryIndex: 0
+                            - colorMode: fixed
+                              colorValue: '#EE6C6C'
+                              queryIndex: 1
+                            - colorMode: fixed
+                              colorValue: '#643535'
+                              queryIndex: 2
+                            - colorMode: fixed
+                              colorValue: '#32466d'
+                              queryIndex: 3
                         yAxis:
                             format:
                                 unit: bytes
@@ -144,16 +128,6 @@
                             min: 0
                             show: true
                 queries:
-                    - kind: TimeSeriesQuery
-                      spec:
-                        plugin:
-                            kind: PrometheusTimeSeriesQuery
-                            spec:
-                                query: |-
-                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
-                                    -
-                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
-                                seriesNameFormat: Node memory utilization (with virt)
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
@@ -170,9 +144,32 @@
                                     sum(node_memory_MemTotal_bytes{instance=~"$node"})
                                     -
                                     sum(node_memory_MemAvailable_bytes{instance=~"$node"})
+                                seriesNameFormat: Node memory utilization (with virt)
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
                                     -
                                     sum(kubevirt_vmi_memory_used_bytes{node=~"$node"})
                                 seriesNameFormat: Node memory utilization (without virt)
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    (
+                                    sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    +
+                                    sum(kube_pod_resource_request{resource="memory", node=~"$node"})
         UtilizationDsitribution:
             kind: Panel
             spec:
@@ -235,12 +232,22 @@
             spec:
                 display:
                     name: Virtual
+                    description: The virtual memory assignment is showing the worst-case scenario if all virtual memory was used right now. The assigned virtual memory is shown on top of the non virtualization related memory utilization. The current utiliztaion plus worst-case virtual memory utilization is indiacting the worst case memor overcommittment.
                 plugin:
                     kind: TimeSeriesChart
                     spec:
                         legend:
                             position: bottom
-                        querySettings: []
+                        querySettings:
+                            - colorMode: fixed
+                              colorValue: '#555'
+                              queryIndex: 0
+                            - colorMode: fixed
+                              colorValue: '#FFCC00'
+                              queryIndex: 1
+                            - colorMode: fixed
+                              colorValue: '#7c6400'
+                              queryIndex: 2
                         thresholds:
                             mode: percent
                             steps: []
@@ -263,8 +270,8 @@
                             kind: PrometheusTimeSeriesQuery
                             spec:
                                 minStep: ""
-                                query: sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                seriesNameFormat: Node allocatable
+                                query: sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                seriesNameFormat: Node capacity
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
@@ -329,12 +336,6 @@
                     $ref: '#/spec/panels/UtilizationOverCommitLevel'
                 - x: 0
                   "y": 14
-                  width: 14
-                  height: 7
-                  content:
-                    $ref: '#/spec/panels/Memoryreservation'
-                - x: 0
-                  "y": 21
                   width: 14
                   height: 7
                   content:
