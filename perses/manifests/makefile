@@ -8,6 +8,8 @@ PROJECT := openshift-cnv
 URL := https://$(shell oc get route -n openshift-monitoring prometheus-k8s -o jsonpath='{.status.ingress[0].host}')
 TOKEN := $(shell oc whoami -t)
 
+import:
+	percli get -o yaml dash memory-overcommit | sed -e "s#^\(\s\+\)project: .*#\\1project: {{PROJECT}}#" -e "/^\s\+\(createdAt\|updatedAt\|version\)/ d" > 04-dash.yaml.in
 
 apply: $(yamls)
 	echo $(sources) 

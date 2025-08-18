@@ -4,7 +4,7 @@
     project: {{PROJECT}}
   spec:
     display:
-        name: "Memory overcommit"
+        name: Memory overcommit
     variables:
         - kind: ListVariable
           spec:
