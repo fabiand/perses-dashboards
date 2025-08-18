@@ -18,6 +18,9 @@ apply: $(yamls)
 	percli project $(PROJECT)
 	for F in $(yamls) ; do ( set -x ; percli apply -f $$F ; ) ; done
 
+url:
+	@echo "http://localhost:8080/projects/$(PROJECT)/dashboards/memory-overcommit"
+
 %.yaml: %.yaml.in
 	sed -e "s!{{URL}}!$(URL)!" \
 	    -e "s;{{TOKEN}};$(TOKEN);" \
