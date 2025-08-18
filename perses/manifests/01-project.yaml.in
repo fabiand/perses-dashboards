@@ -1,6 +1,6 @@
 - kind: Project
   metadata:
-    name: openshift-cnv
+    name: {{PROJECT}}
   spec:
     display:
         name: "OpenShift Virtualization"

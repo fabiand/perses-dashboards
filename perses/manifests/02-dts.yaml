@@ -26,5 +26,5 @@
                         - endpointPattern: /api/v1/parse_query
                           method: POST
                     secret: default
-                    url: {{URL}}
+                    url: prometheus-k8s-openshift-monitoring.apps.cnv2.engineering.redhat.com
 
