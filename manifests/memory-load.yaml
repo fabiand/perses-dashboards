@@ -1,0 +1,60 @@
+apiVersion: pool.kubevirt.io/v1alpha1
+kind: VirtualMachinePool
+metadata:
+  annotations:
+  name: memory-load
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      kubevirt.io/vmpool: memory-load
+  virtualMachineTemplate:
+    metadata:
+      creationTimestamp: null
+      labels:
+        kubevirt.io/vmpool: memory-load
+    spec:
+      runStrategy: Always
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            kubevirt.io/vmpool: memory-load
+        spec:
+          domain:
+            cpu:
+              cores: 2
+              model: Penryn
+            devices:
+              disks:
+              - disk:
+                  bus: virtio
+                name: containerdisk
+              - disk:
+                  bus: virtio
+                name: cloudinitdisk
+              interfaces:
+              - masquerade: {}
+                name: default
+              rng: {}
+            memory:
+              guest: 16G
+            resources:
+              requests:
+                memory: 8G
+          networks:
+          - name: default
+            pod: {}
+          terminationGracePeriodSeconds: 0
+          volumes:
+          - containerDisk:
+              image: quay.io/containerdisks/fedora:latest
+            name: containerdisk
+          - cloudInitNoCloud:
+              userData: |-
+                #cloud-config
+                password: fedora
+                chpasswd: { expire: False }
+                runcmd:
+                - "sudo dnf install -y stress ; stress -m 8 --vm-bytes 1G --vm-hang 6"
+            name: cloudinitdisk
