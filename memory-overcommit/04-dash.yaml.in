@@ -366,19 +366,19 @@
                 - x: 0
                   "y": 14
                   width: 14
-                  height: 7
+                  height: 3
                   content:
                     $ref: '#/spec/panels/Pressure'
         - kind: Grid
           spec:
             display:
-                title: Cluster
+                title: DRAFT Cluster
                 collapse:
                     open: true
             items:
                 - x: 0
                   "y": 0
-                  width: 12
+                  width: 14
                   height: 6
                   content:
                     $ref: '#/spec/panels/UtilizationDsitribution'
