@@ -48,15 +48,15 @@
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
-                                query: sum(kube_pod_resource_request{resource="memory", node=~"$node"})
-                                seriesNameFormat: Amount of reserved memory
+                                query: sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                seriesNameFormat: Allocatable memory
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
-                                query: sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                seriesNameFormat: Allocatable memory
+                                query: sum(kube_pod_resource_request{resource="memory", node=~"$node"})
+                                seriesNameFormat: Amount of reserved memory
         OverCommitLevel:
             kind: Panel
             spec:
@@ -267,16 +267,16 @@
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
-                                query: sum(kubevirt_vmi_memory_domain_bytes{node=~"$node"})
-                                seriesNameFormat: Sum of virtual memory allocatoins
+                                minStep: ""
+                                query: sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                seriesNameFormat: Allocatable memory
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
-                                minStep: ""
-                                query: sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                seriesNameFormat: Allocatable memory
+                                query: sum(kubevirt_vmi_memory_domain_bytes{node=~"$node"})
+                                seriesNameFormat: Sum of virtual memory allocatoins
     layouts:
         - kind: Grid
           spec:
