@@ -19,7 +19,7 @@
 > [!NOTE]
 > You need to have `make` installed
 
-    $ cd perses/manifests
+    $ cd memory-overcommit
     $ make apply
     sed -e "s!{{URL}}!https://prometheus-k8s-openshift-monitoring.apps.example.com!" \
     ...
