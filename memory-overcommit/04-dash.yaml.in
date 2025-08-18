@@ -70,7 +70,7 @@
                                     (
                                     sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
                                     )
-                                seriesNameFormat: Virtual Overcomit Level
+                                seriesNameFormat: Plan - Virtual Overcomit Level
         Pressure:
             kind: Panel
             spec:
@@ -126,6 +126,8 @@
                 plugin:
                     kind: TimeSeriesChart
                     spec:
+                        legend:
+                            position: bottom
                         querySettings:
                             - colorMode: fixed
                               colorValue: '#555'
@@ -137,7 +139,7 @@
                               colorValue: '#643535'
                               queryIndex: 2
                             - colorMode: fixed
-                              colorValue: '#32466d'
+                              colorValue: '#FFCC00'
                               queryIndex: 3
                         yAxis:
                             format:
@@ -162,7 +164,7 @@
                                     sum(node_memory_MemTotal_bytes{instance=~"$node"})
                                     -
                                     sum(node_memory_MemAvailable_bytes{instance=~"$node"})
-                                seriesNameFormat: Node memory utilization (with virt)
+                                seriesNameFormat: Utilization - Node memory utilization (with virt)
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
@@ -174,7 +176,7 @@
                                     sum(node_memory_MemAvailable_bytes{instance=~"$node"})
                                     -
                                     sum(kubevirt_vmi_memory_used_bytes{node=~"$node"})
-                                seriesNameFormat: Node memory utilization (without virt)
+                                seriesNameFormat: Utilization - Node memory utilization (without virt)
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
@@ -188,7 +190,7 @@
                                     )
                                     +
                                     sum(kube_pod_resource_request{resource="memory", node=~"$node"})
-                                seriesNameFormat: Memory requests
+                                seriesNameFormat: Plan - Memory requests
         UtilizationDsitribution:
             kind: Panel
             spec:
@@ -255,7 +257,7 @@
                                     (
                                     sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
                                     )
-                                seriesNameFormat: Actual Overcommit Level
+                                seriesNameFormat: Utilization - Actual Overcommit Level
         Virtualmemoryallocation:
             kind: Panel
             spec:
@@ -318,7 +320,7 @@
                                     )
                                     +
                                     sum(kubevirt_vmi_memory_domain_bytes{node=~"$node"})
-                                seriesNameFormat: VM assigned virtual memory
+                                seriesNameFormat: Plan - VM assigned virtual memory
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
@@ -330,12 +332,85 @@
                                     sum(node_memory_MemAvailable_bytes{instance=~"$node"})
                                     -
                                     sum(kubevirt_vmi_memory_used_bytes{node=~"$node"})
-                                seriesNameFormat: Node memory utilization (without virt)
+                                seriesNameFormat: Utilization - Node memory utilization (without virt)
+        MemoryPlanAndUtilization:
+            kind: Panel
+            spec:
+                display:
+                    name: Memory Plan & Utilization - Summary
+                    description: The virtual memory assignment is showing the worst-case scenario if all virtual memory was used right now. The assigned virtual memory is shown on top of the non virtualization related memory utilization. The current utiliztaion plus worst-case virtual memory utilization is indiacting the worst case memor overcommittment.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            position: bottom
+                        querySettings:
+                            - colorMode: fixed
+                              colorValue: '#555'
+                              queryIndex: 0
+                            - colorMode: fixed
+                              colorValue: '#FFCC00'
+                              queryIndex: 1
+                            - colorMode: fixed
+                              colorValue: '#EE6C6C'
+                              queryIndex: 2
+                        thresholds:
+                            mode: percent
+                            steps: []
+                        visual:
+                            areaOpacity: 0
+                            connectNulls: false
+                            display: line
+                            lineWidth: 1.25
+                            pointRadius: 2.75
+                        yAxis:
+                            format:
+                                unit: bytes
+                            label: ""
+                            min: 0
+                            show: true
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                minStep: ""
+                                query: sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                seriesNameFormat: Node capacity
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    -
+                                    (
+                                    sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    +
+                                    sum(kubevirt_vmi_memory_domain_bytes{node=~"$node"})
+                                seriesNameFormat: Plan - VM assigned virtual memory
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
+                                seriesNameFormat: Utilization - Node memory utilization
     layouts:
         - kind: Grid
           spec:
             display:
-                title: Memory
+                title: Memory Consumption - Plan & Utilization
                 collapse:
                     open: true
             items:
@@ -344,7 +419,27 @@
                   width: 14
                   height: 7
                   content:
-                    $ref: '#/spec/panels/Virtualmemoryallocation'
+                    $ref: '#/spec/panels/MemoryPlanAndUtilization'
+                - x: 14
+                  "y": 0
+                  width: 4
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/OverCommitLevel'
+                - x: 18
+                  "y": 7
+                  width: 4
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/UtilizationOverCommitLevel'
+
+        - kind: Grid
+          spec:
+            display:
+                title: Memory Consumption - Plan & utilization - Detailed
+                collapse:
+                    open: false
+            items:
                 - x: 14
                   "y": 0
                   width: 4
@@ -356,6 +451,12 @@
                   width: 14
                   height: 7
                   content:
+                    $ref: '#/spec/panels/Virtualmemoryallocation'
+                - x: 0
+                  "y": 14
+                  width: 14
+                  height: 7
+                  content:
                     $ref: '#/spec/panels/Utilization'
                 - x: 14
                   "y": 7
@@ -364,7 +465,7 @@
                   content:
                     $ref: '#/spec/panels/UtilizationOverCommitLevel'
                 - x: 0
-                  "y": 14
+                  "y": 21
                   width: 14
                   height: 3
                   content:
