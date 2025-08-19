@@ -414,6 +414,52 @@
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                     )
                                 seriesNameFormat: '{{node}}'
+        Utilization-Node-1:
+            kind: Panel
+            spec:
+                display:
+                    name: Utilization - Actual overcommit level - 80% quantile
+                plugin:
+                    kind: StatChart
+                    spec:
+                        calculation: last-number
+                        format:
+                            unit: decimal
+                        sparkline: {}
+                        thresholds:
+                            steps:
+                                - value: 0.8
+                                - color: '#EE6C6C'
+                                  value: 0.9
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    quantile(0.8, (
+                                    (
+                                    label_replace((
+                                    (node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    (node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    ), "node", "$1", "instance", "(.+)")
+                                    - on (node)
+                                    (
+                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    )
+
+                                    / on (node)
+
+                                    (
+                                    (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
+                                    )
+                                    ))
+                                seriesNameFormat: Memory utilization 80% quantile
         UtilizationDsitribution:
             kind: Panel
             spec:
@@ -664,29 +710,29 @@
                   content:
                     $ref: '#/spec/panels/Utilization'
                 - x: 14
-                  "y": 7
-                  width: 4
-                  height: 4
-                  content:
-                    $ref: '#/spec/panels/Systemmemoryutilizationexceedingreservation'
-                - x: 14
                   "y": 0
                   width: 4
                   height: 7
                   content:
                     $ref: '#/spec/panels/UtilizationOverCommitLevel-1'
-                - x: 0
-                  "y": 7
-                  width: 14
-                  height: 7
-                  content:
-                    $ref: '#/spec/panels/Virtualmemoryallocation'
                 - x: 18
                   "y": 0
                   width: 4
                   height: 7
                   content:
                     $ref: '#/spec/panels/OverCommitLevel-1'
+                - x: 14
+                  "y": 7
+                  width: 4
+                  height: 4
+                  content:
+                    $ref: '#/spec/panels/Systemmemoryutilizationexceedingreservation'
+                - x: 0
+                  "y": 7
+                  width: 14
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/Virtualmemoryallocation'
                 - x: 0
                   "y": 14
                   width: 14
@@ -701,17 +747,23 @@
                     open: true
             items:
                 - x: 0
-                  "y": 10
-                  width: 21
-                  height: 10
-                  content:
-                    $ref: '#/spec/panels/UtilizationDsitribution'
-                - x: 0
                   "y": 0
                   width: 21
                   height: 10
                   content:
                     $ref: '#/spec/panels/Utilization-Node'
+                - x: 21
+                  "y": 0
+                  width: 2
+                  height: 9
+                  content:
+                    $ref: '#/spec/panels/Utilization-Node-1'
+                - x: 0
+                  "y": 10
+                  width: 21
+                  height: 10
+                  content:
+                    $ref: '#/spec/panels/UtilizationDsitribution'
                 - x: 0
                   "y": 20
                   width: 21
