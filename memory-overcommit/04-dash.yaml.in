@@ -418,27 +418,39 @@
             kind: Panel
             spec:
                 display:
-                    name: Utilization - Actual overcommit level - 80% quantile
+                    name: Utilization - Actual overcommit level - TOP 5
                 plugin:
-                    kind: StatChart
+                    kind: StatusHistoryChart
                     spec:
-                        calculation: last-number
-                        format:
-                            unit: decimal
-                        sparkline: {}
-                        thresholds:
-                            steps:
-                                - value: 0.8
-                                - color: '#EE6C6C'
-                                  value: 0.9
+                        mappings:
+                            - kind: Range
+                              spec:
+                                from: 0.8
+                                result:
+                                    color: '#FFCC00'
+                                    value: ""
+                                to: 0.9
+                            - kind: Range
+                              spec:
+                                from: 0.9
+                                result:
+                                    color: '#EE6C6C'
+                                    value: ""
+                            - kind: Range
+                              spec:
+                                result:
+                                    color: '#59CC8D'
+                                    value: ""
+                                to: 0.8
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
+                                minStep: 1h
                                 query: |-
-                                    quantile(0.8, (
+                                    ( (
                                     (
                                     label_replace((
                                     (node_memory_MemTotal_bytes{instance=~"$node"})
@@ -459,7 +471,7 @@
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                     )
                                     ))
-                                seriesNameFormat: Memory utilization 80% quantile
+                                seriesNameFormat: '{{node}}'
         UtilizationDsitribution:
             kind: Panel
             spec:
@@ -752,20 +764,20 @@
                   height: 10
                   content:
                     $ref: '#/spec/panels/Utilization-Node'
-                - x: 21
-                  "y": 0
-                  width: 2
-                  height: 9
+                - x: 0
+                  "y": 10
+                  width: 21
+                  height: 4
                   content:
                     $ref: '#/spec/panels/Utilization-Node-1'
                 - x: 0
-                  "y": 10
+                  "y": 14
                   width: 21
                   height: 10
                   content:
                     $ref: '#/spec/panels/UtilizationDsitribution'
                 - x: 0
-                  "y": 20
+                  "y": 24
                   width: 21
                   height: 6
                   content:
