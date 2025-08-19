@@ -10,6 +10,7 @@ TOKEN := $(shell oc whoami -t)
 
 import:
 	percli get -o yaml dash memory-overcommit | sed -e "s#^\(\s\+\)project: .*#\\1project: {{PROJECT}}#" -e "/^\s\+\(createdAt\|updatedAt\|version\)/ d" > 04-dash.yaml.in
+	test -f 01-*.yaml && mv *.yaml .trash/ || :
 
 apply: $(yamls)
 	echo $(sources) 

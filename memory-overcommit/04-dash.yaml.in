@@ -115,9 +115,9 @@
                         max: 2
                         thresholds:
                             steps:
-                                - value: 0.8
+                                - value: 1.2
                                 - color: '#EE6C6C'
-                                  value: 1.2
+                                  value: 1.5
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
@@ -142,7 +142,53 @@
                                     /
 
                                     (
+                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                seriesNameFormat: Plan - Virtual Overcomit Level
+        OverCommitLevel-1:
+            kind: Panel
+            spec:
+                display:
+                    name: Virtual Overcommit Level
+                    description: Overcommit ratio based on the current utilization and allocated virtual memory to VMs
+                plugin:
+                    kind: StatChart
+                    spec:
+                        calculation: last-number
+                        format:
+                            unit: percent-decimal
+                        mappings: []
+                        sparkline: {}
+                        thresholds:
+                            steps:
+                                - value: 1.2
+                                - color: '#EE6C6C'
+                                  value: 1.5
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    (
+                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    -
+                                    (
                                     sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    +
+                                    sum(kubevirt_vmi_memory_domain_bytes{node=~"$node"})
+                                    )
+
+                                    /
+
+                                    (
+                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
                                     )
                                 seriesNameFormat: Plan - Virtual Overcomit Level
         Pressure:
@@ -348,16 +394,24 @@
                             kind: PrometheusTimeSeriesQuery
                             spec:
                                 query: |-
+                                    (
                                     label_replace((
                                     (node_memory_MemTotal_bytes{instance=~"$node"})
                                     -
                                     (node_memory_MemAvailable_bytes{instance=~"$node"})
                                     ), "node", "$1", "instance", "(.+)")
+                                    - on (node)
+                                    (
+                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    )
 
                                     / on (node)
 
                                     (
-                                    (kube_node_status_capacity{resource="memory"} * on (node) kube_node_role{role="worker"})
+                                    (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                     )
                                 seriesNameFormat: '{{node}}'
         UtilizationDsitribution:
@@ -379,7 +433,29 @@
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
-                                query: "(((\nlabel_replace((\n(node_memory_MemTotal_bytes)\n-\n(node_memory_MemAvailable_bytes)\n), \"node\", \"$1\", \"instance\", \"(.+)\")  * on (node) kube_node_role{role=\"worker\"})\n-\n(\n(kube_node_status_capacity{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n-\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_capacity{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n) "
+                                query: |-
+                                    (
+                                    (
+                                    label_replace((
+                                    (node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    (node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    ), "node", "$1", "instance", "(.+)")
+                                    - on (node)
+                                    (
+                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    )
+                                    +
+                                    sum by (node) (kubevirt_vmi_memory_domain_bytes)
+                                    )
+
+
+                                    /
+
+                                    (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                 seriesNameFormat: '{{node}}'
         UtilizationOverCommitLevel:
             kind: Panel
@@ -392,8 +468,57 @@
                     spec:
                         calculation: last-number
                         format:
-                            decimalPlaces: 1
                             unit: percent-decimal
+                        thresholds:
+                            steps:
+                                - value: 0.8
+                                - color: '#EE6C6C'
+                                  value: 0.9
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    (
+                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    -
+                                    (
+                                    sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    )
+
+                                    /
+
+                                    (
+                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                seriesNameFormat: Utilization - Actual Overcommit Level
+        UtilizationOverCommitLevel-1:
+            kind: Panel
+            spec:
+                display:
+                    name: Actual Overcommit Level
+                    description: Overcommit level based on the current utilization of the cluster
+                plugin:
+                    kind: StatChart
+                    spec:
+                        calculation: last-number
+                        format:
+                            unit: percent-decimal
+                        mappings:
+                            - kind: Range
+                              spec:
+                                from: 0.8
+                                result:
+                                    color: '#FFCC00'
+                                    value: ""
+                        sparkline: {}
                         thresholds:
                             steps:
                                 - value: 0.8
@@ -515,7 +640,7 @@
                     $ref: '#/spec/panels/MemoryPlanAndUtilization'
                 - x: 18
                   "y": 0
-                  width: 3
+                  width: 4
                   height: 7
                   content:
                     $ref: '#/spec/panels/OverCommitLevel'
@@ -525,12 +650,6 @@
                   height: 7
                   content:
                     $ref: '#/spec/panels/UtilizationOverCommitLevel'
-                - x: 21
-                  "y": 0
-                  width: 3
-                  height: 7
-                  content:
-                    $ref: '#/spec/panels/Systemmemoryutilizationexceedingreservation'
         - kind: Grid
           spec:
             display:
@@ -538,18 +657,6 @@
                 collapse:
                     open: false
             items:
-                - x: 14
-                  "y": 7
-                  width: 4
-                  height: 7
-                  content:
-                    $ref: '#/spec/panels/OverCommitLevel'
-                - x: 0
-                  "y": 7
-                  width: 14
-                  height: 7
-                  content:
-                    $ref: '#/spec/panels/Virtualmemoryallocation'
                 - x: 0
                   "y": 0
                   width: 14
@@ -557,11 +664,29 @@
                   content:
                     $ref: '#/spec/panels/Utilization'
                 - x: 14
+                  "y": 7
+                  width: 4
+                  height: 4
+                  content:
+                    $ref: '#/spec/panels/Systemmemoryutilizationexceedingreservation'
+                - x: 14
                   "y": 0
                   width: 4
                   height: 7
                   content:
-                    $ref: '#/spec/panels/UtilizationOverCommitLevel'
+                    $ref: '#/spec/panels/UtilizationOverCommitLevel-1'
+                - x: 0
+                  "y": 7
+                  width: 14
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/Virtualmemoryallocation'
+                - x: 18
+                  "y": 0
+                  width: 4
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/OverCommitLevel-1'
                 - x: 0
                   "y": 14
                   width: 14
