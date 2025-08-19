@@ -199,7 +199,7 @@
                     kind: TimeSeriesChart
                     spec:
                         legend:
-                            position: bottom
+                            position: right
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
@@ -291,7 +291,7 @@
                     kind: TimeSeriesChart
                     spec:
                         legend:
-                            position: bottom
+                            position: right
                         thresholds:
                             steps:
                                 - color: '#EE6C6C'
@@ -324,7 +324,7 @@
                     kind: TimeSeriesChart
                     spec:
                         legend:
-                            position: bottom
+                            position: right
                         thresholds:
                             steps:
                                 - value: 0.9
@@ -519,20 +519,20 @@
                     open: true
             items:
                 - x: 0
-                  "y": 0
-                  width: 13
-                  height: 11
+                  "y": 10
+                  width: 21
+                  height: 10
                   content:
                     $ref: '#/spec/panels/UtilizationDsitribution'
-                - x: 13
+                - x: 0
                   "y": 0
-                  width: 11
-                  height: 11
+                  width: 21
+                  height: 10
                   content:
                     $ref: '#/spec/panels/Utilization-Node'
                 - x: 0
-                  "y": 11
-                  width: 13
+                  "y": 20
+                  width: 21
                   height: 6
                   content:
                     $ref: '#/spec/panels/Pressure-1'
