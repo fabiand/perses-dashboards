@@ -38,6 +38,13 @@
                 hidden: true
             value: '# system reserved ( sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="$role", node=~"$node"}) - sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="$role", node=~"$node"}) )'
             name: query_kube_node_system_reserved_memory
+        - kind: TextVariable
+          spec:
+            display:
+                name: querySumNodePressureMemoryWaitingSecondsTotal
+                hidden: true
+            value: sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~"$node"}[1m]))
+            name: querySumNodePressureMemoryWaitingSecondsTotal
     panels:
         MemoryPlanAndUtilization:
             kind: Panel
@@ -120,17 +127,18 @@
                     name: Cluster Committed
                     description: Commit ratio based on the current utilization and allocated virtual memory to VMs. Overcommit occurs whenever the values goes beyond 100%.
                 plugin:
-                    kind: GaugeChart
+                    kind: StatChart
                     spec:
                         calculation: last-number
                         format:
-                            decimalPlaces: 1
                             unit: percent-decimal
-                        max: 2
+                        sparkline: {}
                         thresholds:
                             steps:
-                                - value: 1.2
-                                - color: '#EE6C6C'
+                                - value: 1
+                                - color: '#FF9F1C'
+                                  value: 1.2
+                                - color: '#EA4747'
                                   value: 1.5
                 queries:
                     - kind: TimeSeriesQuery
@@ -289,7 +297,7 @@
             kind: Panel
             spec:
                 display:
-                    name: Pressure
+                    name: Cluster - Memory Pressure
                     description: The pressure is indicating if workloads are waiting for memory.
                 plugin:
                     kind: StatChart
@@ -298,31 +306,15 @@
                         format:
                             shortValues: true
                             unit: decimal
-                        mappings:
-                            - kind: Range
-                              spec:
-                                from: 1
-                                result:
-                                    color: '#FFCC00'
-                                    value: ""
-                                to: 5
-                            - kind: Range
-                              spec:
-                                from: 5
-                                result:
-                                    color: '#FF9F1C'
-                                    value: ""
-                                to: 7
-                            - kind: Range
-                              spec:
-                                from: 7
-                                result:
-                                    color: '#EA4747'
-                                    value: ""
+                        mappings: []
                         sparkline: {}
                         thresholds:
                             steps:
-                                - value: 1
+                                - color: '#FF9F1C'
+                                  value: 2
+                                - value: 4
+                                - color: '#EA4747'
+                                  value: 6
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
@@ -331,6 +323,13 @@
                             spec:
                                 query: sum(rate(node_pressure_memory_waiting_seconds_total{instance=~"$node"}[1m]))
                                 seriesNameFormat: Waiting
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum(rate(node_pressure_memory_stalled_seconds_total{instance=~"$node"}[1m]))
+                                seriesNameFormat: Stalled
         Pressure-1:
             kind: Panel
             spec:
@@ -677,14 +676,18 @@
                 display:
                     name: Node Utilization - min/max
                 plugin:
-                    kind: TimeSeriesChart
+                    kind: StatChart
                     spec:
-                        querySettings: []
+                        calculation: last-number
+                        format:
+                            unit: decimal
+                        sparkline: {}
                         thresholds:
                             steps:
-                                - color: '#FFB249'
+                                - value: 0.7
+                                - color: '#FF9F1C'
                                   value: 0.8
-                                - color: '#EE6C6C'
+                                - color: '#EA4747'
                                   value: 0.9
                 queries:
                     - kind: TimeSeriesQuery
@@ -713,7 +716,7 @@
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                     )
                                     ))
-                                seriesNameFormat: '{{node}}'
+                                seriesNameFormat: Min - {{node}}
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
@@ -740,7 +743,7 @@
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                     )
                                     ))
-                                seriesNameFormat: '{{node}}'
+                                seriesNameFormat: Max - {{node}}
         UtilizationOverCommitLevel:
             kind: Panel
             spec:
@@ -748,15 +751,18 @@
                     name: Cluster Utilization
                     description: Current aggregate utilization of the cluster
                 plugin:
-                    kind: GaugeChart
+                    kind: StatChart
                     spec:
                         calculation: last-number
                         format:
                             unit: percent-decimal
+                        sparkline: {}
                         thresholds:
                             steps:
-                                - value: 0.8
-                                - color: '#EE6C6C'
+                                - value: 0.7
+                                - color: '#FF9F1C'
+                                  value: 0.8
+                                - color: '#EA4747'
                                   value: 0.9
                 queries:
                     - kind: TimeSeriesQuery
@@ -917,31 +923,31 @@
                     open: true
             items:
                 - x: 0
-                  "y": 0
+                  "y": 7
                   width: 18
                   height: 7
                   content:
                     $ref: '#/spec/panels/MemoryPlanAndUtilization'
                 - x: 4
-                  "y": 7
+                  "y": 0
                   width: 4
                   height: 7
                   content:
                     $ref: '#/spec/panels/OverCommitLevel'
                 - x: 0
-                  "y": 7
+                  "y": 0
                   width: 4
                   height: 7
                   content:
                     $ref: '#/spec/panels/UtilizationOverCommitLevel'
                 - x: 8
-                  "y": 7
-                  width: 4
+                  "y": 0
+                  width: 2
                   height: 7
                   content:
                     $ref: '#/spec/panels/SystemExceedsResevration'
                 - x: 12
-                  "y": 7
+                  "y": 0
                   width: 6
                   height: 7
                   content:
