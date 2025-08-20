@@ -169,7 +169,7 @@
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                     )
                                     ))
-                                seriesNameFormat: min {{node}}
+                                seriesNameFormat: '{{node}}'
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
@@ -196,7 +196,57 @@
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                     )
                                     ))
-                                seriesNameFormat: max {{node}}
+                                seriesNameFormat: '{{node}}'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    stddev(((
+                                    label_replace((
+                                    (node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    (node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    ), "node", "$1", "instance", "(.+)")
+                                    - on (node)
+                                    (
+                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    )
+
+                                    / on (node)
+
+                                    (
+                                    (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
+                                    )
+                                    ))
+
+                                    /
+
+                                    avg(((
+                                    label_replace((
+                                    (node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    (node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    ), "node", "$1", "instance", "(.+)")
+                                    - on (node)
+                                    (
+                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    )
+
+                                    / on (node)
+
+                                    (
+                                    (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
+                                    )
+                                    ))
+                                seriesNameFormat: Coefficient of Variation
         Minmax-1:
             kind: Panel
             spec:
@@ -217,7 +267,7 @@
                             kind: PrometheusTimeSeriesQuery
                             spec:
                                 query: |-
-                                    min(
+                                    min (
                                     (
                                     sum by (node) (container_memory_rss{id="/system.slice"})
 
@@ -270,7 +320,7 @@
                             kind: PrometheusTimeSeriesQuery
                             spec:
                                 query: |-
-                                    min(
+                                    bottomk(1, min by (node) ((
 
                                     (
                                     (
@@ -295,15 +345,15 @@
 
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
 
-                                    )
-                                seriesNameFormat: min {{node}}
+                                    )))
+                                seriesNameFormat: '{{node}}'
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
                                 query: |-
-                                    max(
+                                    topk(1, max by (node) ((
 
                                     (
                                     (
@@ -328,14 +378,14 @@
 
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
 
-                                    )
-                                seriesNameFormat: max {{node}}
+                                    )))
+                                seriesNameFormat: '{{node}}'
         OverCommitLevel:
             kind: Panel
             spec:
                 display:
-                    name: Virtual Overcommit Level
-                    description: Overcommit ratio based on the current utilization and allocated virtual memory to VMs
+                    name: Commit Level
+                    description: Commit ratio based on the current utilization and allocated virtual memory to VMs. Overcommit occurs whenever the values goes beyond 100%.
                 plugin:
                     kind: GaugeChart
                     spec:
@@ -494,50 +544,6 @@
                             spec:
                                 query: sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~"$node"}[1m]))
                                 seriesNameFormat: '{{instance}}'
-        Systemmemoryutilizationexceedingreservation:
-            kind: Panel
-            spec:
-                display:
-                    name: System memory utilization exceeding reservation
-                    description: 'The number of nodes where the system utilization is exceeding the reservation. This can '
-                plugin:
-                    kind: StatChart
-                    spec:
-                        calculation: last-number
-                        format:
-                            shortValues: true
-                            unit: decimal
-                        mappings:
-                            - kind: Value
-                              spec:
-                                result:
-                                    color: '#59CC8D'
-                                    value: ""
-                                value: "0"
-                            - kind: Range
-                              spec:
-                                from: 1
-                                result:
-                                    color: '#EE6C6C'
-                                    value: ""
-                        sparkline: {}
-                        thresholds:
-                            steps:
-                                - value: 1
-                queries:
-                    - kind: TimeSeriesQuery
-                      spec:
-                        plugin:
-                            kind: PrometheusTimeSeriesQuery
-                            spec:
-                                minStep: 1h
-                                query: |-
-                                    count (
-                                    (sum by (node) (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}))
-                                    <
-                                    sum by (node) (container_memory_rss{id="/system.slice"})
-                                    )
-                                seriesNameFormat: Nodes where the system utilization exceeding reservation
         Utilization:
             kind: Panel
             spec:
@@ -696,6 +702,37 @@
                                     )
                                     ))
                                 seriesNameFormat: '{{node}}'
+        Utilization-Node-2:
+            kind: Panel
+            spec:
+                display:
+                    name: Plan - Pod requests
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            position: bottom
+                        thresholds:
+                            steps:
+                                - color: '#FFB249'
+                                  value: 0.8
+                                - color: '#EE6C6C'
+                                  value: 0.9
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    sum by (node) (kube_pod_resource_request{resource="memory", node=~"$node"})
+
+                                    / on (node)
+
+                                    (
+                                    (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
+                                    )
+                                seriesNameFormat: '{{node}}'
         UtilizationDsitribution:
             kind: Panel
             spec:
@@ -743,8 +780,8 @@
             kind: Panel
             spec:
                 display:
-                    name: Actual Overcommit Level
-                    description: Overcommit level based on the current utilization of the cluster
+                    name: Utilization Level
+                    description: Current aggregate utilization of the cluster
                 plugin:
                     kind: GaugeChart
                     spec:
@@ -785,8 +822,8 @@
             kind: Panel
             spec:
                 display:
-                    name: Actual Overcommit Level
-                    description: Overcommit level based on the current utilization of the cluster
+                    name: Utilization Level
+                    description: Utilization level based on the current utilization of the cluster
                 plugin:
                     kind: StatChart
                     spec:
@@ -910,7 +947,7 @@
         - kind: Grid
           spec:
             display:
-                title: Cluster - Plan & Utilization
+                title: Summary - Plan & Utilization
                 collapse:
                     open: true
             items:
@@ -951,18 +988,12 @@
                   height: 7
                   content:
                     $ref: '#/spec/panels/UtilizationOverCommitLevel-1'
-                - x: 18
-                  "y": 0
+                - x: 14
+                  "y": 7
                   width: 4
                   height: 7
                   content:
                     $ref: '#/spec/panels/OverCommitLevel-1'
-                - x: 14
-                  "y": 7
-                  width: 4
-                  height: 4
-                  content:
-                    $ref: '#/spec/panels/Systemmemoryutilizationexceedingreservation'
                 - x: 0
                   "y": 7
                   width: 14
@@ -994,6 +1025,12 @@
                   height: 8
                   content:
                     $ref: '#/spec/panels/Minmax'
+                - x: 0
+                  "y": 8
+                  width: 14
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/Utilization-Node-2'
                 - x: 14
                   "y": 8
                   width: 4
@@ -1001,13 +1038,13 @@
                   content:
                     $ref: '#/spec/panels/Minmax-2'
                 - x: 0
-                  "y": 8
+                  "y": 16
                   width: 14
                   height: 8
                   content:
                     $ref: '#/spec/panels/UtilizationDsitribution'
                 - x: 0
-                  "y": 16
+                  "y": 24
                   width: 14
                   height: 6
                   content:
