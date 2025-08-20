@@ -980,7 +980,7 @@
             display:
                 title: Nodes - Plan & Utilization
                 collapse:
-                    open: true
+                    open: false
             items:
                 - x: 0
                   "y": 0
