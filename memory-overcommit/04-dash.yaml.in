@@ -121,11 +121,11 @@
                         sparkline: {}
                         thresholds:
                             steps:
-                                - value: 1
+                                - value: 1.2
                                 - color: '#FF9F1C'
-                                  value: 1.2
-                                - color: '#EA4747'
                                   value: 1.5
+                                - color: '#EA4747'
+                                  value: 2
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
@@ -248,14 +248,105 @@
             kind: Panel
             spec:
                 display:
-                    name: Plan - min/max
+                    name: Node virtual - min/max
                 plugin:
-                    kind: TimeSeriesChart
+                    kind: StatChart
                     spec:
-                        querySettings: []
+                        calculation: last-number
+                        format:
+                            unit: decimal
+                        sparkline: {}
                         thresholds:
                             steps:
-                                - color: '#EE6C6C'
+                                - value: 1.2
+                                - color: '#FF9F1C'
+                                  value: 1.5
+                                - color: '#EA4747'
+                                  value: 2
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    (min by () ((
+
+                                    (
+                                    (
+                                    label_replace((
+                                    (node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    (node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    ), "node", "$1", "instance", "(.+)")
+                                    - on (node)
+                                    (
+                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    )
+                                    +
+                                    sum by (node) (kubevirt_vmi_memory_domain_bytes)
+                                    )
+
+
+                                    /
+
+                                    (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
+
+                                    )))
+                                seriesNameFormat: '{{node}}'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: |-
+                                    (max by () ((
+
+                                    (
+                                    (
+                                    label_replace((
+                                    (node_memory_MemTotal_bytes{instance=~"$node"})
+                                    -
+                                    (node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    ), "node", "$1", "instance", "(.+)")
+                                    - on (node)
+                                    (
+                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    )
+                                    )
+                                    +
+                                    sum by (node) (kubevirt_vmi_memory_domain_bytes)
+                                    )
+
+
+                                    /
+
+                                    (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
+
+                                    )))
+                                seriesNameFormat: '{{node}}'
+        PlanMinmax-1:
+            kind: Panel
+            spec:
+                display:
+                    name: Node requests - min/max
+                plugin:
+                    kind: StatChart
+                    spec:
+                        calculation: last-number
+                        format:
+                            unit: decimal
+                        sparkline: {}
+                        thresholds:
+                            steps:
+                                - color: '#FF9F1C'
+                                  value: 0.8
+                                - color: '#EA4747'
                                   value: 0.9
                 queries:
                     - kind: TimeSeriesQuery
@@ -264,66 +355,32 @@
                             kind: PrometheusTimeSeriesQuery
                             spec:
                                 query: |-
-                                    bottomk(1, min by (node) ((
+                                    min(
+                                    sum by (node) (kube_pod_resource_request{resource="memory", node=~"$node"})
+
+                                    / on (node)
 
                                     (
-                                    (
-                                    label_replace((
-                                    (node_memory_MemTotal_bytes{instance=~"$node"})
-                                    -
-                                    (node_memory_MemAvailable_bytes{instance=~"$node"})
-                                    ), "node", "$1", "instance", "(.+)")
-                                    - on (node)
-                                    (
-                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    -
-                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    )
-                                    )
-                                    +
-                                    sum by (node) (kubevirt_vmi_memory_domain_bytes)
-                                    )
-
-
-                                    /
-
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
-
-                                    )))
-                                seriesNameFormat: '{{node}}'
+                                    )
+                                    )
+                                seriesNameFormat: Min
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
                                 query: |-
-                                    topk(1, max by (node) ((
+                                    max(
+                                    sum by (node) (kube_pod_resource_request{resource="memory", node=~"$node"})
+
+                                    / on (node)
 
                                     (
-                                    (
-                                    label_replace((
-                                    (node_memory_MemTotal_bytes{instance=~"$node"})
-                                    -
-                                    (node_memory_MemAvailable_bytes{instance=~"$node"})
-                                    ), "node", "$1", "instance", "(.+)")
-                                    - on (node)
-                                    (
-                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    -
-                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    )
-                                    )
-                                    +
-                                    sum by (node) (kubevirt_vmi_memory_domain_bytes)
-                                    )
-
-
-                                    /
-
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
-
-                                    )))
-                                seriesNameFormat: '{{node}}'
+                                    )
+                                    )
+                                seriesNameFormat: Max
         Pressure:
             kind: Panel
             spec:
@@ -331,19 +388,13 @@
                     name: Cluster - Memory Pressure
                     description: The pressure is indicating if workloads are waiting for memory.
                 plugin:
-                    kind: StatChart
+                    kind: TimeSeriesChart
                     spec:
-                        calculation: last-number
-                        format:
-                            shortValues: true
-                            unit: decimal
-                        mappings: []
-                        sparkline: {}
                         thresholds:
                             steps:
+                                - value: 2
                                 - color: '#FF9F1C'
-                                  value: 2
-                                - value: 4
+                                  value: 4
                                 - color: '#EA4747'
                                   value: 6
                 queries:
@@ -386,6 +437,33 @@
                             kind: PrometheusTimeSeriesQuery
                             spec:
                                 query: sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~"$node"}[1m]))
+                                seriesNameFormat: '{{instance}}'
+        PressureMax:
+            kind: Panel
+            spec:
+                display:
+                    name: Node Pressure - max
+                plugin:
+                    kind: StatChart
+                    spec:
+                        calculation: last-number
+                        format:
+                            unit: decimal
+                        sparkline: {}
+                        thresholds:
+                            steps:
+                                - value: 4
+                                - color: '#FF9F1C'
+                                  value: 4
+                                - color: '#EA4747'
+                                  value: 6
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: topk(1, (sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~"$node"}[1m]@end()))))
                                 seriesNameFormat: '{{instance}}'
         SystemExceedsResevration:
             kind: Panel
@@ -469,33 +547,6 @@
 
                                     )
                                 seriesNameFormat: max {{node}}
-        TBDPressure:
-            kind: Panel
-            spec:
-                display:
-                    name: Node Pressure - max
-                plugin:
-                    kind: StatChart
-                    spec:
-                        calculation: last-number
-                        format:
-                            unit: decimal
-                        sparkline: {}
-                        thresholds:
-                            steps:
-                                - value: 4
-                                - color: '#FF9F1C'
-                                  value: 4
-                                - color: '#EA4747'
-                                  value: 6
-                queries:
-                    - kind: TimeSeriesQuery
-                      spec:
-                        plugin:
-                            kind: PrometheusTimeSeriesQuery
-                            spec:
-                                query: topk(1, (sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~"$node"}[1m]@end()))))
-                                seriesNameFormat: '{{instance}}'
         Utilization:
             kind: Panel
             spec:
@@ -697,7 +748,11 @@
                             position: bottom
                         thresholds:
                             steps:
-                                - value: 0.9
+                                - value: 1.2
+                                - color: '#FF9F1C'
+                                  value: 1.5
+                                - color: '#EA4747'
+                                  value: 2
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
@@ -740,13 +795,6 @@
                         format:
                             unit: decimal
                         sparkline: {}
-                        thresholds:
-                            steps:
-                                - value: 0.7
-                                - color: '#FF9F1C'
-                                  value: 0.8
-                                - color: '#EA4747'
-                                  value: 0.9
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
@@ -754,7 +802,7 @@
                             kind: PrometheusTimeSeriesQuery
                             spec:
                                 query: |-
-                                    bottomk(1, min by (node) ((
+                                    (min by () ((
                                     label_replace((
                                     (node_memory_MemTotal_bytes{instance=~"$node"})
                                     -
@@ -774,14 +822,14 @@
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                     )
                                     ))
-                                seriesNameFormat: Min - {{node}}
+                                seriesNameFormat: Min
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
                             kind: PrometheusTimeSeriesQuery
                             spec:
                                 query: |-
-                                    topk(1, max by (node) ((
+                                    (max by () ((
                                     label_replace((
                                     (node_memory_MemTotal_bytes{instance=~"$node"})
                                     -
@@ -801,7 +849,7 @@
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                     )
                                     ))
-                                seriesNameFormat: Max - {{node}}
+                                seriesNameFormat: Max
         UtilizationOverCommitLevel:
             kind: Panel
             spec:
@@ -1050,7 +1098,7 @@
                   width: 5
                   height: 7
                   content:
-                    $ref: '#/spec/panels/TBDPressure'
+                    $ref: '#/spec/panels/PressureMax'
                 - x: 4
                   "y": 7
                   width: 4
@@ -1103,7 +1151,7 @@
                 - x: 0
                   "y": 14
                   width: 14
-                  height: 3
+                  height: 5
                   content:
                     $ref: '#/spec/panels/Pressure'
         - kind: Grid
@@ -1132,11 +1180,17 @@
                   content:
                     $ref: '#/spec/panels/Utilization-Node-2'
                 - x: 14
-                  "y": 8
+                  "y": 16
                   width: 4
                   height: 8
                   content:
                     $ref: '#/spec/panels/PlanMinmax'
+                - x: 14
+                  "y": 8
+                  width: 4
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/PlanMinmax-1'
                 - x: 0
                   "y": 16
                   width: 14
@@ -1149,6 +1203,12 @@
                   height: 6
                   content:
                     $ref: '#/spec/panels/Pressure-1'
+                - x: 14
+                  "y": 24
+                  width: 4
+                  height: 6
+                  content:
+                    $ref: '#/spec/panels/PressureMax'
         - kind: Grid
           spec:
             display:
