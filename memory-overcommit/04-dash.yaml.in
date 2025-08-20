@@ -25,6 +25,33 @@
                     labelName: node
             name: node
     panels:
+        Controlplanememoryalerts:
+            kind: Panel
+            spec:
+                display:
+                    name: Control plane memory alerts
+                plugin:
+                    kind: StatChart
+                    spec:
+                        calculation: last-number
+                        format:
+                            shortValues: true
+                            unit: decimal
+                        mappings:
+                            - kind: Range
+                              spec:
+                                from: 1
+                                result:
+                                    color: '#EE6C6C'
+                                    value: ""
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: count by (alertname) (ALERTS{alertname="SystemMemoryExceedsReservation"})
+                                seriesNameFormat: '{{alertname}}'
         MemoryPlanAndUtilization:
             kind: Panel
             spec:
@@ -246,7 +273,7 @@
                     kind: TimeSeriesChart
                     spec:
                         legend:
-                            position: right
+                            position: bottom
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
@@ -382,7 +409,7 @@
                     kind: TimeSeriesChart
                     spec:
                         legend:
-                            position: right
+                            position: bottom
                         thresholds:
                             steps:
                                 - color: '#EE6C6C'
@@ -418,30 +445,23 @@
             kind: Panel
             spec:
                 display:
-                    name: Utilization - Actual overcommit level - TOP 5
+                    name: System - Utilization - reserved (ratio)
+                    description: This graph is showing the utilization of the hypervisor system reserved memory. The utilization must stay below 100%, otherwise the hypervisor is using more memory for system processes then what was reserved. This is putting system processes at risk.
                 plugin:
-                    kind: StatusHistoryChart
+                    kind: TimeSeriesChart
                     spec:
-                        mappings:
-                            - kind: Range
-                              spec:
-                                from: 0.8
-                                result:
-                                    color: '#FFCC00'
-                                    value: ""
-                                to: 0.9
-                            - kind: Range
-                              spec:
-                                from: 0.9
-                                result:
-                                    color: '#EE6C6C'
-                                    value: ""
-                            - kind: Range
-                              spec:
-                                result:
-                                    color: '#59CC8D'
-                                    value: ""
-                                to: 0.8
+                        legend:
+                            position: bottom
+                        thresholds:
+                            steps:
+                                - value: 0.9
+                                - color: '#EE6C6C'
+                                  value: 1
+                        yAxis:
+                            format:
+                                unit: percent-decimal
+                            label: ""
+                            show: true
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
@@ -450,25 +470,32 @@
                             spec:
                                 minStep: 1h
                                 query: |-
-                                    ( (
-                                    (
-                                    label_replace((
-                                    (node_memory_MemTotal_bytes{instance=~"$node"})
-                                    -
-                                    (node_memory_MemAvailable_bytes{instance=~"$node"})
-                                    ), "node", "$1", "instance", "(.+)")
-                                    - on (node)
-                                    (
-                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    -
-                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    )
-                                    )
+                                    topk(5, (
+                                    #(
+                                    #label_replace((
+                                    #(node_memory_MemTotal_bytes{instance=~"$node"})
+                                    #-
+                                    #(node_memory_MemAvailable_bytes{instance=~"$node"})
+                                    #), "node", "$1", "instance", "(.+)")
+                                    #- on (node)
+                                    #(
+                                    ## system reserved
+                                    #sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) #kube_node_role{role="worker", node=~"$node"})
+                                    #-
+                                    #sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) #kube_node_role{role="worker", node=~"$node"})
+                                    #)
+                                    #)
+
+                                    sum by (node) (container_memory_rss{id="/system.slice"})
 
                                     / on (node)
 
                                     (
-                                    (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
+                                    #(kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
+                                    # system reserved
+                                    sum by (node) (kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
+                                    -
+                                    sum by (node) (kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
                                     )
                                     ))
                                 seriesNameFormat: '{{node}}'
@@ -481,7 +508,7 @@
                     kind: TimeSeriesChart
                     spec:
                         legend:
-                            position: right
+                            position: bottom
                         thresholds:
                             steps:
                                 - value: 0.9
@@ -760,27 +787,40 @@
             items:
                 - x: 0
                   "y": 0
-                  width: 21
-                  height: 10
+                  width: 14
+                  height: 8
                   content:
                     $ref: '#/spec/panels/Utilization-Node'
                 - x: 0
-                  "y": 10
-                  width: 21
-                  height: 4
-                  content:
-                    $ref: '#/spec/panels/Utilization-Node-1'
-                - x: 0
-                  "y": 14
-                  width: 21
-                  height: 10
+                  "y": 8
+                  width: 14
+                  height: 7
                   content:
                     $ref: '#/spec/panels/UtilizationDsitribution'
                 - x: 0
-                  "y": 24
-                  width: 21
+                  "y": 15
+                  width: 14
                   height: 6
                   content:
                     $ref: '#/spec/panels/Pressure-1'
+        - kind: Grid
+          spec:
+            display:
+                title: System
+                collapse:
+                    open: false
+            items:
+                - x: 0
+                  "y": 0
+                  width: 14
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/Utilization-Node-1'
+                - x: 0
+                  "y": 7
+                  width: 2
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/Controlplanememoryalerts'
     duration: 1h
 
