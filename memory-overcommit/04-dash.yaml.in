@@ -31,20 +31,6 @@
                 hidden: true
             value: worker
             name: role
-        - kind: TextVariable
-          spec:
-            display:
-                name: query_kube_node_system_reserved_memory
-                hidden: true
-            value: '# system reserved ( sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="$role", node=~"$node"}) - sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="$role", node=~"$node"}) )'
-            name: query_kube_node_system_reserved_memory
-        - kind: TextVariable
-          spec:
-            display:
-                name: querySumNodePressureMemoryWaitingSecondsTotal
-                hidden: true
-            value: sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~"$node"}[1m]))
-            name: querySumNodePressureMemoryWaitingSecondsTotal
     panels:
         MemoryPlanAndUtilization:
             kind: Panel
