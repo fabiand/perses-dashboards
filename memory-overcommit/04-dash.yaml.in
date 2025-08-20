@@ -83,7 +83,7 @@
                             spec:
                                 minStep: ""
                                 query: sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                seriesNameFormat: Node capacity
+                                seriesNameFormat: Cluster allocatable capacity
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
@@ -112,7 +112,7 @@
                                     sum(node_memory_MemTotal_bytes{instance=~"$node"})
                                     -
                                     sum(node_memory_MemAvailable_bytes{instance=~"$node"})
-                                seriesNameFormat: Utilization - Node memory utilization
+                                seriesNameFormat: Utilization - Cluster memory utilization
         OverCommitLevel:
             kind: Panel
             spec:
@@ -158,7 +158,7 @@
                                     (
                                     sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
                                     )
-                                seriesNameFormat: Memory committment
+                                seriesNameFormat: Virtual Memory committment
         OverCommitLevel-1:
             kind: Panel
             spec:
@@ -560,7 +560,7 @@
             kind: Panel
             spec:
                 display:
-                    name: Utilization - reserved (ratio)
+                    name: Utilization - Utilization of reserved system memory
                     description: This graph is showing the utilization of the hypervisor system reserved memory. The utilization must stay below 100%, otherwise the hypervisor is using more memory for system processes then what was reserved. This is putting system processes at risk.
                 plugin:
                     kind: TimeSeriesChart
@@ -782,7 +782,7 @@
                                     (
                                     sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
                                     )
-                                seriesNameFormat: Memory utilization
+                                seriesNameFormat: Physical Memory utilization
         UtilizationOverCommitLevel-1:
             kind: Panel
             spec:
