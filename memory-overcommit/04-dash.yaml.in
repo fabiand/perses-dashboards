@@ -106,53 +106,6 @@
                                     -
                                     sum(node_memory_MemAvailable_bytes{instance=~"$node"})
                                 seriesNameFormat: Utilization - Cluster memory utilization
-        OverCommitLevel:
-            kind: Panel
-            spec:
-                display:
-                    name: Cluster Committed
-                    description: Commit ratio based on the current utilization and allocated virtual memory to VMs. Overcommit occurs whenever the values goes beyond 100%.
-                plugin:
-                    kind: StatChart
-                    spec:
-                        calculation: last-number
-                        format:
-                            unit: percent-decimal
-                        sparkline: {}
-                        thresholds:
-                            steps:
-                                - value: 1.2
-                                - color: '#FF9F1C'
-                                  value: 1.5
-                                - color: '#EA4747'
-                                  value: 2
-                queries:
-                    - kind: TimeSeriesQuery
-                      spec:
-                        plugin:
-                            kind: PrometheusTimeSeriesQuery
-                            spec:
-                                query: |-
-                                    (
-                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
-                                    -
-                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
-                                    -
-                                    (
-                                    sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    -
-                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    )
-                                    +
-                                    sum(kubevirt_vmi_memory_domain_bytes{node=~"$node"})
-                                    )
-
-                                    /
-
-                                    (
-                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    )
-                                seriesNameFormat: Virtual Memory committment
         OverCommitLevel-1:
             kind: Panel
             spec:
@@ -203,7 +156,7 @@
             kind: Panel
             spec:
                 display:
-                    name: Cluster Committed
+                    name: Cluster Virtual Committed
                     description: Commit ratio based on the current utilization and allocated virtual memory to VMs. Overcommit occurs whenever the values goes beyond 100%.
                 plugin:
                     kind: GaugeChart
@@ -444,18 +397,17 @@
                 display:
                     name: Node Pressure - max
                 plugin:
-                    kind: StatChart
+                    kind: GaugeChart
                     spec:
                         calculation: last-number
                         format:
-                            unit: decimal
-                        sparkline: {}
+                            decimalPlaces: 2
+                            unit: percent-decimal
                         thresholds:
                             steps:
+                                - value: 2
                                 - value: 4
-                                - color: '#FF9F1C'
-                                  value: 4
-                                - color: '#EA4747'
+                                - color: '#EE6C6C'
                                   value: 6
                 queries:
                     - kind: TimeSeriesQuery
@@ -476,16 +428,11 @@
                     spec:
                         calculation: last-number
                         format:
-                            shortValues: true
                             unit: decimal
-                        mappings:
-                            - kind: Range
-                              spec:
-                                from: 1
-                                result:
-                                    color: '#EE6C6C'
-                                    value: ""
-                        sparkline: {}
+                        thresholds:
+                            steps:
+                                - color: '#EE6C6C'
+                                  value: 1
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
@@ -787,14 +734,19 @@
             kind: Panel
             spec:
                 display:
-                    name: Node Utilization - min/max
+                    name: Node Utilization
                 plugin:
-                    kind: StatChart
+                    kind: GaugeChart
                     spec:
                         calculation: last-number
                         format:
-                            unit: decimal
-                        sparkline: {}
+                            unit: percent-decimal
+                        thresholds:
+                            steps:
+                                - value: 0.7
+                                - value: 0.8
+                                - color: '#EE6C6C'
+                                  value: 0.9
                 queries:
                     - kind: TimeSeriesQuery
                       spec:
@@ -823,6 +775,24 @@
                                     )
                                     ))
                                 seriesNameFormat: Min
+        UtilizationMinmax-1:
+            kind: Panel
+            spec:
+                display:
+                    name: Node Utilization - max
+                plugin:
+                    kind: GaugeChart
+                    spec:
+                        calculation: last-number
+                        format:
+                            unit: percent-decimal
+                        thresholds:
+                            steps:
+                                - value: 0.7
+                                - value: 0.8
+                                - color: '#EE6C6C'
+                                  value: 0.9
+                queries:
                     - kind: TimeSeriesQuery
                       spec:
                         plugin:
@@ -850,51 +820,6 @@
                                     )
                                     ))
                                 seriesNameFormat: Max
-        UtilizationOverCommitLevel:
-            kind: Panel
-            spec:
-                display:
-                    name: Cluster Utilization
-                    description: Current aggregate utilization of the cluster
-                plugin:
-                    kind: StatChart
-                    spec:
-                        calculation: last-number
-                        format:
-                            unit: percent-decimal
-                        sparkline: {}
-                        thresholds:
-                            steps:
-                                - value: 0.7
-                                - color: '#FF9F1C'
-                                  value: 0.8
-                                - color: '#EA4747'
-                                  value: 0.9
-                queries:
-                    - kind: TimeSeriesQuery
-                      spec:
-                        plugin:
-                            kind: PrometheusTimeSeriesQuery
-                            spec:
-                                query: |-
-                                    (
-                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
-                                    -
-                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
-                                    -
-                                    (
-                                    sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    -
-                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    )
-                                    )
-
-                                    /
-
-                                    (
-                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    )
-                                seriesNameFormat: Physical Memory utilization
         UtilizationOverCommitLevel-1:
             kind: Panel
             spec:
@@ -1071,23 +996,29 @@
             items:
                 - x: 0
                   "y": 0
-                  width: 4
+                  width: 6
                   height: 7
                   content:
-                    $ref: '#/spec/panels/UtilizationOverCommitLevel'
-                - x: 4
+                    $ref: '#/spec/panels/UtilizationOverCommitLevel-2'
+                - x: 6
                   "y": 0
-                  width: 4
+                  width: 6
                   height: 7
                   content:
-                    $ref: '#/spec/panels/OverCommitLevel'
-                - x: 8
-                  "y": 0
-                  width: 5
+                    $ref: '#/spec/panels/OverCommitLevel-2'
+                - x: 0
+                  "y": 7
+                  width: 6
                   height: 7
                   content:
                     $ref: '#/spec/panels/UtilizationMinmax'
-                - x: 8
+                - x: 6
+                  "y": 7
+                  width: 6
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/UtilizationMinmax-1'
+                - x: 13
                   "y": 7
                   width: 5
                   height: 7
@@ -1099,18 +1030,6 @@
                   height: 7
                   content:
                     $ref: '#/spec/panels/PressureMax'
-                - x: 4
-                  "y": 7
-                  width: 4
-                  height: 7
-                  content:
-                    $ref: '#/spec/panels/OverCommitLevel-2'
-                - x: 0
-                  "y": 7
-                  width: 4
-                  height: 7
-                  content:
-                    $ref: '#/spec/panels/UtilizationOverCommitLevel-2'
                 - x: 0
                   "y": 14
                   width: 18
@@ -1132,13 +1051,13 @@
                     $ref: '#/spec/panels/Utilization'
                 - x: 14
                   "y": 0
-                  width: 4
+                  width: 7
                   height: 7
                   content:
                     $ref: '#/spec/panels/UtilizationOverCommitLevel-1'
                 - x: 14
                   "y": 7
-                  width: 4
+                  width: 7
                   height: 7
                   content:
                     $ref: '#/spec/panels/OverCommitLevel-1'
