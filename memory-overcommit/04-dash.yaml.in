@@ -319,11 +319,11 @@
                             spec:
                                 query: sum(rate(node_pressure_memory_stalled_seconds_total{instance=~"$node"}[1m]))
                                 seriesNameFormat: Stalled
-        Pressure-1:
+        NodePressureHistory:
             kind: Panel
             spec:
                 display:
-                    name: Pressure
+                    name: Node - Pressure
                 plugin:
                     kind: TimeSeriesChart
                     spec:
@@ -1075,7 +1075,7 @@
                   width: 14
                   height: 6
                   content:
-                    $ref: '#/spec/panels/Pressure-1'
+                    $ref: '#/spec/panels/NodePressureHistory'
                 - x: 14
                   "y": 24
                   width: 4
