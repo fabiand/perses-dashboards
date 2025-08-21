@@ -345,7 +345,7 @@
                             spec:
                                 query: sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~"$node"}[1m]))
                                 seriesNameFormat: '{{instance}}'
-        PressureMax:
+        NodePressureMaxNow:
             kind: Panel
             spec:
                 display:
@@ -684,7 +684,7 @@
 
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                 seriesNameFormat: '{{node}}'
-        UtilizationMinmax:
+        NodeUtilizationMinNow:
             kind: Panel
             spec:
                 display:
@@ -915,7 +915,7 @@
                   width: 6
                   height: 7
                   content:
-                    $ref: '#/spec/panels/UtilizationMinmax'
+                    $ref: '#/spec/panels/NodeUtilizationMinNow'
                 - x: 6
                   "y": 7
                   width: 6
@@ -933,7 +933,7 @@
                   width: 5
                   height: 7
                   content:
-                    $ref: '#/spec/panels/PressureMax'
+                    $ref: '#/spec/panels/NodePressureMaxNow'
                 - x: 0
                   "y": 14
                   width: 18
@@ -995,7 +995,7 @@
                   width: 4
                   height: 8
                   content:
-                    $ref: '#/spec/panels/UtilizationMinmax'
+                    $ref: '#/spec/panels/NodeUtilizationMinNow'
                 - x: 0
                   "y": 8
                   width: 14
@@ -1031,7 +1031,7 @@
                   width: 4
                   height: 6
                   content:
-                    $ref: '#/spec/panels/PressureMax'
+                    $ref: '#/spec/panels/NodePressureMaxNow'
         - kind: Grid
           spec:
             display:
