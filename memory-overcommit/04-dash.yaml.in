@@ -110,7 +110,7 @@
             kind: Panel
             spec:
                 display:
-                    name: Cluster Virtual Committed
+                    name: Cluster Virtual Commited
                     description: Commit ratio based on the current utilization and allocated virtual memory to VMs. Overcommit occurs whenever the values goes beyond 100%.
                 plugin:
                     kind: GaugeChart
@@ -288,7 +288,7 @@
                                     )
                                     )
                                 seriesNameFormat: Max
-        Pressure:
+        ClusterPressure:
             kind: Panel
             spec:
                 display:
@@ -894,7 +894,7 @@
         - kind: Grid
           spec:
             display:
-                title: Summary - Plan & Utilization
+                title: Summary
                 collapse:
                     open: true
             items:
@@ -943,7 +943,7 @@
         - kind: Grid
           spec:
             display:
-                title: Cluster - Plan & utilization - Detailed
+                title: Cluster - Detailed
                 collapse:
                     open: false
             items:
@@ -976,11 +976,11 @@
                   width: 14
                   height: 5
                   content:
-                    $ref: '#/spec/panels/Pressure'
+                    $ref: '#/spec/panels/ClusterPressure'
         - kind: Grid
           spec:
             display:
-                title: Nodes - Plan & Utilization
+                title: Nodes - Detailed
                 collapse:
                     open: false
             items:
@@ -1035,7 +1035,7 @@
         - kind: Grid
           spec:
             display:
-                title: System
+                title: System - Detailed
                 collapse:
                     open: false
             items:
