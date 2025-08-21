@@ -606,11 +606,11 @@
                                     )
                                     ))
                                 seriesNameFormat: '{{node}}'
-        Utilization-Node-2:
+        NodeRequestsHistory:
             kind: Panel
             spec:
                 display:
-                    name: Plan - Pod requests
+                    name: Plan - Pod requests per Node
                 plugin:
                     kind: TimeSeriesChart
                     spec:
@@ -1051,7 +1051,7 @@
                   width: 14
                   height: 8
                   content:
-                    $ref: '#/spec/panels/Utilization-Node-2'
+                    $ref: '#/spec/panels/NodeRequestsHistory'
                 - x: 14
                   "y": 16
                   width: 4
