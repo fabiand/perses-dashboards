@@ -371,7 +371,7 @@
                             spec:
                                 query: topk(1, (sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~"$node"}[1m]@end()))))
                                 seriesNameFormat: '{{instance}}'
-        SystemExceedsResevration:
+        NodeSystemExceedsReservationAlertNow:
             kind: Panel
             spec:
                 display:
@@ -395,7 +395,7 @@
                             spec:
                                 query: count by (alertname) (ALERTS{alertname="SystemMemoryExceedsReservation"})
                                 seriesNameFormat: '{{alertname}}'
-        SystemMinmax:
+        NodeSystemReservedMinmaxHistory:
             kind: Panel
             spec:
                 display:
@@ -565,7 +565,7 @@
                                     (kube_node_status_allocatable{resource="memory"} * on (node) kube_node_role{role="worker"})
                                     )
                                 seriesNameFormat: '{{node}}'
-        NodeReservedSystemUtilizationHistory:
+        NodeSystemReservedUtilizationHistory:
             kind: Panel
             spec:
                 display:
@@ -927,7 +927,7 @@
                   width: 5
                   height: 7
                   content:
-                    $ref: '#/spec/panels/SystemExceedsResevration'
+                    $ref: '#/spec/panels/NodeSystemExceedsReservationAlertNow'
                 - x: 13
                   "y": 0
                   width: 5
@@ -1044,18 +1044,18 @@
                   width: 14
                   height: 8
                   content:
-                    $ref: '#/spec/panels/NodeReservedSystemUtilizationHistory'
+                    $ref: '#/spec/panels/NodeSystemReservedUtilizationHistory'
                 - x: 21
                   "y": 0
                   width: 2
                   height: 8
                   content:
-                    $ref: '#/spec/panels/SystemExceedsResevration'
+                    $ref: '#/spec/panels/NodeSystemExceedsReservationAlertNow'
                 - x: 14
                   "y": 0
                   width: 7
                   height: 8
                   content:
-                    $ref: '#/spec/panels/SystemMinmax'
+                    $ref: '#/spec/panels/NodeSystemReservedMinmaxHistory'
     duration: 1h
 
