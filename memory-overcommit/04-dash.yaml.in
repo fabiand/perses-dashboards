@@ -32,11 +32,11 @@
             value: worker
             name: role
     panels:
-        MemoryPlanAndUtilization:
+        ClusterUtilizationHistorySummary:
             kind: Panel
             spec:
                 display:
-                    name: Cluster Utilization & Plan - Summary
+                    name: Cluster Utilization
                     description: The virtual memory assignment is showing the worst-case scenario if all virtual memory was used right now. The assigned virtual memory is shown on top of the non virtualization related memory utilization. The current utiliztaion plus worst-case virtual memory utilization is indiacting the worst case memor overcommittment.
                 plugin:
                     kind: TimeSeriesChart
@@ -106,53 +106,7 @@
                                     -
                                     sum(node_memory_MemAvailable_bytes{instance=~"$node"})
                                 seriesNameFormat: Utilization - Cluster memory utilization
-        OverCommitLevel-1:
-            kind: Panel
-            spec:
-                display:
-                    name: Virtual Overcommit Level
-                    description: Overcommit ratio based on the current utilization and allocated virtual memory to VMs
-                plugin:
-                    kind: StatChart
-                    spec:
-                        calculation: last-number
-                        format:
-                            unit: percent-decimal
-                        mappings: []
-                        sparkline: {}
-                        thresholds:
-                            steps:
-                                - value: 1.2
-                                - color: '#EE6C6C'
-                                  value: 1.5
-                queries:
-                    - kind: TimeSeriesQuery
-                      spec:
-                        plugin:
-                            kind: PrometheusTimeSeriesQuery
-                            spec:
-                                query: |-
-                                    (
-                                    sum(node_memory_MemTotal_bytes{instance=~"$node"})
-                                    -
-                                    sum(node_memory_MemAvailable_bytes{instance=~"$node"})
-                                    -
-                                    (
-                                    sum(kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    -
-                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    )
-                                    +
-                                    sum(kubevirt_vmi_memory_domain_bytes{node=~"$node"})
-                                    )
-
-                                    /
-
-                                    (
-                                    sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
-                                    )
-                                seriesNameFormat: Plan - Virtual Overcomit Level
-        OverCommitLevel-2:
+        ClusterVirtualCommitedNow:
             kind: Panel
             spec:
                 display:
@@ -283,7 +237,7 @@
 
                                     )))
                                 seriesNameFormat: '{{node}}'
-        PlanMinmax-1:
+        NodeRequestsMinmaxNow:
             kind: Panel
             spec:
                 display:
@@ -494,7 +448,7 @@
 
                                     )
                                 seriesNameFormat: max {{node}}
-        Utilization:
+        ClusterUtilizationHistory:
             kind: Panel
             spec:
                 display:
@@ -820,7 +774,7 @@
                                     )
                                     ))
                                 seriesNameFormat: Max
-        UtilizationOverCommitLevel-1:
+        ClusterUtilizationNow:
             kind: Panel
             spec:
                 display:
@@ -911,7 +865,7 @@
                                     sum(kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="worker", node=~"$node"})
                                     )
                                 seriesNameFormat: Physical Memory utilization
-        Virtualmemoryallocation:
+        ClusterVirtualCommitedHistory:
             kind: Panel
             spec:
                 display:
@@ -1005,7 +959,7 @@
                   width: 6
                   height: 7
                   content:
-                    $ref: '#/spec/panels/OverCommitLevel-2'
+                    $ref: '#/spec/panels/ClusterVirtualCommitedNow'
                 - x: 0
                   "y": 7
                   width: 6
@@ -1035,7 +989,7 @@
                   width: 18
                   height: 7
                   content:
-                    $ref: '#/spec/panels/MemoryPlanAndUtilization'
+                    $ref: '#/spec/panels/ClusterUtilizationHistorySummary'
         - kind: Grid
           spec:
             display:
@@ -1048,25 +1002,25 @@
                   width: 14
                   height: 7
                   content:
-                    $ref: '#/spec/panels/Utilization'
+                    $ref: '#/spec/panels/ClusterUtilizationHistory'
                 - x: 14
                   "y": 0
                   width: 7
                   height: 7
                   content:
-                    $ref: '#/spec/panels/UtilizationOverCommitLevel-1'
-                - x: 14
-                  "y": 7
-                  width: 7
-                  height: 7
-                  content:
-                    $ref: '#/spec/panels/OverCommitLevel-1'
+                    $ref: '#/spec/panels/ClusterUtilizationNow'
                 - x: 0
                   "y": 7
                   width: 14
                   height: 7
                   content:
-                    $ref: '#/spec/panels/Virtualmemoryallocation'
+                    $ref: '#/spec/panels/ClusterVirtualCommitedHistory'
+                - x: 14
+                  "y": 7
+                  width: 7
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/ClusterVirtualCommitedNow'
                 - x: 0
                   "y": 14
                   width: 14
@@ -1109,7 +1063,7 @@
                   width: 4
                   height: 8
                   content:
-                    $ref: '#/spec/panels/PlanMinmax-1'
+                    $ref: '#/spec/panels/NodeRequestsMinmaxNow'
                 - x: 0
                   "y": 16
                   width: 14
