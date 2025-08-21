@@ -943,7 +943,7 @@
         - kind: Grid
           spec:
             display:
-                title: Cluster - Detailed
+                title: Cluster
                 collapse:
                     open: false
             items:
@@ -980,7 +980,7 @@
         - kind: Grid
           spec:
             display:
-                title: Nodes - Detailed
+                title: Nodes
                 collapse:
                     open: false
             items:
@@ -1035,7 +1035,7 @@
         - kind: Grid
           spec:
             display:
-                title: System - Detailed
+                title: System Reserved
                 collapse:
                     open: false
             items:
