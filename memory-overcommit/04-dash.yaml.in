@@ -522,7 +522,7 @@
                                     +
                                     sum(kube_pod_resource_request{resource="memory", node=~"$node"})
                                 seriesNameFormat: Plan - Memory requests
-        Utilization-Node:
+        NodeUtilizationHistory:
             kind: Panel
             spec:
                 display:
@@ -1039,7 +1039,7 @@
                   width: 14
                   height: 8
                   content:
-                    $ref: '#/spec/panels/Utilization-Node'
+                    $ref: '#/spec/panels/NodeUtilizationHistory'
                 - x: 14
                   "y": 0
                   width: 4
