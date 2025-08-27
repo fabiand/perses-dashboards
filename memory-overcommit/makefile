@@ -18,7 +18,7 @@ import:
 	
 	test -f 01-*.json && mv *.json .trash/ || :
 
-apply: $(jsons)
+apply: FORCE $(jsons)
 	@echo -n "$(URL)" > vars.d/URL
 	@echo -n "$(TOKEN)" > vars.d/TOKEN
 	@echo -n "$(PROJECT)" > vars.d/PROJECT
@@ -33,7 +33,6 @@ url:
 	@echo "http://localhost:8080/projects/$(PROJECT)/dashboards/memory-overcommit"
 
 %.json: %.json.in
-	#python3 vars.py $< > $@
 	cp $< $@
 	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if type == "string" and contains($$var) then (split($$var)|join($$val)) else . end)' $@ > .$@ ; mv .$@ $@ ; done
 
