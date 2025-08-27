@@ -1,7 +1,7 @@
 # 	vim: noexpandtab:
 
 sources := $(wildcard *.json.in)
-jsons := $(patsubst %.json.in,%.yaml,$(sources))
+jsons := $(patsubst %.json.in,%.json,$(sources))
 
 #URL=https://prometheus-k8s-openshift-monitoring.apps.cnv2.engineering.redhat.com
 PROJECT := openshift-cnv
@@ -15,8 +15,12 @@ import:
 	test -f 01-*.json && mv *.json .trash/ || :
 
 apply: $(jsons)
-	echo $(sources) 
-	echo $(jsons)
+	@echo "$(URL)" > vars.d/URL
+	@echo "$(TOKEN)" > vars.d/TOKEN
+	@echo "$(PROJECT)" > vars.d/PROJECT
+	
+	echo sources $(sources)
+	echo jsons $(jsons)
 	percli apply -f 01-project.json
 	percli project $(PROJECT)
 	for F in $(jsons) ; do ( set -x ; percli apply -f $$F ; ) ; done
@@ -25,11 +29,9 @@ url:
 	@echo "http://localhost:8080/projects/$(PROJECT)/dashboards/memory-overcommit"
 
 %.json: %.json.in
-	echo "$(URL)" > vars.d/URL
-	echo "$(TOKEN)" > vars.d/TOKEN
-	echo "$(PROJECT)" > vars.d/PROJECT
 	#python3 vars.py $< > $@
-	for VAR in $$(ls -1 vars.d); do	jq --arg var $$VAR --rawfile val vars.d/$$VAR 'walk(if . == $$var then $$val else . end)' $<
+	cp $< $@
+	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . == $$var then $$val | sub("[[:space:]]+$") else . end)' $@ > .$@ ; mv .$@ $@ ; done
 
 FORCE:
 
