@@ -1,1 +1,1 @@
-sum(node_memory_MemTotal_bytes{instance=~"$node"}) - sum(node_memory_MemAvailable_bytes{instance=~"$node"})
+(node_memory_MemTotal_bytes{instance=~"$node"}) - (node_memory_MemAvailable_bytes{instance=~"$node"})
