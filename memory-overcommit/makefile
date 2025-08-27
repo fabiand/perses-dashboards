@@ -10,7 +10,8 @@ TOKEN := $(shell oc whoami -t)
 
 import:
 	percli get -o json dash memory-overcommit \
-	| jq '.[] | .metadata.project = "{{PROJECT}}"' > 04-dash.json.in
+	| jq '.[] | .metadata.project = "{{PROJECT}}"' \
+	| jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash.json.in
 	#sed -e "s#^\(\s\+\)project: .*#\\1project: {{PROJECT}}#" -e "/^\s\+\(createdAt\|updatedAt\|version\)/ d" > 04-dash.json.in
 	test -f 01-*.json && mv *.json .trash/ || :
 
@@ -32,6 +33,9 @@ url:
 	#python3 vars.py $< > $@
 	cp $< $@
 	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . == $$var then $$val | gsub("[[:space:]]+$$"; "") else . end)' $@ > .$@ ; mv .$@ $@ ; done
+
+clean: $(jsons)
+	rm -v $(jsons)
 
 FORCE:
 
