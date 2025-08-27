@@ -13,6 +13,8 @@ import:
 	| jq '.[] | .metadata.project = "{{PROJECT}}"' \
 	| jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash.json.in
 	#sed -e "s#^\(\s\+\)project: .*#\\1project: {{PROJECT}}#" -e "/^\s\+\(createdAt\|updatedAt\|version\)/ d" > 04-dash.json.in
+	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . == $$val then $$var else . end)' $@ > .$@ ; mv .$@ $@ ; done
+	
 	test -f 01-*.json && mv *.json .trash/ || :
 
 apply: $(jsons)
@@ -32,7 +34,7 @@ url:
 %.json: %.json.in
 	#python3 vars.py $< > $@
 	cp $< $@
-	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . == $$var then $$val | gsub("[[:space:]]+$$"; "") else . end)' $@ > .$@ ; mv .$@ $@ ; done
+	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . == $$var then $$val else . end)' $@ > .$@ ; mv .$@ $@ ; done
 
 clean: $(jsons)
 	rm -v $(jsons)
