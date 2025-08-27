@@ -31,7 +31,7 @@ url:
 %.json: %.json.in
 	#python3 vars.py $< > $@
 	cp $< $@
-	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . == $$var then $$val | sub("[[:space:]]+$") else . end)' $@ > .$@ ; mv .$@ $@ ; done
+	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . == $$var then $$val | gsub("[[:space:]]+$$"; "") else . end)' $@ > .$@ ; mv .$@ $@ ; done
 
 FORCE:
 
