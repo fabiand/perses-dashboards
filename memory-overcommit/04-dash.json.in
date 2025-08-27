@@ -460,7 +460,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\nsum((node_memory_MemTotal_bytes{instance=~\"$node\"}) - node_memory_MemAvailable_bytes{instance=~\"$node\"}))\n-\n(\n{{kube_node_status_capacity_memory:sum}}\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n)\n\n/\n\n(\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)",
+                    "query": "(\nsum((node_memory_MemTotal_bytes{instance=~\"$node\"} - node_memory_MemAvailable_bytes{instance=~\"$node\"}))\n-\n(\n{{kube_node_status_capacity_memory:sum}}\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n)\n\n/\n\n(\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)",
                     "seriesNameFormat": "Virtual Memory committment"
                   }
                 }
@@ -824,7 +824,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\nlabel_replace((\n(node_memory_MemTotal_bytes{instance=~\"$node\"} - node_memory_MemAvailable_bytes{instance=~\"$node\"})\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)",
+                    "query": "(\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)",
                     "seriesNameFormat": "{{node}}"
                   }
                 }
@@ -869,7 +869,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(max by () ((\nlabel_replace((\n(node_memory_MemTotal_bytes{instance=~\"$node\"} - node_memory_MemAvailable_bytes{instance=~\"$node\"})\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)\n))",
+                    "query": "(max by () ((\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)\n))",
                     "seriesNameFormat": "Max"
                   }
                 }
@@ -914,7 +914,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(min by () ((\nlabel_replace((\n(node_memory_MemTotal_bytes{instance=~\"$node\"} - node_memory_MemAvailable_bytes{instance=~\"$node\"})\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)\n))",
+                    "query": "(min by () ((\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)\n))",
                     "seriesNameFormat": "Min"
                   }
                 }
@@ -961,7 +961,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(min by () ((\n\n(\n(\nlabel_replace((\n(node_memory_MemTotal_bytes{instance=~\"$node\"} - node_memory_MemAvailable_bytes{instance=~\"$node\"})\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n\n)))",
+                    "query": "(min by () ((\n\n(\n(\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n\n)))",
                     "seriesNameFormat": "{{node}}"
                   }
                 }
@@ -973,7 +973,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(max by () ((\n\n(\n(\nlabel_replace((\n(node_memory_MemTotal_bytes{instance=~\"$node\"} - node_memory_MemAvailable_bytes{instance=~\"$node\"})\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n\n)))",
+                    "query": "(max by () ((\n\n(\n(\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n\n)))",
                     "seriesNameFormat": "{{node}}"
                   }
                 }
@@ -1018,7 +1018,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\n(\nlabel_replace((\n(node_memory_MemTotal_bytes{instance=~\"$node\"} - node_memory_MemAvailable_bytes{instance=~\"$node\"})\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})",
+                    "query": "(\n(\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) (kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum by (node) (kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})",
                     "seriesNameFormat": "{{node}}"
                   }
                 }
