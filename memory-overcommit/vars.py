@@ -1,7 +1,7 @@
 import sys
 import os
 import re
-
+import yaml
 
 def replace_tpl_vars(data):
     tpl_vars = (
