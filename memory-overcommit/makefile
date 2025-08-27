@@ -13,14 +13,14 @@ import:
 	| jq '.[] | .metadata.project = "{{PROJECT}}"' \
 	| jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash.json.in
 	#sed -e "s#^\(\s\+\)project: .*#\\1project: {{PROJECT}}#" -e "/^\s\+\(createdAt\|updatedAt\|version\)/ d" > 04-dash.json.in
-	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . == $$val then $$var else . end)' $@ > .$@ ; mv .$@ $@ ; done
+	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . == $$val then $$var else . end)' 04-dash.json.in > .04-dash.json.in ; mv .04-dash.json.in 04-dash.json.in ; done
 	
 	test -f 01-*.json && mv *.json .trash/ || :
 
 apply: $(jsons)
-	@echo "$(URL)" > vars.d/URL
-	@echo "$(TOKEN)" > vars.d/TOKEN
-	@echo "$(PROJECT)" > vars.d/PROJECT
+	@echo -n "$(URL)" > vars.d/URL
+	@echo -n "$(TOKEN)" > vars.d/TOKEN
+	@echo -n "$(PROJECT)" > vars.d/PROJECT
 	
 	echo sources $(sources)
 	echo jsons $(jsons)
@@ -41,4 +41,4 @@ clean: $(jsons)
 
 FORCE:
 
-.PHONY: FORCE $(sources)
+.PHONY: FORCE import apply $(sources)

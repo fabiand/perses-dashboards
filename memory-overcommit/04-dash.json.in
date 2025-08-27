@@ -2,9 +2,6 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "memory-overcommit",
-    "createdAt": "2025-08-18T08:15:59.304297484Z",
-    "updatedAt": "2025-08-27T13:49:16.975836041Z",
-    "version": 134,
     "project": "{{PROJECT}}"
   },
   "spec": {
@@ -157,7 +154,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})",
+                    "query": "{{kube_node_status_capacity_memory:sum}}",
                     "seriesNameFormat": "Node memory capacity"
                   }
                 }
@@ -169,7 +166,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})",
+                    "query": "{{node_memory_MemNotAvailable_bytes:sum}}",
                     "seriesNameFormat": "Utilization - Node memory utilization (with virt)"
                   }
                 }
@@ -395,7 +392,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "minStep": "",
-                    "query": "sum(kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})",
+                    "query": "{{kube_node_status_capacity_memory:total}}",
                     "seriesNameFormat": "Node capacity"
                   }
                 }
