@@ -23,10 +23,10 @@ url:
 	@echo "http://localhost:8080/projects/$(PROJECT)/dashboards/memory-overcommit"
 
 %.yaml: %.yaml.in
-	sed -e "s!{{URL}}!$(URL)!" \
-	    -e "s;{{TOKEN}};$(TOKEN);" \
-	    -e "s;{{PROJECT}};$(PROJECT);" \
-	$< > $@
+	echo "$(URL)" > vars.d/URL
+	echo "$(TOKEN)" > vars.d/TOKEN
+	echo "$(PROJECT)" > vars.d/PROJECT
+	python3 vars.py $< > $@
 
 FORCE:
 
