@@ -9,11 +9,12 @@ URL := https://$(shell oc get route -n openshift-monitoring prometheus-k8s -o js
 TOKEN := $(shell oc whoami -t)
 
 import:
+	-rm vars.d/{URL,TOKEN,PROJECT}
 	percli get -o json dash memory-overcommit \
 	| jq '.[] | .metadata.project = "{{PROJECT}}"' \
 	| jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash.json.in
 	#sed -e "s#^\(\s\+\)project: .*#\\1project: {{PROJECT}}#" -e "/^\s\+\(createdAt\|updatedAt\|version\)/ d" > 04-dash.json.in
-	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . | contains($$val) then $$var else . end)' 04-dash.json.in > .04-dash.json.in ; mv .04-dash.json.in 04-dash.json.in ; done
+	for VAR in $$(ls -1 vars.d); do	( set -x ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if type == "string" and contains($$val) then (split($$val)|join($$var)) else . end)' 04-dash.json.in > .04-dash.json.in && mv .04-dash.json.in 04-dash.json.in ; ) || exit 1 ; done
 	
 	test -f 01-*.json && mv *.json .trash/ || :
 
@@ -34,7 +35,7 @@ url:
 %.json: %.json.in
 	#python3 vars.py $< > $@
 	cp $< $@
-	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if . | contains($$var) then $$val else . end)' $@ > .$@ ; mv .$@ $@ ; done
+	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if type == "string" and contains($$var) then (split($$var)|join($$val)) else . end)' $@ > .$@ ; mv .$@ $@ ; done
 
 clean: $(jsons)
 	rm -v $(jsons)

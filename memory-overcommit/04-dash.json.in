@@ -178,7 +178,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})\n-\nsum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})",
+                    "query": "{{node_memory_MemNotAvailable_bytes:sum}}\n-\nsum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})",
                     "seriesNameFormat": "Utilization - Node memory utilization (without virt)"
                   }
                 }
@@ -190,7 +190,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\nsum(kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n+\nsum(kube_pod_resource_request{resource=\"memory\", node=~\"$node\"})",
+                    "query": "(\n{{kube_node_status_capacity_memory:sum}}\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n+\nsum(kube_pod_resource_request{resource=\"memory\", node=~\"$node\"})",
                     "seriesNameFormat": "Plan - Memory requests"
                   }
                 }
@@ -270,7 +270,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "# all used - system reserved + plan vm\nsum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})\n-\n( # system reserved\nsum(kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
+                    "query": "# all used - system reserved + plan vm\nsum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})\n-\n( # system reserved\n{{kube_node_status_capacity_memory:sum}}\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
                     "seriesNameFormat": "Plan - VM assigned virtual memory"
                   }
                 }
@@ -324,7 +324,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\nsum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})\n-\n(\nsum(kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n\n/\n\n(\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)",
+                    "query": "(\nsum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})\n-\n(\n{{kube_node_status_capacity_memory:sum}}\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n)\n\n/\n\n(\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)",
                     "seriesNameFormat": "Physical Memory utilization"
                   }
                 }
@@ -404,7 +404,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})\n-\n(\nsum(kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
+                    "query": "sum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})\n-\n(\n{{kube_node_status_capacity_memory:sum}}\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
                     "seriesNameFormat": "Plan - VM assigned virtual memory"
                   }
                 }
@@ -460,7 +460,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\nsum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})\n-\n(\nsum(kube_node_status_capacity{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n)\n\n/\n\n(\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)",
+                    "query": "(\nsum(node_memory_MemTotal_bytes{instance=~\"$node\"})\n-\nsum(node_memory_MemAvailable_bytes{instance=~\"$node\"})\n-\n(\n{{kube_node_status_capacity_memory:sum}}\n-\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n)\n\n/\n\n(\nsum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} * on (node) kube_node_role{role=\"worker\", node=~\"$node\"})\n)",
                     "seriesNameFormat": "Virtual Memory committment"
                   }
                 }
