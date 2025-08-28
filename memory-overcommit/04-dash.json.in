@@ -1026,9 +1026,56 @@
             }
           ]
         }
+      },
+      "VMs": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "VMs"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(label_replace(kubevirt_vmi_memory_domain_bytes, \"label_vm_kubevirt_io_name\", \"$1\", \"kubernetes_vmi_label_kubevirt_io_domain\", \"(.+)\"))\n\n/ on (namespace, label_vm_kubevirt_io_name) group_left()\n\n(kube_pod_resource_request{resource=\"memory\", pod=~\"virt-launcher.*\"} * on (namespace, pod) group_left() kube_pod_labels{pod=~\"virt-launcher.*\"})"
+                  }
+                }
+              }
+            }
+          ]
+        }
       }
     },
     "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Workloads",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/VMs"
+              }
+            }
+          ]
+        }
+      },
       {
         "kind": "Grid",
         "spec": {
