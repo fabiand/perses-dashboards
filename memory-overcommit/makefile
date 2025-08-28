@@ -11,6 +11,7 @@ TOKEN := $(shell oc whoami -t)
 import:
 	make get-dashboard
 	make inject-vars
+	make inject-vars
 
 	test -f 01-*.json && mv *.json .trash/ || :
 
@@ -22,7 +23,7 @@ get-dashboard:
 
 inject-vars: FORCE
 	-rm vars.d/{URL,TOKEN,PROJECT}
-	for VAR in $$(ls -1 vars.d); do	( set -x ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if type == "string" and contains($$val) then (split($$val)|join($$var)) else . end)' 04-dash.json.in > .04-dash.json.in && mv .04-dash.json.in 04-dash.json.in ; ) || exit 1 ; done
+	for VAR in $$(ls -1 vars.d); do	( jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if type == "string" and contains($$val) then (split($$val)|join($$var)) else . end)' 04-dash.json.in > .04-dash.json.in && mv .04-dash.json.in 04-dash.json.in ; ) || exit 1 ; done
 
 apply: FORCE $(jsons)
 	@echo -n "$(URL)" > vars.d/URL
@@ -40,7 +41,9 @@ url:
 
 %.json: %.json.in
 	cp $< $@
-	for VAR in $$(ls -1 vars.d); do	echo $$VAR ; jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if type == "string" and contains($$var) then (split($$var)|join($$val)) else . end)' $@ > .$@ ; mv .$@ $@ ; done
+	for SEQ in 1 2; do \
+	for VAR in $$(ls -1 vars.d); do	( jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if type == "string" and contains($$var) then (split($$var)|join($$val)) else . end)' $@ > .$@ && mv .$@ $@  ; ) || exit 1 ; done \
+	done
 
 clean: $(jsons)
 	rm -v $(jsons)
