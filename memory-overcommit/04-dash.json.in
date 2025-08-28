@@ -1044,7 +1044,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(label_replace(kubevirt_vmi_memory_domain_bytes, \"label_vm_kubevirt_io_name\", \"$1\", \"kubernetes_vmi_label_kubevirt_io_domain\", \"(.+)\"))\n\n/ on (namespace, label_vm_kubevirt_io_name) group_left()\n\n(kube_pod_resource_request{resource=\"memory\", pod=~\"virt-launcher.*\"} * on (namespace, pod) group_left() kube_pod_labels{pod=~\"virt-launcher.*\"})"
+                    "query": "#kubevirt_vmi_memory_domain_bytes{kubernetes_vmi_label_vm_kubevirt_io_name!=\"\"}\n(label_replace(kubevirt_vmi_memory_domain_bytes, \"label_vm_kubevirt_io_name\", \"$1\", \"kubernetes_vmi_label_kubevirt_io_domain\", \"(.+)\"))\n/ on (namespace, label_vm_kubevirt_io_name) \nmax by (namespace, label_vm_kubevirt_io_name) (\nkube_pod_resource_request{resource=\"memory\"}\n* on(namespace, pod) group_left(label_vm_kubevirt_io_name)\ngroup by(namespace, pod, label_vm_kubevirt_io_name) (\n  kube_pod_labels{label_vm_kubevirt_io_name!=\"\"}\n)\n)"
                   }
                 }
               }
