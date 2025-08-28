@@ -19,11 +19,10 @@ get-dashboard:
 	percli get -o json dash memory-overcommit \
 	| jq '.[] | .metadata.project = "{{PROJECT}}"' \
 	| jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash.json.in
-	#sed -e "s#^\(\s\+\)project: .*#\\1project: {{PROJECT}}#" -e "/^\s\+\(createdAt\|updatedAt\|version\)/ d" > 04-dash.json.in
 
 inject-vars: FORCE
 	-rm vars.d/{URL,TOKEN,PROJECT}
-	for VAR in $$(ls -1 vars.d); do	( jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if type == "string" and contains($$val) then (split($$val)|join($$var)) else . end)' 04-dash.json.in > .04-dash.json.in && mv .04-dash.json.in 04-dash.json.in ; ) || exit 1 ; done
+	bash do-vars.sh query_to_vars "04-dash.json.in"
 
 apply: FORCE $(jsons)
 	@echo -n "$(URL)" > vars.d/URL
@@ -42,7 +41,7 @@ url:
 %.json: %.json.in
 	cp $< $@
 	for SEQ in 1 2; do \
-	for VAR in $$(ls -1 vars.d); do	( jq --arg var "{{$$VAR}}" --rawfile val "vars.d/$$VAR" 'walk(if type == "string" and contains($$var) then (split($$var)|join($$val)) else . end)' $@ > .$@ && mv .$@ $@  ; ) || exit 1 ; done \
+	bash do-vars.sh vars_to_query "04-dash.json.in" ; \
 	done
 
 clean: $(jsons)
