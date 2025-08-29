@@ -684,7 +684,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "count by (alertname) (ALERTS{alertname=\"SystemMemoryExceedsReservation\"})",
+                    "query": "count by (alertname) (ALERTS{alertname=\"SystemMemoryExceedsReservation\"}) OR vector(0)",
                     "seriesNameFormat": "{{alertname}}"
                   }
                 }
