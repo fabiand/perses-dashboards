@@ -19,18 +19,14 @@ get-dashboard:
 	percli get -o json dash memory-overcommit \
 	| jq '.[] | .metadata.project = "{{PROJECT}}"' \
 	| jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash.json.in
-
-inject-vars: FORCE
-	-rm vars.d/{URL,TOKEN,PROJECT}
 	bash do-vars.sh query_to_vars "04-dash.json.in"
 
-apply: FORCE $(jsons)
-	@echo -n "$(URL)" > vars.d/URL
-	@echo -n "$(TOKEN)" > vars.d/TOKEN
-	@echo -n "$(PROJECT)" > vars.d/PROJECT
-	
-	echo sources $(sources)
-	echo jsons $(jsons)
+env-vars: FORCE
+	echo -n "$(URL)" > vars.d/URL
+	echo -n "$(TOKEN)" > vars.d/TOKEN
+	echo -n "$(PROJECT)" > vars.d/PROJECT
+
+apply: FORCE env-vars $(jsons)
 	percli apply -f 01-project.json
 	percli project $(PROJECT)
 	for F in $(jsons) ; do ( set -x ; percli apply -f $$F ; ) ; done
@@ -40,13 +36,11 @@ url:
 
 %.json: %.json.in
 	cp $< $@
-	for SEQ in 1 2; do \
-	bash do-vars.sh vars_to_query "04-dash.json.in" ; \
-	done
+	bash do-vars.sh vars_to_query $@
 
 clean: $(jsons)
 	rm -v $(jsons)
 
 FORCE:
 
-.PHONY: FORCE import apply $(sources) inject-vars
+.PHONY: FORCE import apply $(sources) inject-vars env-vars

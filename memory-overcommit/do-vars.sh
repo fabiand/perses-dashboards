@@ -1,7 +1,10 @@
 
-set -x
+#set -x
+
 query_to_vars() {
-  local JSONINFILE="${1:-04-dash.json.in}"
+  local JSONFILE="${1}"
+
+  [[ -z "$1" ]] && exit 4
 
   for VAR in $(ls -1 vars.d)
   do
@@ -9,22 +12,28 @@ query_to_vars() {
       --arg var "{{$VAR}}" \
       --rawfile val "vars.d/$VAR" \
       'walk(if type == "string" and contains($val) then (split($val)|join($var)) else . end)' \
-      $JSONINFILE > .$JSONINFILE || exit 4
-      mv .$JSONINFILE $JSONINFILE
+      "$JSONFILE" > ".$JSONFILE" || exit 4
+      mv ".$JSONFILE" "$JSONFILE"
   done
 }
 
 vars_to_query() {
-  local JSONINFILE="${1:-04-dash.json.in}"
+  local JSONFILE="${1}"
+  
+  [[ -z "$1" ]] && exit 4
 
-	for VAR in $(ls -1 vars.d);
+  # Replace vars as long as vars are in the file
+  while grep -qE "{{($(ls -1 vars.d | tr "\n" "|"))}}" $JSONFILE;
   do
-    jq \
-      --arg var "{{$VAR}}" \
-      --rawfile val "vars.d/$VAR" \
-      'walk(if type == "string" and contains($var) then (split($var)|join($val)) else . end)' \
-      $JSONINFILE > .$JSONINFILE || exit 4
-      mv .$JSONINFILE $JSONINFILE
+    for VAR in $(ls -1 vars.d);
+    do
+      jq \
+        --arg var "{{$VAR}}" \
+        --rawfile val "vars.d/$VAR" \
+        'walk(if type == "string" and contains($var) then (split($var)|join($val)) else . end)' \
+        "$JSONFILE" > ".$JSONFILE" || exit 4
+        mv ".$JSONFILE" "$JSONFILE"
+    done
   done
 }
 
