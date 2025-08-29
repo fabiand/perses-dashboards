@@ -923,6 +923,31 @@
           ]
         }
       },
+      "NumberofrunningVMs": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Number of running VMs"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "count(kubevirt_vmi_memory_domain_bytes)"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
       "PlanMinmax": {
         "kind": "Panel",
         "spec": {
@@ -1031,11 +1056,23 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "VMs"
+            "name": "VM overcommit ratio",
+            "description": "Any value larger than 1 shows that the VM is using more memory than it requested"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
-            "spec": {}
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 1
+                  }
+                ]
+              }
+            }
           },
           "queries": [
             {
@@ -1044,7 +1081,8 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "#kubevirt_vmi_memory_domain_bytes{kubernetes_vmi_label_vm_kubevirt_io_name!=\"\"}\n(label_replace(kubevirt_vmi_memory_domain_bytes, \"label_vm_kubevirt_io_name\", \"$1\", \"kubernetes_vmi_label_kubevirt_io_domain\", \"(.+)\"))\n/ on (namespace, label_vm_kubevirt_io_name) \nmax by (namespace, label_vm_kubevirt_io_name) (\nkube_pod_resource_request{resource=\"memory\"}\n* on(namespace, pod) group_left(label_vm_kubevirt_io_name)\ngroup by(namespace, pod, label_vm_kubevirt_io_name) (\n  kube_pod_labels{label_vm_kubevirt_io_name!=\"\"}\n)\n)"
+                    "query": "#kubevirt_vmi_memory_domain_bytes{kubernetes_vmi_label_vm_kubevirt_io_name!=\"\"}\n(label_replace(kubevirt_vmi_memory_domain_bytes, \"label_vm_kubevirt_io_name\", \"$1\", \"name\", \"(.+)\"))\n\n/ on (namespace, label_vm_kubevirt_io_name) \nmax by (namespace, label_vm_kubevirt_io_name) (\nkube_pod_resource_request{resource=\"memory\"}\n* on(namespace, pod) group_left(label_vm_kubevirt_io_name)\ngroup by(namespace, pod, label_vm_kubevirt_io_name) (\n  kube_pod_labels{label_vm_kubevirt_io_name!=\"\"}\n)\n)",
+                    "seriesNameFormat": "{{namespace}}/{{label_vm_kubevirt_io_name}}"
                   }
                 }
               }
@@ -1054,28 +1092,6 @@
       }
     },
     "layouts": [
-      {
-        "kind": "Grid",
-        "spec": {
-          "display": {
-            "title": "Workloads",
-            "collapse": {
-              "open": true
-            }
-          },
-          "items": [
-            {
-              "x": 0,
-              "y": 0,
-              "width": 12,
-              "height": 6,
-              "content": {
-                "$ref": "#/spec/panels/VMs"
-              }
-            }
-          ]
-        }
-      },
       {
         "kind": "Grid",
         "spec": {
@@ -1334,8 +1350,39 @@
             }
           ]
         }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Workloads",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/VMs"
+              }
+            },
+            {
+              "x": 12,
+              "y": 0,
+              "width": 5,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/NumberofrunningVMs"
+              }
+            }
+          ]
+        }
       }
     ],
-    "duration": "6h"
+    "duration": "1w"
   }
 }
