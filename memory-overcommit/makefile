@@ -10,8 +10,6 @@ TOKEN := $(shell oc whoami -t)
 
 import:
 	make get-dashboard
-	make inject-vars
-	make inject-vars
 
 	test -f 01-*.json && mv *.json .trash/ || :
 
