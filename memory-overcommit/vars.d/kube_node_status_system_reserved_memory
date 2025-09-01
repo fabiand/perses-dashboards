@@ -1,4 +1,4 @@
 sum({{kube_node_status_capacity_memory_workers}})
 -
-sum({{kube_node_status_allocatable_memory_workers}}
+sum({{kube_node_status_allocatable_memory_workers}})
 )
