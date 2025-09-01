@@ -215,7 +215,7 @@
               "querySettings": [
                 {
                   "colorMode": "fixed",
-                  "colorValue": "#8f8fff",
+                  "colorValue": "#59CC8D",
                   "queryIndex": 0
                 },
                 {
@@ -227,10 +227,14 @@
                   "colorMode": "fixed",
                   "colorValue": "#EE6C6C",
                   "queryIndex": 2
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#196b3e",
+                  "queryIndex": 3
                 }
               ],
               "thresholds": {
-                "mode": "percent",
                 "steps": []
               },
               "visual": {
@@ -259,7 +263,7 @@
                   "spec": {
                     "minStep": "",
                     "query": "sum({{kube_node_status_allocatable_memory_workers}}",
-                    "seriesNameFormat": "Cluster allocatable capacity"
+                    "seriesNameFormat": "Cluster allocatable memory capacity"
                   }
                 }
               }
@@ -284,6 +288,18 @@
                   "spec": {
                     "query": "sum({{node_memory_MemNotAvailable_bytes}})",
                     "seriesNameFormat": "Utilization - Cluster memory utilization"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum({{kube_node_status_allocatable_memory_workers}} + sum(label_replace(node_memory_SwapTotal_bytes{instance=~\".+\"}, \"node\", \"$1\", \"instance\", \"(.+)\"))",
+                    "seriesNameFormat": "Cluster allocatable memory + swap capacity"
                   }
                 }
               }
@@ -1357,7 +1373,7 @@
           "display": {
             "title": "Workloads",
             "collapse": {
-              "open": true
+              "open": false
             }
           },
           "items": [
