@@ -37,3 +37,7 @@
 
     $ oc apply -f manifests/memory-load.yaml
     $ oc edit vmpool memory-load
+
+## Look
+
+![Screenshoit](docs/perses-mem-over-dashboard-0.1.png)
