@@ -1105,6 +1105,59 @@
             }
           ]
         }
+      },
+      "VMvirtualmemoryutiliztaionhostvmurilization": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "VM virtual memory utiliztaion vs host vm urilization"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 1
+                  }
+                ]
+              },
+              "visual": {
+                "areaOpacity": 0,
+                "connectNulls": false,
+                "display": "line",
+                "lineWidth": 1.25,
+                "pointRadius": 2.75
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "decimal"
+                },
+                "label": "",
+                "min": 0,
+                "show": true
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "#kubevirt_vmi_memory_domain_bytes{kubernetes_vmi_label_vm_kubevirt_io_name!=\"\"}\ntopk(10, (label_replace(kubevirt_vmi_memory_used_bytes@end(), \"label_vm_kubevirt_io_name\", \"$1\", \"name\", \"(.+)\"))\n\n/ on (namespace, label_vm_kubevirt_io_name) group_left()\n\nsum by (namespace, label_vm_kubevirt_io_name) (\n  container_memory_usage_bytes\n  * on(namespace, pod) group_left(label_vm_kubevirt_io_name)\n  group by(namespace, pod, label_vm_kubevirt_io_name) (\n    kube_pod_labels{label_vm_kubevirt_io_name!=\"\"}\n  )\n)\n)",
+                    "seriesNameFormat": "{{namespace}}/{{label_vm_kubevirt_io_name}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
       }
     },
     "layouts": [
@@ -1394,11 +1447,20 @@
               "content": {
                 "$ref": "#/spec/panels/NumberofrunningVMs"
               }
+            },
+            {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/VMvirtualmemoryutiliztaionhostvmurilization"
+              }
             }
           ]
         }
       }
     ],
-    "duration": "1w"
+    "duration": "1h"
   }
 }
