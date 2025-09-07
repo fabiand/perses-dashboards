@@ -1,0 +1,1466 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "memory-overcommit",
+    "project": "{{PROJECT}}"
+  },
+  "spec": {
+    "display": {
+      "name": "Memory overcommit"
+    },
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "name": "Node",
+            "hidden": false
+          },
+          "defaultValue": "$__all",
+          "allowAllValue": true,
+          "allowMultiple": false,
+          "customAllValue": ".*",
+          "sort": "alphabetical-ci-asc",
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "datasource": {
+                "kind": "PrometheusDatasource",
+                "name": "default"
+              },
+              "labelName": "node"
+            }
+          },
+          "name": "node"
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "display": {
+            "name": "role",
+            "hidden": true
+          },
+          "value": "worker",
+          "name": "role"
+        }
+      }
+    ],
+    "panels": {
+      "ClusterPressure": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Cluster - Memory Pressure",
+            "description": "The pressure is indicating if workloads are waiting for memory."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 2
+                  },
+                  {
+                    "color": "#FF9F1C",
+                    "value": 4
+                  },
+                  {
+                    "color": "#EA4747",
+                    "value": 6
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(node_pressure_memory_waiting_seconds_total{instance=~\"$node\"}[1m]))",
+                    "seriesNameFormat": "Waiting"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(node_pressure_memory_stalled_seconds_total{instance=~\"$node\"}[1m]))",
+                    "seriesNameFormat": "Stalled"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "ClusterUtilizationHistory": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Physical memory utilization & requests",
+            "description": "This is showing the total system utilization (split between virt and non virt workloads). In addition the current plan (requests) are shown in order to to show how much available memory the scheduler is seeing."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "querySettings": [
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#8f8fff",
+                  "queryIndex": 0
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#EE6C6C",
+                  "queryIndex": 1
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#643535",
+                  "queryIndex": 2
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#FFCC00",
+                  "queryIndex": 3
+                }
+              ],
+              "yAxis": {
+                "format": {
+                  "unit": "bytes"
+                },
+                "label": "",
+                "min": 0,
+                "show": true
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum({{kube_node_status_capacity_memory_workers}})",
+                    "seriesNameFormat": "Node memory capacity"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum({{node_memory_MemNotAvailable_bytes}}\n)",
+                    "seriesNameFormat": "Utilization - Node memory utilization (with virt)"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum({{node_memory_MemNotAvailable_bytes}}\n) - sum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})",
+                    "seriesNameFormat": "Utilization - Node memory utilization (without virt)"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kube_pod_resource_request{resource=\"memory\", node=~\"$node\"})",
+                    "seriesNameFormat": "Plan - Memory requests"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "ClusterUtilizationHistorySummary": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Cluster Utilization",
+            "description": "The virtual memory assignment is showing the worst-case scenario if all virtual memory was used right now. The assigned virtual memory is shown on top of the non virtualization related memory utilization. The current utiliztaion plus worst-case virtual memory utilization is indiacting the worst case memor overcommittment."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "querySettings": [
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#59CC8D",
+                  "queryIndex": 0
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#FFCC00",
+                  "queryIndex": 1
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#EE6C6C",
+                  "queryIndex": 2
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#196b3e",
+                  "queryIndex": 3
+                }
+              ],
+              "thresholds": {
+                "steps": []
+              },
+              "visual": {
+                "areaOpacity": 0,
+                "connectNulls": false,
+                "display": "line",
+                "lineWidth": 1.25,
+                "pointRadius": 2.75
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "bytes"
+                },
+                "label": "",
+                "min": 0,
+                "show": true
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum({{kube_node_status_allocatable_memory_workers}})",
+                    "seriesNameFormat": "Cluster allocatable memory capacity"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "# all used - system reserved + plan vm\nsum({{node_memory_MemNotAvailable_bytes}}\n)\n-\n( # system reserved\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
+                    "seriesNameFormat": "Plan - VM assigned virtual memory"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum({{node_memory_MemNotAvailable_bytes}})",
+                    "seriesNameFormat": "Utilization - Cluster memory utilization"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum({{kube_node_status_allocatable_memory_workers}}) + sum(label_replace(node_memory_SwapTotal_bytes{instance=~\".+\"}, \"node\", \"$1\", \"instance\", \"(.+)\"))",
+                    "seriesNameFormat": "Cluster allocatable memory + swap capacity"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "ClusterUtilizationNow": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Cluster Utilization",
+            "description": "Current aggregate utilization of the cluster"
+          },
+          "plugin": {
+            "kind": "GaugeChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "unit": "percent-decimal"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 0.8
+                  },
+                  {
+                    "value": 0.9
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(\nsum({{node_memory_MemNotAvailable_bytes}})\n-\n(\n{{kube_node_status_system_reserved_memory}}\n)\n\n/\n\n(\nsum({{kube_node_status_allocatable_memory_workers}})\n)",
+                    "seriesNameFormat": "Physical Memory utilization"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "ClusterVirtualCommitedHistory": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Virtual Memory assignment",
+            "description": "The virtual memory assignment is showing the worst-case scenario if all virtual memory was used right now. The assigned virtual memory is shown on top of the non virtualization related memory utilization. The current utiliztaion plus worst-case virtual memory utilization is indiacting the worst case memor overcommittment."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "querySettings": [
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#8f8fff",
+                  "queryIndex": 0
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#FFCC00",
+                  "queryIndex": 1
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#7c6400",
+                  "queryIndex": 2
+                }
+              ],
+              "thresholds": {
+                "mode": "percent",
+                "steps": []
+              },
+              "visual": {
+                "areaOpacity": 0,
+                "connectNulls": false,
+                "display": "line",
+                "lineWidth": 1.25,
+                "pointRadius": 2.75
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "bytes"
+                },
+                "label": "",
+                "min": 0,
+                "show": true
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum({{kube_node_status_capacity_memory_workers}})",
+                    "seriesNameFormat": "Node capacity"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum({{node_memory_MemNotAvailable_bytes}})\n-\n(\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
+                    "seriesNameFormat": "Plan - VM assigned virtual memory"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum({{node_memory_MemNotAvailable_bytes}})\n-\nsum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})",
+                    "seriesNameFormat": "Utilization - Node memory utilization (without virt)"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "ClusterVirtualCommitedNow": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Cluster Virtual Commited",
+            "description": "Commit ratio based on the current utilization and allocated virtual memory to VMs. Overcommit occurs whenever the values goes beyond 100%."
+          },
+          "plugin": {
+            "kind": "GaugeChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "unit": "percent-decimal"
+              },
+              "max": 2,
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 1.2
+                  },
+                  {
+                    "color": "#EA4747",
+                    "value": 1.5
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(\nsum({{node_memory_MemNotAvailable_bytes}})\n-\n(\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n)\n\n/\n\n(\nsum({{kube_node_status_allocatable_memory_workers}})\n)",
+                    "seriesNameFormat": "Virtual Memory committment"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NodePressureHistory": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Node - Pressure"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "yAxis": {
+                "format": {
+                  "shortValues": true,
+                  "unit": "decimal"
+                },
+                "label": "",
+                "max": 2,
+                "min": 0,
+                "show": true
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~\"$node\"}[1m]))",
+                    "seriesNameFormat": "{{instance}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NodePressureMaxNow": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Node Pressure - max"
+          },
+          "plugin": {
+            "kind": "GaugeChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "decimalPlaces": 2,
+                "unit": "percent-decimal"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 2
+                  },
+                  {
+                    "value": 4
+                  },
+                  {
+                    "color": "#EE6C6C",
+                    "value": 6
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "topk(1, (sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~\"$node\"}[1m]@end()))))",
+                    "seriesNameFormat": "{{instance}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NodeRequestsHistory": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Plan - Pod requests per Node"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "color": "#FFB249",
+                    "value": 0.8
+                  },
+                  {
+                    "color": "#EE6C6C",
+                    "value": 0.9
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum by (node) (kube_pod_resource_request{resource=\"memory\", node=~\"$node\"})\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)",
+                    "seriesNameFormat": "{{node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NodeRequestsMinmaxNow": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Node requests - min/max"
+          },
+          "plugin": {
+            "kind": "StatChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "unit": "decimal"
+              },
+              "sparkline": {},
+              "thresholds": {
+                "steps": [
+                  {
+                    "color": "#FF9F1C",
+                    "value": 0.8
+                  },
+                  {
+                    "color": "#EA4747",
+                    "value": 0.9
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "min(\nsum by (node) (kube_pod_resource_request{resource=\"memory\", node=~\"$node\"})\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)\n)",
+                    "seriesNameFormat": "Min"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "max(\nsum by (node) (kube_pod_resource_request{resource=\"memory\", node=~\"$node\"})\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)\n)",
+                    "seriesNameFormat": "Max"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NodeSystemExceedsReservationAlertNow": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "System exceeding reservation",
+            "description": "This panel provides the number of nodes where the system - core hypervisor components - are exceeding the amount of memory that were reserved for it."
+          },
+          "plugin": {
+            "kind": "StatChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "unit": "decimal"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "color": "#EE6C6C",
+                    "value": 1
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "count(ALERTS{alertname=\"SystemMemoryExceedsReservation\"}) OR vector(0)",
+                    "seriesNameFormat": "{{alertname}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NodeSystemReservedMinmaxHistory": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Utilization - min/max"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "querySettings": [],
+              "thresholds": {
+                "steps": [
+                  {
+                    "color": "#EE6C6C",
+                    "value": 0.9
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "min (\n(\nsum by (node) (container_memory_rss{id=\"/system.slice\"})\n\n/ on (node)\n\n(\nsum by (node) ({{kube_node_status_capacity_memory_workers}})\n-\nsum by (node) ({{kube_node_status_allocatable_memory_workers}})\n)\n)\n)",
+                    "seriesNameFormat": "min {{node}}"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "max(\nsum by (node) (container_memory_rss{id=\"/system.slice\"})\n\n/ on (node)\n\n(\nsum by (node) ({{kube_node_status_capacity_memory_workers}})\n-\nsum by (node) ({{kube_node_status_allocatable_memory_workers}})\n)\n\n)",
+                    "seriesNameFormat": "max {{node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NodeSystemReservedUtilizationHistory": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Utilization - Utilization of reserved system memory",
+            "description": "This graph is showing the utilization of the hypervisor system reserved memory. The utilization must stay below 100%, otherwise the hypervisor is using more memory for system processes then what was reserved. This is putting system processes at risk."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 0.9
+                  },
+                  {
+                    "color": "#EE6C6C",
+                    "value": 1
+                  }
+                ]
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "percent-decimal"
+                },
+                "label": "",
+                "show": true
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "topk(5, (\nsum by (node) (container_memory_rss{id=\"/system.slice\"})\n\n/ on (node)\n\n(\nsum by (node) ({{kube_node_status_capacity_memory_workers}})\n-\nsum by (node) ({{kube_node_status_allocatable_memory_workers}})\n)\n))",
+                    "seriesNameFormat": "{{node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NodeUtilizationHistory": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Utilization - Actual overcommit level"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "color": "#FFB249",
+                    "value": 0.8
+                  },
+                  {
+                    "color": "#EE6C6C",
+                    "value": 0.9
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) ({{kube_node_status_capacity_memory_workers}})\n-\nsum by (node) ({{kube_node_status_allocatable_memory_workers}})\n)\n)\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)",
+                    "seriesNameFormat": "{{node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NodeUtilizationMaxNow": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Node Utilization - max"
+          },
+          "plugin": {
+            "kind": "GaugeChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "unit": "percent-decimal"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 0.7
+                  },
+                  {
+                    "value": 0.8
+                  },
+                  {
+                    "color": "#EE6C6C",
+                    "value": 0.9
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(max by () ((\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) ({{kube_node_status_capacity_memory_workers}})\n-\nsum by (node) ({{kube_node_status_allocatable_memory_workers}})\n)\n)\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)\n))",
+                    "seriesNameFormat": "Max"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NodeUtilizationMinNow": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Node Utilization - min"
+          },
+          "plugin": {
+            "kind": "GaugeChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "unit": "percent-decimal"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 0.7
+                  },
+                  {
+                    "value": 0.8
+                  },
+                  {
+                    "color": "#EE6C6C",
+                    "value": 0.9
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(min by () ((\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) ({{kube_node_status_capacity_memory_workers}})\n-\nsum by (node) ({{kube_node_status_allocatable_memory_workers}})\n)\n)\n\n/ on (node)\n\n(\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n)\n))",
+                    "seriesNameFormat": "Min"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "NumberofrunningVMs": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Number of running VMs"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "count(kubevirt_vmi_memory_domain_bytes)"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "PlanMinmax": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Node virtual - min/max"
+          },
+          "plugin": {
+            "kind": "StatChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "unit": "decimal"
+              },
+              "sparkline": {},
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 1.2
+                  },
+                  {
+                    "color": "#FF9F1C",
+                    "value": 1.5
+                  },
+                  {
+                    "color": "#EA4747",
+                    "value": 2
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(min by () ((\n\n(\n(\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) ({{kube_node_status_capacity_memory_workers}})\n-\nsum by (node) ({{kube_node_status_allocatable_memory_workers}})\n)\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n\n)))",
+                    "seriesNameFormat": "{{node}}"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(max by () ((\n\n(\n(\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) ({{kube_node_status_capacity_memory_workers}})\n-\nsum by (node) ({{kube_node_status_allocatable_memory_workers}})\n)\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})\n\n)))",
+                    "seriesNameFormat": "{{node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "UtilizationDsitribution": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Plan - Virtual memory overcommit level"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 1.2
+                  },
+                  {
+                    "color": "#FF9F1C",
+                    "value": 1.5
+                  },
+                  {
+                    "color": "#EA4747",
+                    "value": 2
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(\n(\nlabel_replace((\n{{node_memory_MemNotAvailable_bytes}}\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) ({{kube_node_status_capacity_memory_workers}})\n-\nsum by (node) ({{kube_node_status_allocatable_memory_workers}})\n)\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})",
+                    "seriesNameFormat": "{{node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "VMs": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "VM overcommit ratio",
+            "description": "Any value larger than 1 shows that the VM is using more memory than it requested"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 1
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "#kubevirt_vmi_memory_domain_bytes{kubernetes_vmi_label_vm_kubevirt_io_name!=\"\"}\n(label_replace(kubevirt_vmi_memory_domain_bytes, \"label_vm_kubevirt_io_name\", \"$1\", \"name\", \"(.+)\"))\n\n/ on (namespace, label_vm_kubevirt_io_name) group_left()\n\nmax by (namespace, label_vm_kubevirt_io_name) (\n  kube_pod_resource_request{resource=\"memory\"}\n  * on(namespace, pod) group_left(label_vm_kubevirt_io_name)\n  group by(namespace, pod, label_vm_kubevirt_io_name) (\n    kube_pod_labels{label_vm_kubevirt_io_name!=\"\"}\n  )\n)",
+                    "seriesNameFormat": "{{namespace}}/{{label_vm_kubevirt_io_name}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "VMvirtualmemoryutiliztaionhostvmurilization": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "VM virtual memory utiliztaion vs host vm urilization"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 1
+                  }
+                ]
+              },
+              "visual": {
+                "areaOpacity": 0,
+                "connectNulls": false,
+                "display": "line",
+                "lineWidth": 1.25,
+                "pointRadius": 2.75
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "decimal"
+                },
+                "label": "",
+                "min": 0,
+                "show": true
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "#kubevirt_vmi_memory_domain_bytes{kubernetes_vmi_label_vm_kubevirt_io_name!=\"\"}\ntopk(10, (label_replace(kubevirt_vmi_memory_used_bytes@end(), \"label_vm_kubevirt_io_name\", \"$1\", \"name\", \"(.+)\"))\n\n/ on (namespace, label_vm_kubevirt_io_name) group_left()\n\nsum by (namespace, label_vm_kubevirt_io_name) (\n  container_memory_usage_bytes\n  * on(namespace, pod) group_left(label_vm_kubevirt_io_name)\n  group by(namespace, pod, label_vm_kubevirt_io_name) (\n    kube_pod_labels{label_vm_kubevirt_io_name!=\"\"}\n  )\n)\n)",
+                    "seriesNameFormat": "{{namespace}}/{{label_vm_kubevirt_io_name}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Summary",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 10,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/ClusterUtilizationNow"
+              }
+            },
+            {
+              "x": 10,
+              "y": 0,
+              "width": 8,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/ClusterVirtualCommitedNow"
+              }
+            },
+            {
+              "x": 0,
+              "y": 7,
+              "width": 5,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/NodeUtilizationMinNow"
+              }
+            },
+            {
+              "x": 5,
+              "y": 7,
+              "width": 5,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/NodeUtilizationMaxNow"
+              }
+            },
+            {
+              "x": 15,
+              "y": 7,
+              "width": 3,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/NodeSystemExceedsReservationAlertNow"
+              }
+            },
+            {
+              "x": 10,
+              "y": 7,
+              "width": 5,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/NodePressureMaxNow"
+              }
+            },
+            {
+              "x": 0,
+              "y": 14,
+              "width": 18,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/ClusterUtilizationHistorySummary"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Cluster",
+            "collapse": {
+              "open": false
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 14,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/ClusterUtilizationHistory"
+              }
+            },
+            {
+              "x": 14,
+              "y": 0,
+              "width": 7,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/ClusterUtilizationNow"
+              }
+            },
+            {
+              "x": 0,
+              "y": 7,
+              "width": 14,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/ClusterVirtualCommitedHistory"
+              }
+            },
+            {
+              "x": 14,
+              "y": 7,
+              "width": 7,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/ClusterVirtualCommitedNow"
+              }
+            },
+            {
+              "x": 0,
+              "y": 14,
+              "width": 14,
+              "height": 5,
+              "content": {
+                "$ref": "#/spec/panels/ClusterPressure"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Nodes",
+            "collapse": {
+              "open": false
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 14,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/NodeUtilizationHistory"
+              }
+            },
+            {
+              "x": 14,
+              "y": 0,
+              "width": 4,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/NodeUtilizationMinNow"
+              }
+            },
+            {
+              "x": 0,
+              "y": 8,
+              "width": 14,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/NodeRequestsHistory"
+              }
+            },
+            {
+              "x": 14,
+              "y": 16,
+              "width": 4,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/PlanMinmax"
+              }
+            },
+            {
+              "x": 14,
+              "y": 8,
+              "width": 4,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/NodeRequestsMinmaxNow"
+              }
+            },
+            {
+              "x": 0,
+              "y": 16,
+              "width": 14,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/UtilizationDsitribution"
+              }
+            },
+            {
+              "x": 0,
+              "y": 24,
+              "width": 14,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/NodePressureHistory"
+              }
+            },
+            {
+              "x": 14,
+              "y": 24,
+              "width": 4,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/NodePressureMaxNow"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "System Reserved",
+            "collapse": {
+              "open": false
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 14,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/NodeSystemReservedUtilizationHistory"
+              }
+            },
+            {
+              "x": 21,
+              "y": 0,
+              "width": 2,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/NodeSystemExceedsReservationAlertNow"
+              }
+            },
+            {
+              "x": 14,
+              "y": 0,
+              "width": 7,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/NodeSystemReservedMinmaxHistory"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Workloads",
+            "collapse": {
+              "open": false
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/VMs"
+              }
+            },
+            {
+              "x": 12,
+              "y": 0,
+              "width": 5,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/NumberofrunningVMs"
+              }
+            },
+            {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/VMvirtualmemoryutiliztaionhostvmurilization"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
+  }
+}

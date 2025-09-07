@@ -1,0 +1,13 @@
+[
+  {
+    "kind": "Project",
+    "metadata": {
+      "name": "{{PROJECT}}"
+    },
+    "spec": {
+      "display": {
+        "name": "OpenShift Virtualization"
+      }
+    }
+  }
+]
