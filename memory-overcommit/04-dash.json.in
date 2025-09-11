@@ -303,6 +303,18 @@
                   }
                 }
               }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "(kubevirt_hco_memory_overcommit_percentage / 100)\n\n*\n\nsum({{kube_node_status_allocatable_memory_workers}})",
+                    "seriesNameFormat": "Plan - Maximum VM assigned virtual memory"
+                  }
+                }
+              }
             }
           ]
         }
