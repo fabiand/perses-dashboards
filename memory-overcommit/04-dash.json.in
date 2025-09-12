@@ -1205,7 +1205,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "avg(\n(label_replace(kubevirt_vmi_memory_domain_bytes, \"label_vm_kubevirt_io_name\", \"$1\", \"name\", \"(.+)\"))\n\n/ on (namespace, label_vm_kubevirt_io_name) group_left()\n\nmax by (namespace, label_vm_kubevirt_io_name) (\n  kube_pod_resource_request{resource=\"memory\"}\n  * on(namespace, pod) group_left(label_vm_kubevirt_io_name)\n  group by(namespace, pod, label_vm_kubevirt_io_name) (\n    kube_pod_labels{label_vm_kubevirt_io_name!=\"\"}\n  )\n)\n)",
+                    "query": "avg(\n(\n(label_replace(kubevirt_vmi_memory_domain_bytes, \"label_vm_kubevirt_io_name\", \"$1\", \"name\", \"(.+)\"))\n+ on(name, namespace) group_left() kubevirt_vmi_launcher_memory_overhead_bytes\n)\n\n/ on (namespace, label_vm_kubevirt_io_name) group_left()\n\navg by (namespace, label_vm_kubevirt_io_name) (\n  kube_pod_resource_request{resource=\"memory\"}\n  * on(namespace, pod) group_left(label_vm_kubevirt_io_name)\n  group by(namespace, pod, label_vm_kubevirt_io_name) (\n    kube_pod_labels{label_vm_kubevirt_io_name!=\"\"}\n  )\n)\n\n)",
                     "seriesNameFormat": "Average VM overcommit ratio"
                   }
                 }
