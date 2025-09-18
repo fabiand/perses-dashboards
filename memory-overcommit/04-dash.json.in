@@ -611,6 +611,13 @@
                     "value": 0.9
                   }
                 ]
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "percent-decimal"
+                },
+                "label": "",
+                "show": true
               }
             }
           },
@@ -641,7 +648,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "unit": "decimal"
+                "unit": "percent-decimal"
               },
               "sparkline": {},
               "thresholds": {
@@ -743,6 +750,13 @@
                     "value": 0.9
                   }
                 ]
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "percent-decimal"
+                },
+                "label": "",
+                "show": true
               }
             }
           },
@@ -847,6 +861,13 @@
                     "value": 0.9
                   }
                 ]
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "percent-decimal"
+                },
+                "label": "",
+                "show": true
               }
             }
           },
@@ -992,7 +1013,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "unit": "decimal"
+                "unit": "percent-decimal"
               },
               "sparkline": {},
               "thresholds": {
@@ -1044,7 +1065,7 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Plan - Virtual memory overcommit level"
+            "name": "Plan - Virtual memory commit level"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -1066,6 +1087,13 @@
                     "value": 2
                   }
                 ]
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "percent-decimal"
+                },
+                "label": "",
+                "show": true
               }
             }
           },
@@ -1104,6 +1132,13 @@
                     "value": 1
                   }
                 ]
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "percent-decimal"
+                },
+                "label": "",
+                "show": true
               }
             }
           },
