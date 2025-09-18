@@ -546,7 +546,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Node Pressure - max"
+            "name": "Node PSI - max",
+            "description": "Memory PSI (pressure Stall Informations)"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -559,14 +560,14 @@
               "thresholds": {
                 "steps": [
                   {
-                    "value": 2
+                    "value": 0.1
                   },
                   {
-                    "value": 4
+                    "value": 0.25
                   },
                   {
                     "color": "#EE6C6C",
-                    "value": 6
+                    "value": 0.5
                   }
                 ]
               }
