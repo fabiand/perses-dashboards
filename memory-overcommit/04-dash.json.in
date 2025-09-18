@@ -557,6 +557,7 @@
                 "decimalPlaces": 3,
                 "unit": "decimal"
               },
+              "max": 1,
               "thresholds": {
                 "steps": [
                   {
