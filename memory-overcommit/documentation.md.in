@@ -1,0 +1,12 @@
+# Memory Monitoring Dashboard Documentation
+
+## Overview
+
+The memory monitoring dashboard is intended to allow a cluster administrator to carefully watch
+
+1. The memory utilization on a cluster, and node level
+2. The committed virtual memory on a cluster, node, and VM level
+3. The memory request on a cluster, and node level
+
+## Panels
+
