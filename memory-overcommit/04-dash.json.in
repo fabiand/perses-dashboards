@@ -324,7 +324,7 @@
         "spec": {
           "display": {
             "name": "Cluster Utilization",
-            "description": "Current aggregate utilization of the cluster"
+            "description": "This panel is providing the aggregated memory utilization of all nodes of the cluster. This value is more helpful, the more balanced the memory utilization of all nodes is."
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -463,7 +463,7 @@
         "spec": {
           "display": {
             "name": "Cluster Virtual Commited",
-            "description": "Commit ratio based on the current utilization and allocated virtual memory to VMs. Overcommit occurs whenever the values goes beyond 100%."
+            "description": "This panel shows the amount of committed virtual memory as a percentage of the allocatable physical memory. Overcommit occurs whenever the values goes beyond 100%."
           },
           "plugin": {
             "kind": "GaugeChart",
