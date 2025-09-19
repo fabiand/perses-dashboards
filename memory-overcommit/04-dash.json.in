@@ -342,7 +342,7 @@
         "spec": {
           "display": {
             "name": "Cluster Utilization",
-            "description": "This panel is providing the aggregated memory utilization of all nodes of the cluster. This value is more helpful, the more balanced the memory utilization of all nodes is."
+            "description": "This panel is providing the aggregated memory utilization of all nodes of the cluster. This value is more helpful, the more balanced the memory utilization of all nodes is. Keep it green."
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -605,6 +605,17 @@
                 }
               }
             }
+          ],
+          "links": [
+            {
+              "name": "Red Hat Customer Portal Article",
+              "url": "https://access.redhat.com/solutions/6987181",
+              "targetBlank": true
+            },
+            {
+              "name": "Upstream Linux Kernel PSI Documentation",
+              "url": "https://www.kernel.org/doc/html/latest/accounting/psi.html"
+            }
           ]
         }
       },
@@ -718,7 +729,7 @@
         "spec": {
           "display": {
             "name": "System exceeding reservation",
-            "description": "This panel provides the number of nodes where the system - core hypervisor components - are exceeding the amount of memory that were reserved for it."
+            "description": "This panel provides the precentage of nodes where core system (hypervisor) components are utilizing more than reserved memory. This should not happen, and is specifically critical for clusters under load. Keep it green."
           },
           "plugin": {
             "kind": "StatChart",
@@ -749,6 +760,18 @@
                   }
                 }
               }
+            }
+          ],
+          "links": [
+            {
+              "name": "Red Hat Customer Portal Article",
+              "url": "https://access.redhat.com/solutions/5788171",
+              "targetBlank": true
+            },
+            {
+              "name": "Upstream OpenShift Alert Runbook",
+              "url": "https://github.com/openshift/runbooks/blob/master/alerts/machine-config-operator/SystemMemoryExceedsReservation.md",
+              "tooltip": "Runbook"
             }
           ]
         }
