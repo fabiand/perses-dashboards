@@ -66,6 +66,9 @@
           "plugin": {
             "kind": "TimeSeriesChart",
             "spec": {
+              "legend": {
+                "position": "bottom"
+              },
               "thresholds": {
                 "steps": [
                   {
