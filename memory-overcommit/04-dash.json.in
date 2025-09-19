@@ -199,7 +199,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kube_pod_resource_request{resource=\"memory\", node=~\"$node\"})",
+                    "query": "{{kube_node_status_system_reserved_memory}}\n+\nsum(kube_pod_resource_request{resource=\"memory\", node=~\"$node\"})",
                     "seriesNameFormat": "Plan - Memory requests"
                   }
                 }
@@ -283,7 +283,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "# all used - system reserved + plan vm\nsum({{node_memory_MemNotAvailable_bytes}}\n)\n-\n( # system reserved\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
+                    "query": "# all used - system reserved + plan vm\nsum({{node_memory_MemNotAvailable_bytes}}\n)\n-\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
                     "seriesNameFormat": "Plan - VM assigned virtual memory"
                   }
                 }
@@ -295,7 +295,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum({{node_memory_MemNotAvailable_bytes}})\n-\n( # system reserved\n{{kube_node_status_system_reserved_memory}}",
+                    "query": "sum({{node_memory_MemNotAvailable_bytes}})\n-\n{{kube_node_status_system_reserved_memory}}",
                     "seriesNameFormat": "Utilization - Cluster memory utilization"
                   }
                 }
@@ -366,7 +366,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\nsum({{node_memory_MemNotAvailable_bytes}})\n-\n( # system reserved\n{{kube_node_status_system_reserved_memory}}\n)\n\n/\n\n(\nsum({{kube_node_status_allocatable_memory_workers}})\n)",
+                    "query": "(\nsum({{node_memory_MemNotAvailable_bytes}})\n-\n{{kube_node_status_system_reserved_memory}}\n)\n\n/\n\n(\nsum({{kube_node_status_allocatable_memory_workers}})\n)",
                     "seriesNameFormat": "Physical Memory utilization"
                   }
                 }
@@ -446,7 +446,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum({{node_memory_MemNotAvailable_bytes}})\n-\n(\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
+                    "query": "sum({{node_memory_MemNotAvailable_bytes}})\n-\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
                     "seriesNameFormat": "Plan - VM assigned virtual memory"
                   }
                 }
@@ -502,7 +502,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\nsum({{node_memory_MemNotAvailable_bytes}})\n-\n(\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n)\n\n/\n\n(\nsum({{kube_node_status_allocatable_memory_workers}})\n)",
+                    "query": "(\nsum({{node_memory_MemNotAvailable_bytes}})\n-\n{{kube_node_status_system_reserved_memory}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n)\n\n/\n\n(\nsum({{kube_node_status_allocatable_memory_workers}})\n)",
                     "seriesNameFormat": "Virtual Memory committment"
                   }
                 }

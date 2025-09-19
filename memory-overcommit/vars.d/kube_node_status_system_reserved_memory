@@ -1,4 +1,3 @@
-sum({{kube_node_status_capacity_memory_workers}})
--
-sum({{kube_node_status_allocatable_memory_workers}})
+( # kube_node_status_system_reserved_memory
+sum({{kube_node_status_capacity_memory_workers}}) - sum({{kube_node_status_allocatable_memory_workers}})
 )
