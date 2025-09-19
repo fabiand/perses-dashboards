@@ -35,13 +35,22 @@
         }
       },
       {
-        "kind": "TextVariable",
+        "kind": "ListVariable",
         "spec": {
           "display": {
             "name": "role",
-            "hidden": true
+            "hidden": false
           },
-          "value": "worker",
+          "defaultValue": "worker",
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "PrometheusPromQLVariable",
+            "spec": {
+              "expr": "kube_node_role",
+              "labelName": "role"
+            }
+          },
           "name": "role"
         }
       }
@@ -947,7 +956,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Node Utilization - min"
+            "name": "Node Utilization - min",
+            "description": "This panel is showing the node memory utilization of the node with the lowest memory utilization in the cluster."
           },
           "plugin": {
             "kind": "GaugeChart",
