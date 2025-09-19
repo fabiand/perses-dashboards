@@ -30,7 +30,7 @@ apply: FORCE env-vars $(jsons)
 	for F in $(jsons) ; do ( set -x ; percli apply -f $$F ; ) ; done
 
 docs: 04-dash.json.in
-	cp documentaion.md.in documentation.md
+	cp documentation.md.in documentation.md
 	cat $< | jq -re '[ .spec.panels[].spec.display ] | sort_by(.name) | .[] | "### " + .name + "\n" + (.description // "None") + "\n"' >> documentation.md
 
 url:
