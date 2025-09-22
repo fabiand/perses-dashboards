@@ -21,9 +21,7 @@
 
     $ cd memory
     $ make apply
-    sed -e "s!{{URL}}!https://prometheus-k8s-openshift-monitoring.apps.example.com!" \
     ...
-    + percli apply -f 04-dash.yaml
     object "Dashboard" "memory" has been applied in the project "openshift-cnv"
     $
 
