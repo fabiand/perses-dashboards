@@ -1,12 +1,12 @@
 {
   "kind": "Dashboard",
   "metadata": {
-    "name": "memory-overcommit",
+    "name": "memory",
     "project": "{{PROJECT}}"
   },
   "spec": {
     "display": {
-      "name": "Memory overcommit"
+      "name": "Memory"
     },
     "variables": [
       {

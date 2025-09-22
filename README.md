@@ -19,18 +19,18 @@
 > [!NOTE]
 > You need to have `make` installed
 
-    $ cd memory-overcommit
+    $ cd memory
     $ make apply
     sed -e "s!{{URL}}!https://prometheus-k8s-openshift-monitoring.apps.example.com!" \
     ...
     + percli apply -f 04-dash.yaml
-    object "Dashboard" "memory-overcommit" has been applied in the project "openshift-cnv"
+    object "Dashboard" "memory" has been applied in the project "openshift-cnv"
     $
 
 4. Navigate to perses to enjoy the dashboard
 
     $ make url
-    http://localhost:8080/projects/openshift-cnv/dashboards/memory-overcommit
+    http://localhost:8080/projects/openshift-cnv/dashboards/memory
     $
 
 5. Optional: Generate some load

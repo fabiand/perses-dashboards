@@ -38,10 +38,10 @@ spec:
                 name: default
               rng: {}
             memory:
-              guest: 16G
+              guest: 6G
             resources:
               requests:
-                memory: 8G
+                memory: 2G
           networks:
           - name: default
             pod: {}
@@ -56,5 +56,5 @@ spec:
                 password: fedora
                 chpasswd: { expire: False }
                 runcmd:
-                - "sudo dnf install -y stress ; stress -m 8 --vm-bytes 1G --vm-hang 6"
+                - "sudo dnf install -y stress ; stress -m 1 --vm-bytes 1G --vm-hang 6"
             name: cloudinitdisk
