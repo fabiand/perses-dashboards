@@ -1108,6 +1108,67 @@
           ]
         }
       },
+      "Swap": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Cluster - Aggregated Swap"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "legend": {
+                "position": "bottom"
+              },
+              "querySettings": [
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#59CC8D",
+                  "queryIndex": 0
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#FFB249",
+                  "queryIndex": 1
+                }
+              ],
+              "yAxis": {
+                "format": {
+                  "unit": "bytes"
+                },
+                "label": "",
+                "show": true
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum((\nlabel_replace(\n  (node_memory_SwapTotal_bytes{instance=~\"$node\"}),\n  \"node\", \"$1\",\n  \"instance\", \"(.+)\"\n) * on (node) kube_node_role{role=\"$role\", node=~\"$node\"}\n)\n)",
+                    "seriesNameFormat": "Available"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum((\nlabel_replace(\n  (node_memory_SwapTotal_bytes{instance=~\"$node\"} - node_memory_SwapFree_bytes{instance=~\"$node\"}),\n  \"node\", \"$1\",\n  \"instance\", \"(.+)\"\n) * on (node) kube_node_role{role=\"$role\", node=~\"$node\"}\n)\n)",
+                    "seriesNameFormat": "Used"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
       "UtilizationDsitribution": {
         "kind": "Panel",
         "spec": {
@@ -1441,6 +1502,15 @@
               "height": 5,
               "content": {
                 "$ref": "#/spec/panels/ClusterPressure"
+              }
+            },
+            {
+              "x": 0,
+              "y": 19,
+              "width": 14,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/Swap"
               }
             }
           ]
