@@ -237,22 +237,22 @@
                 {
                   "colorMode": "fixed",
                   "colorValue": "#59CC8D",
-                  "queryIndex": 0
-                },
-                {
-                  "colorMode": "fixed",
-                  "colorValue": "#FFCC00",
                   "queryIndex": 1
                 },
                 {
                   "colorMode": "fixed",
-                  "colorValue": "#EE6C6C",
+                  "colorValue": "#FFCC00",
                   "queryIndex": 2
                 },
                 {
                   "colorMode": "fixed",
-                  "colorValue": "#196b3e",
+                  "colorValue": "#EE6C6C",
                   "queryIndex": 3
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#196b3e",
+                  "queryIndex": 0
                 }
               ],
               "thresholds": {
@@ -276,6 +276,18 @@
             }
           },
           "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum({{kube_node_status_allocatable_memory_workers}}) + sum(label_replace(node_memory_SwapTotal_bytes{instance=~\".+\"}, \"node\", \"$1\", \"instance\", \"(.+)\"))",
+                    "seriesNameFormat": "Cluster allocatable memory + swap capacity"
+                  }
+                }
+              }
+            },
             {
               "kind": "TimeSeriesQuery",
               "spec": {
@@ -309,18 +321,6 @@
                   "spec": {
                     "query": "sum({{node_memory_MemNotAvailable_bytes}})\n-\n{{kube_node_status_system_reserved_memory}}",
                     "seriesNameFormat": "Utilization - Cluster memory utilization"
-                  }
-                }
-              }
-            },
-            {
-              "kind": "TimeSeriesQuery",
-              "spec": {
-                "plugin": {
-                  "kind": "PrometheusTimeSeriesQuery",
-                  "spec": {
-                    "query": "sum({{kube_node_status_allocatable_memory_workers}}) + sum(label_replace(node_memory_SwapTotal_bytes{instance=~\".+\"}, \"node\", \"$1\", \"instance\", \"(.+)\"))",
-                    "seriesNameFormat": "Cluster allocatable memory + swap capacity"
                   }
                 }
               }
