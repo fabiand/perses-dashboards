@@ -14,12 +14,14 @@ import:
 	test -f 01-*.json && mv *.json .trash/ || :
 
 get-dashboards:
-	for DASH in $$(jq .metadata.name *dash*.in); \
+	jq -r .metadata.name *dash*.in
+	for DASH in $$(jq -r .metadata.name *dash*.in); \
 	do \
+	  echo $$DASH; \
 	  percli get -o json dash $$DASH \
 	  | jq '.[] | .metadata.project = "{{PROJECT}}"' \
-	  | jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash-$$DASH.json.in \
-	  bash do-vars.sh query_to_vars "04-dash-$$DASH.json.in" \
+	  | jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash-$$DASH.json.in ; \
+	  bash do-vars.sh query_to_vars "04-dash-$$DASH.json.in" ;  \
 	done
 
 env-vars: FORCE
