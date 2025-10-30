@@ -1,12 +1,12 @@
 {
   "kind": "Dashboard",
   "metadata": {
-    "name": "memory",
+    "name": "memory-details",
     "project": "{{PROJECT}}"
   },
   "spec": {
     "display": {
-      "name": "Memory"
+      "name": "Memory Details"
     },
     "variables": [
       {

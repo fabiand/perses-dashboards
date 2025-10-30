@@ -9,15 +9,18 @@ URL := https://$(shell oc get route -n openshift-monitoring prometheus-k8s -o js
 TOKEN := $(shell oc whoami -t)
 
 import:
-	make get-dashboard
+	make get-dashboards
 
 	test -f 01-*.json && mv *.json .trash/ || :
 
-get-dashboard:
-	percli get -o json dash $$(basename $$PWD) \
-	| jq '.[] | .metadata.project = "{{PROJECT}}"' \
-	| jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash.json.in
-	bash do-vars.sh query_to_vars "04-dash.json.in"
+get-dashboards:
+	for DASH in $$(jq .metadata.name *dash*.in); \
+	do \
+	  percli get -o json dash $$DASH \
+	  | jq '.[] | .metadata.project = "{{PROJECT}}"' \
+	  | jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash-$$DASH.json.in \
+	  bash do-vars.sh query_to_vars "04-dash-$$DASH.json.in" \
+	done
 
 env-vars: FORCE
 	echo -n "$(URL)" > vars.d/URL
@@ -29,7 +32,7 @@ apply: FORCE env-vars $(jsons)
 	percli project $(PROJECT)
 	for F in $(jsons) ; do ( set -x ; percli apply -f $$F ; ) ; done
 
-docs: 04-dash.json.in
+docs: 04-dash-memory-summary.json.in 04-dash-memory-details.json.in
 	cp documentation.md.in documentation.md
 	cat $< | jq -re '[ .spec.panels[].spec.display ] | sort_by(.name) | .[] | "### " + .name + "\n" + (.description // "None") + "\n"' >> documentation.md
 
