@@ -1,0 +1,3 @@
+(
+sum({{x_kube_node_status_capacity_memory_by_role}}) - sum({{x_kube_node_status_allocatable_memory_by_role}})
+)

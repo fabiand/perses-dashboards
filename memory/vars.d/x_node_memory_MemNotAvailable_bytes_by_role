@@ -1,4 +1,4 @@
-( # node_memory_MemNotAvailable_bytes
+(
 label_replace(
   (node_memory_MemTotal_bytes{instance=~"$node"} - node_memory_MemAvailable_bytes{instance=~"$node"}),
   "node", "$1",
