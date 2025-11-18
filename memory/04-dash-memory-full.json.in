@@ -307,7 +307,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "# all used - system reserved + plan vm\nsum({{x_node_memory_MemNotAvailable_bytes_by_role}}\n)\n-\n{{x_kube_node_status_system_reserved_memory_by_role}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
+                    "query": "# all used - system reserved + plan vm\nsum({{x_node_memory_MemNotAvailable_bytes_by_role}}\n)\n-\n{{x_kube_node_status_system_reserved_memory_by_role}}\n\n-\nsum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})\n\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})",
                     "seriesNameFormat": "Plan - VM assigned virtual memory"
                   }
                 }
