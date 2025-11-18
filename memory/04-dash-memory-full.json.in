@@ -758,7 +758,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "count(ALERTS{alertname=\"SystemMemoryExceedsReservation\"}) OR vector(0)\n/\ncount(ALERTS{alertname=\"Watchdog\"}) OR vector(0)",
+                    "query": "count(ALERTS{alertname=\"SystemMemoryExceedsReservation\"}) OR vector(0)\n/\ncount(ALERTS{alertname=\"Watchdog\"})",
                     "seriesNameFormat": "{{alertname}}"
                   }
                 }
@@ -1323,7 +1323,7 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "VM virtual commited"
+            "name": "VM Virtual commited"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -1386,16 +1386,16 @@
             {
               "x": 10,
               "y": 0,
-              "width": 5,
+              "width": 6,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/ClusterVirtualCommitedNow"
               }
             },
             {
-              "x": 15,
+              "x": 16,
               "y": 0,
-              "width": 3,
+              "width": 6,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/VmVirtualCommitedNow"
@@ -1403,7 +1403,7 @@
             },
             {
               "x": 0,
-              "y": 7,
+              "y": 14,
               "width": 5,
               "height": 7,
               "content": {
@@ -1412,7 +1412,7 @@
             },
             {
               "x": 5,
-              "y": 7,
+              "y": 14,
               "width": 5,
               "height": 7,
               "content": {
@@ -1421,16 +1421,16 @@
             },
             {
               "x": 15,
-              "y": 7,
-              "width": 3,
-              "height": 7,
+              "y": 14,
+              "width": 7,
+              "height": 4,
               "content": {
                 "$ref": "#/spec/panels/NodeSystemExceedsReservationAlertNow"
               }
             },
             {
               "x": 10,
-              "y": 7,
+              "y": 14,
               "width": 5,
               "height": 7,
               "content": {
@@ -1439,8 +1439,8 @@
             },
             {
               "x": 0,
-              "y": 14,
-              "width": 18,
+              "y": 7,
+              "width": 22,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/ClusterUtilizationHistorySummary"
@@ -1538,7 +1538,7 @@
             {
               "x": 14,
               "y": 0,
-              "width": 4,
+              "width": 7,
               "height": 8,
               "content": {
                 "$ref": "#/spec/panels/NodeUtilizationMinNow"
@@ -1556,7 +1556,7 @@
             {
               "x": 14,
               "y": 16,
-              "width": 4,
+              "width": 7,
               "height": 8,
               "content": {
                 "$ref": "#/spec/panels/PlanMinmax"
@@ -1565,7 +1565,7 @@
             {
               "x": 14,
               "y": 8,
-              "width": 4,
+              "width": 7,
               "height": 8,
               "content": {
                 "$ref": "#/spec/panels/NodeRequestsMinmaxNow"
@@ -1592,7 +1592,7 @@
             {
               "x": 14,
               "y": 24,
-              "width": 4,
+              "width": 7,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/NodePressureMaxNow"
@@ -1654,16 +1654,16 @@
             {
               "x": 0,
               "y": 0,
-              "width": 12,
+              "width": 14,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/VMs"
               }
             },
             {
-              "x": 12,
+              "x": 14,
               "y": 6,
-              "width": 5,
+              "width": 7,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/NumberofrunningVMs"
@@ -1672,16 +1672,16 @@
             {
               "x": 0,
               "y": 6,
-              "width": 12,
+              "width": 14,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/VMvirtualmemoryutiliztaionhostvmurilization"
               }
             },
             {
-              "x": 12,
+              "x": 14,
               "y": 0,
-              "width": 5,
+              "width": 7,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/VmVirtualCommitedNow"
