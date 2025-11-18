@@ -1462,14 +1462,14 @@
             {
               "x": 0,
               "y": 0,
-              "width": 14,
+              "width": 15,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/ClusterUtilizationHistory"
               }
             },
             {
-              "x": 14,
+              "x": 15,
               "y": 0,
               "width": 7,
               "height": 7,
@@ -1480,14 +1480,14 @@
             {
               "x": 0,
               "y": 7,
-              "width": 14,
+              "width": 15,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/ClusterVirtualCommitedHistory"
               }
             },
             {
-              "x": 14,
+              "x": 15,
               "y": 7,
               "width": 7,
               "height": 7,
@@ -1498,7 +1498,7 @@
             {
               "x": 0,
               "y": 14,
-              "width": 14,
+              "width": 15,
               "height": 5,
               "content": {
                 "$ref": "#/spec/panels/ClusterPressure"
@@ -1507,7 +1507,7 @@
             {
               "x": 0,
               "y": 19,
-              "width": 14,
+              "width": 15,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/Swap"
@@ -1529,14 +1529,14 @@
             {
               "x": 0,
               "y": 0,
-              "width": 14,
+              "width": 15,
               "height": 8,
               "content": {
                 "$ref": "#/spec/panels/NodeUtilizationHistory"
               }
             },
             {
-              "x": 14,
+              "x": 15,
               "y": 0,
               "width": 7,
               "height": 8,
@@ -1547,14 +1547,14 @@
             {
               "x": 0,
               "y": 8,
-              "width": 14,
+              "width": 15,
               "height": 8,
               "content": {
                 "$ref": "#/spec/panels/NodeRequestsHistory"
               }
             },
             {
-              "x": 14,
+              "x": 15,
               "y": 16,
               "width": 7,
               "height": 8,
@@ -1563,7 +1563,7 @@
               }
             },
             {
-              "x": 14,
+              "x": 15,
               "y": 8,
               "width": 7,
               "height": 8,
@@ -1574,7 +1574,7 @@
             {
               "x": 0,
               "y": 16,
-              "width": 14,
+              "width": 15,
               "height": 8,
               "content": {
                 "$ref": "#/spec/panels/UtilizationDsitribution"
@@ -1583,14 +1583,14 @@
             {
               "x": 0,
               "y": 24,
-              "width": 14,
+              "width": 15,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/NodePressureHistory"
               }
             },
             {
-              "x": 14,
+              "x": 15,
               "y": 24,
               "width": 7,
               "height": 6,
