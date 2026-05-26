@@ -29,7 +29,11 @@ env-vars: FORCE
 	echo -n "$(TOKEN)" > vars.d/TOKEN
 	echo -n "$(PROJECT)" > vars.d/PROJECT
 
-apply: FORCE env-vars $(jsons)
+apply: apply-prom apply-perses
+apply-prom:
+	kubectl apply -f rules.yaml
+
+apply-perses: FORCE env-vars $(jsons)
 	percli apply -f 01-project.json
 	percli project $(PROJECT)
 	for F in $(jsons) ; do ( set -x ; percli apply -f $$F ; ) ; done

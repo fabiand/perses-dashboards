@@ -1,64 +1,68 @@
-groups:
-  - name: memory-dashboard-rules
-    interval: 30s
-    rules:
-      #
-      # System
-      #
-      - record: ocp:node:system:memory:reserved
-        expr: kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}
-        labels:
-          DevelopmentPreview: "true"
-          
-      - record: ocp:node:system:memory:utilization
-        expr: container_memory_rss{id="/system.slice"}
-        labels:
-          DevelopmentPreview: "true"
+#apiVersion: monitoring.rhobs/v1
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: memory-dashboard-rules
+#  namespace: openshift-monitoring # You may adjust this namespace as needed
+  labels:
+    prometheus: k8s
+    role: alert-rules
+spec:
+  groups:
+    - name: memorydashboardrules
+      rules:
+        #
+        # System
+        #
+        - record: ocp:node:system:memory:reserved
+          expr: kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}
+          labels:
+            DevelopmentPreview: "true"
+            
+        - record: ocp:node:system:memory:utilization
+          expr: container_memory_rss{id="/system.slice"}
+          labels:
+            DevelopmentPreview: "true"
 
-      #
-      # Utilization
-      #
-      # Availability Risk (OOM)
-      # (node_memory_Active_anon_bytes + node_memory_Inactive_anon_bytes) / node_memory_MemTotal_bytes
-      # Performance risk (cache)
-      # (node_memory_Active_anon_bytes + node_memory_Active_file_bytes) / node_memory_MemTotal_bytes
+        #
+        # Utilization
+        #
+        # Availability Risk (OOM)
+        # (node_memory_Active_anon_bytes + node_memory_Inactive_anon_bytes) / node_memory_MemTotal_bytes
+        # Performance risk (cache)
+        # (node_memory_Active_anon_bytes + node_memory_Active_file_bytes) / node_memory_MemTotal_bytes
 
-      # Combined - Availability or performance risk
-      - record: ocp:node:workloads:memory:allocatable
-        expr: kube_node_status_allocatable{resource="memory"}
-        labels:
-          DevelopmentPreview: "true"
-          
-      - record: ocp:node:workloads:memory:utilization
-        expr: node_memory_Active_anon_bytes + node_memory_Inactive_anon_bytes + node_memory_Active_file_bytes
-        labels:
-          DevelopmentPreview: "true"
-          
-      - record: ocp:node:workloads:memory:utilization:ratio
-        expr: ocp:node:workloads:memory:utilization / on (node) ocp:node:workloads:memory:allocatable
-        labels:
-          DevelopmentPreview: "true"
+        # Combined - Availability or performance risk
+        - record: ocp:node:workloads:allocatable
+          expr: kube_node_status_allocatable{resource="memory"}
+          labels:
+            DevelopmentPreview: "true"
+            
+        - record: ocp:node:workloads:utilization
+          expr: node_memory_Active_anon_bytes + node_memory_Inactive_anon_bytes + node_memory_Active_file_bytes
+          labels:
+            DevelopmentPreview: "true"
+            
+        - record: ocp:node:workloads:swap
+          expr: container_memory_swap{id="/kubepods.slice"}
+          labels:
+            DevelopmentPreview: "true"
+            
+        - record: ocp:node:virtualization:allocated
+          expr: sum(kubevirt_vmi_memory_domain_bytes) by (node)
+          labels:
+            DevelopmentPreview: "true"
 
-      - record: ocp:node:workloads:memory:swap
-        expr: container_memory_swap{id="/kubepods.slice"}
-        labels:
-          DevelopmentPreview: "true"
-          
-      - record: ocp:node:virtualization:memory:allocated
-        expr: sum(kubevirt_vmi_memory_domain_bytes) by (node)
-        labels:
-          DevelopmentPreview: "true"
-
-      #
-      # Overcommittment
-      #
-      # Overcommitted - Negative values show under committment
-      - record: ocp:node:virtualization:memory:overcommitted
-        expr: ocp:node:virtualization:allocated - on (node) ocp:node:workloads:memory:allocatable
-        labels:
-          DevelopmentPreview: "true"
-          
-      - record: ocp:node:virtualization:memory:overcommitted:ratio
-        expr: ocp:node:virtualization:memory:overcommitted / on (node) ocp:node:workloads:memory:allocatable
-        labels:
-          DevelopmentPreview: "true"
+        #
+        # Overcommittment
+        #
+        # Overcommitted - Negative values show under committment
+        - record: ocp:node:virtualization:overcommitted
+          expr: ocp:node:virtualization:allocated - on (node) ocp:node:workloads:allocatable
+          labels:
+            DevelopmentPreview: "true"
+            
+        - record: ocp:node:virtualization:overcommitted:ratio
+          expr: ocp:node:virtualization:overcommitted / on (node) ocp:node:workloads:allocatable
+          labels:
+            DevelopmentPreview: "true"
