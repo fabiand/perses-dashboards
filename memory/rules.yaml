@@ -18,7 +18,6 @@ spec:
           expr: |
             sum(kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
             by (node, prometheus)
-            #without (container, endpoint, job, namespace, resource, service)
           labels:
             unit: bytes
             DevelopmentPreview: "true"
@@ -27,7 +26,6 @@ spec:
           expr: |
             sum (container_memory_rss{id="/system.slice"})
             by (node, prometheus)
-            #without (endpoint, id, instance, job, metrics_path, service)
           labels:
             unit: bytes
             DevelopmentPreview: "true"
@@ -41,7 +39,7 @@ spec:
         # (node_memory_Active_anon_bytes + node_memory_Active_file_bytes) / node_memory_MemTotal_bytes
 
         # Combined - Availability or performance risk
-        - record: openshift:node:workloads:allocatable
+        - record: openshift:node:workloads:memory:allocatable
           expr: |
             sum(kube_node_status_allocatable{resource="memory"})
             by (node, prometheus)
@@ -49,8 +47,11 @@ spec:
             unit: bytes
             DevelopmentPreview: "true"
             
-        - record: openshift:node:workloads:utilization
+        - record: openshift:node:workloads:memory:utilization
           expr: |
+            # FIXME this should actually be
+            # container_memory_total_Active_anon_bytes + container_memory_total_Inactive_anon_bytes + container_memory_total_Active_file_bytes
+            # but cri/cadvisor does not provide these metrics today.
             sum(label_replace((node_memory_Active_anon_bytes + node_memory_Inactive_anon_bytes + node_memory_Active_file_bytes),
                           "node", "$1",
                           "instance", "(.*)"))
@@ -67,7 +68,7 @@ spec:
             unit: bytes
             DevelopmentPreview: "true"
 
-        - record: openshift:node:virtualization:allocated
+        - record: openshift:node:virtualization:memory:allocated
           expr: |
             sum(kubevirt_vmi_memory_domain_bytes)
             by (node, prometheus)
@@ -79,10 +80,10 @@ spec:
         # Overcommittment
         #
         # Overcommitted - Negative values show under committment
-        - record: openshift:node:virtualization:overcommitted
+        - record: openshift:node:virtualization:memory:overcommitted
           expr: |
-            openshift:node:virtualization:allocated - openshift:node:workloads:allocatable
+            openshift:node:virtualization:memory:allocated - openshift:node:workloads:memory:allocatable
             
         - record: openshift:node:virtualization:overcommitted:ratio
           expr: |
-            openshift:node:virtualization:overcommitted / openshift:node:workloads:allocatable
+            openshift:node:virtualization:memory:overcommitted / openshift:node:workloads:memory:allocatable
