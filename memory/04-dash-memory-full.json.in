@@ -1212,8 +1212,8 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\n(\nlabel_replace((\n{{x_node_memory_MemNotAvailable_bytes_by_role}}\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) ({{x_kube_node_status_capacity_memory_by_role}})\n-\nsum by (node) ({{x_kube_node_status_allocatable_memory_by_role}})\n)\n)\n+\nsum by (node) (kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})",
-                    "seriesNameFormat": "{{node}}"
+                    "query": "(\n(\nlabel_replace((\n{{x_node_memory_MemNotAvailable_bytes_by_role}}\n), \"node\", \"$1\", \"instance\", \"(.+)\")\n- on (node)\n(\nsum by (node) ({{x_kube_node_status_capacity_memory_by_role}})\n-\nsum by (node) ({{x_kube_node_status_allocatable_memory_by_role}})\n)\n)\n+\nsum by (node) (0-kubevirt_vmi_memory_used_bytes + kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})",
+                    "seriesNameFormat": "{{node}} - Virtual Memory committment"
                   }
                 }
               }
