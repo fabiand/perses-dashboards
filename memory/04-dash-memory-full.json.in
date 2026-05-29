@@ -514,7 +514,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\nsum({{x_node_memory_MemNotAvailable_bytes_by_role}})\n-\n{{x_kube_node_status_system_reserved_memory_by_role}}\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"})\n)\n\n/\n\n(\nsum({{x_kube_node_status_allocatable_memory_by_role}})\n)",
+                    "query": "(sum({{x_node_memory_MemNotAvailable_bytes_by_role}}\n)\n-\n{{x_kube_node_status_system_reserved_memory_by_role}}\n\n-\nsum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})\n\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"}))\n/\n\n(\nsum({{x_kube_node_status_allocatable_memory_by_role}})\n)",
                     "seriesNameFormat": "Virtual Memory committment"
                   }
                 }
