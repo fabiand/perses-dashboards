@@ -26,6 +26,7 @@ get-dashboards:
 	  | jq '.[] | .metadata.project = "{{PROJECT}}"' \
 	  | jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash-$$DASH.json.in ; \
 	  bash do-vars.sh query_to_vars "04-dash-$$DASH.json.in" ;  \
+	  make vars-to-rules ; \
 	done
 
 env-vars: FORCE
@@ -37,7 +38,7 @@ apply: apply-prom apply-perses
 apply-prom:
 	kubectl apply -f rules.yaml
 
-apply-perses: FORCE env-vars $(jsons)
+apply-perses: FORCE rules-to-vars env-vars $(jsons)
 	percli apply -f 01-project.json
 	percli project $(PROJECT)
 	for F in $(jsons) ; do ( set -x ; percli apply -f $$F ; ) ; done
@@ -48,6 +49,12 @@ docs: 04-dash-memory-summary.json.in 04-dash-memory-details.json.in
 
 url:
 	@echo "http://localhost:8080/projects/$(PROJECT)/dashboards/$$(basename $$PWD)"
+
+rules-to-vars: rules.yaml
+	./rules_to_vars.py export rules.yaml --output vars.d
+
+vars-to-rules:
+	./rules_to_vars.py import vars.d rules.yaml
 
 %.json: %.json.in
 	cp $< $@
