@@ -8,6 +8,10 @@ PROJECT := openshift-cnv
 URL := https://$(shell oc get route -n openshift-monitoring prometheus-k8s -o jsonpath='{.status.ingress[0].host}')
 TOKEN := $(shell oc whoami -t)
 
+
+run-dashboard:
+	podman -r run --name perses --rm -p 127.0.0.1:8080:8080 persesdev/perses:latest
+
 import:
 	make get-dashboards
 
