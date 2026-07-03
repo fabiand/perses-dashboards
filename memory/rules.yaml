@@ -52,6 +52,7 @@ spec:
             # FIXME this should actually be
             # container_memory_total_Active_anon_bytes + container_memory_total_Inactive_anon_bytes + container_memory_total_Active_file_bytes
             # but cri/cadvisor does not provide these metrics today.
+            # https://github.com/google/cadvisor/pull/3750/changes
             sum(label_replace((node_memory_Active_anon_bytes + node_memory_Inactive_anon_bytes + node_memory_Active_file_bytes),
                           "node", "$1",
                           "instance", "(.*)"))
