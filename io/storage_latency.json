@@ -1,0 +1,311 @@
+[
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "storage_latency",
+      "createdAt": "2026-09-18T14:33:54.933644325Z",
+      "updatedAt": "2026-09-18T15:00:27.127455287Z",
+      "version": 1,
+      "project": "openshift-cnv"
+    },
+    "spec": {
+      "display": {
+        "name": "Storage Latency"
+      },
+      "panels": {
+        "53d12c6d478148e7b910be6a52e0ef52": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Latency Alerts"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "calculation": "last-number",
+                "format": {
+                  "unit": "percent-decimal"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0.01
+                    }
+                  ]
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "count by (instance) (ALERTS{alertname=~\".*Latency.*High\"}) / count(kube_node_info)",
+                      "seriesNameFormat": "Percentage of nodes with IO latency alerts"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "859fb288b6a546a0bea31d734264727c": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "IO Host-To-Device Latency Distribution"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "bottom"
+                },
+                "querySettings": [
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#59CC8D",
+                    "queryIndex": 0
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#FFCC00",
+                    "queryIndex": 1
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#FFB249",
+                    "queryIndex": 2
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#EE6C6C",
+                    "queryIndex": 3
+                  }
+                ],
+                "visual": {
+                  "areaOpacity": 0.3,
+                  "connectNulls": false,
+                  "display": "line",
+                  "lineStyle": "solid",
+                  "lineWidth": 1.25,
+                  "pointRadius": 2.75,
+                  "stack": "all"
+                },
+                "yAxis": {
+                  "format": {
+                    "unit": "percent-decimal"
+                  },
+                  "label": "",
+                  "max": 1,
+                  "min": 0,
+                  "show": true
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "(\nsum(rate(kme_system_block_io_latency_seconds_bucket{le=\"0.01\"}[1m]))\n) / sum (rate(kme_system_block_io_latency_seconds_count[1m]))",
+                      "seriesNameFormat": "0ms - 10ms"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "(\nsum(rate(kme_system_block_io_latency_seconds_bucket{le=\"0.1\"}[1m]))\n- sum(rate(kme_system_block_io_latency_seconds_bucket{le=\"0.01\"}[1m]))\n) / sum (rate(kme_system_block_io_latency_seconds_count[1m]))",
+                      "seriesNameFormat": "10ms - 100ms"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "(\nsum(rate(kme_system_block_io_latency_seconds_bucket{le=\"1.0\"}[1m]))\n- sum(rate(kme_system_block_io_latency_seconds_bucket{le=\"0.1\"}[1m]))\n) / sum (rate(kme_system_block_io_latency_seconds_count[1m]))",
+                      "seriesNameFormat": "100ms - 1s"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "(\nsum(rate(kme_system_block_io_latency_seconds_bucket{le=\"+Inf\"}[1m]))\n- sum(rate(kme_system_block_io_latency_seconds_bucket{le=\"1.0\"}[1m]))\n) / sum (rate(kme_system_block_io_latency_seconds_count[1m]))",
+                      "seriesNameFormat": "> 1s"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "94fe9ebf4b0b43b3bead6d65d8194497": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Seconds spent on IO with Host-To-Device latency > 10ms"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "bottom"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "sum by (instance) (\nrate(kme_system_block_io_latency_seconds_count[1m])\n- on (instance, device, operation)\nrate(kme_system_block_io_latency_seconds_bucket{le=\"0.01\"}[1m])\n)"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "bb254c2f0b9c4fd5bc45f03e39813b16": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "IO Latency alerts over time"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "bottom"
+                },
+                "visual": {
+                  "areaOpacity": 0.3,
+                  "connectNulls": false,
+                  "display": "line",
+                  "lineStyle": "solid",
+                  "lineWidth": 1.25,
+                  "pointRadius": 2.75,
+                  "stack": "all"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "count by (instance) (ALERTS{alertname=~\".*Latency.*High\"})",
+                      "seriesNameFormat": "{{instance}}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Panel Group",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/53d12c6d478148e7b910be6a52e0ef52"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Cluster",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 22,
+                "height": 13,
+                "content": {
+                  "$ref": "#/spec/panels/859fb288b6a546a0bea31d734264727c"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Nodes",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 23,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/bb254c2f0b9c4fd5bc45f03e39813b16"
+                }
+              },
+              {
+                "x": 0,
+                "y": 6,
+                "width": 23,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/94fe9ebf4b0b43b3bead6d65d8194497"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "duration": "1h",
+      "refreshInterval": "15s",
+      "timezone": "local"
+    }
+  }
+]

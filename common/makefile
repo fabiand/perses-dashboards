@@ -36,7 +36,7 @@ env-vars: FORCE
 
 apply: apply-prom apply-perses
 apply-prom:
-	kubectl apply -f rules.yaml
+	-kubectl apply -f rules.yaml
 
 apply-perses: FORCE rules-to-vars env-vars $(jsons)
 	percli apply -f 01-project.json
