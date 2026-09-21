@@ -9,7 +9,72 @@ metadata:
     role: alert-rules
 spec:
   groups:
-    - name: memorydashboard.rules
+    - name: cluster_operator_node_memory.rules
+      rules:
+        # 1. System & Kubelet Reserved Memory
+        - record: openshift_node_memory_bytes
+          expr: |
+            kube_node_status_capacity{resource="memory"}
+            -
+            kube_node_status_allocatable{resource="memory"}
+          labels:
+            state: "reserved"
+            scope: "system"
+
+        # 2. Node Hot Memory in Use (Scoped strictly to pods)
+        - record: openshift_node_memory_bytes
+          expr: |
+            sum by (node) (
+              container_memory_working_set_bytes{container!="", id=~"/kubepods.*"}
+            )
+          labels:
+            state: "hot"
+            scope: "workload"
+
+        # 3. Workload Safe Available Memory (Headroom)
+        - record: openshift_node_memory_bytes
+          expr: |
+            kube_node_status_allocatable{resource="memory"}
+            -
+            openshift_node_memory_bytes{state="hot", scope="workload"}
+          labels:
+            state: "headroom"
+            scope: "workload"
+
+        # 4. Hot Memory Fill Ratio
+        - record: openshift_node_memory_ratio
+          expr: |
+            openshift_node_memory_bytes{state="hot", scope="workload"}
+            /
+            kube_node_status_allocatable{resource="memory"}
+          labels:
+            type: "hot_fill"
+            scope: "workload"
+
+    - name: cluster_operator_kubevirt_vm_memory.rules
+      rules:
+        # 5. Per-VM Hot Memory Usage
+        - record: kubevirt_vm_memory_bytes
+          expr: |
+            container_memory_working_set_bytes{container="compute"}
+          labels:
+            state: "hot"
+            workload_type: "kubevirt_vm"
+
+        # 6. VM Hot Memory vs Requested Allocation Ratio
+        - record: kubevirt_vm_memory_ratio
+          expr: |
+            container_memory_working_set_bytes{container="compute"}
+            / on (pod, namespace) group_left()
+            kube_pod_container_resource_requests{container="compute", resource="memory"}
+          labels:
+            type: "hot_to_request"
+            workload_type: "kubevirt_vm"
+
+    #
+    # LEGACY
+    #
+    - name: legacy.memorydashboard.rules
       rules:
         #
         # System
