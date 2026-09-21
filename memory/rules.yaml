@@ -12,6 +12,7 @@ spec:
     - name: cluster_operator_node_memory.rules
       rules:
         # 1. System & Kubelet Reserved Memory
+        # Memory reserved for system and kubelet, outside allocatable space.
         - record: openshift_node_memory_bytes
           expr: |
             kube_node_status_capacity{resource="memory"}
@@ -20,9 +21,12 @@ spec:
           labels:
             usage: "reserved"
             scope: "system"
+            unit: bytes
             DevelopmentPreview: "true"
 
-        # 2. Node Hot Memory in Use (Scoped strictly to pods)
+        # 2. Node Hot Memory
+        # Working set memory of all pod containers on the node.
+        # Excludes inactive file cache that can be easily reclaimed.
         - record: openshift_node_memory_bytes
           expr: |
             sum by (node) (
@@ -31,9 +35,10 @@ spec:
           labels:
             usage: "hot"
             scope: "workload"
+            unit: bytes
             DevelopmentPreview: "true"
 
-        # 2a. Node Warm Memory (Inactive File Cache)
+        # 2a. Node Warm Memory
         # Inactive file-backed pages that are first candidates for eviction.
         # Reclaimable with minimal performance impact.
         - record: openshift_node_memory_bytes
@@ -44,9 +49,12 @@ spec:
           labels:
             usage: "warm"
             scope: "workload"
+            unit: bytes
             DevelopmentPreview: "true"
 
-        # 3. Workload Safe Available Memory (Remaining)
+        # 3. Node Remaining Memory
+        # Available memory for new workload allocations.
+        # Calculated as allocatable minus hot working set.
         - record: openshift_node_memory_bytes
           expr: |
             kube_node_status_allocatable{resource="memory"}
@@ -55,9 +63,11 @@ spec:
           labels:
             usage: "remaining"
             scope: "workload"
+            unit: bytes
             DevelopmentPreview: "true"
 
-        # 4. Hot Memory Fill Ratio
+        # 4. Node Hot Memory Fill Ratio
+        # Hot memory usage as fraction of allocatable capacity.
         - record: openshift_node_memory_ratio
           expr: |
             openshift_node_memory_bytes{usage="hot", scope="workload"}
@@ -66,6 +76,7 @@ spec:
           labels:
             type: "hot_fill"
             scope: "workload"
+            unit: ratio
             DevelopmentPreview: "true"
 
         # 5. Node VM Memory Commitment
@@ -77,6 +88,7 @@ spec:
               openshift_vm_memory_committed_bytes{workload_type="vm"}
             )
           labels:
+            unit: bytes
             DevelopmentPreview: "true"
 
         # 6. Node VM Memory Commitment Ratio
@@ -88,13 +100,14 @@ spec:
             /
             openshift_node_memory_committed_bytes
           labels:
+            unit: ratio
             DevelopmentPreview: "true"
 
     - name: cluster_operator_kubevirt_vm_memory.rules
       rules:
-        # 5a. Per-VM Hot Memory (VM Working Set)
-        # Measures actual memory actively used by the VM.
-        # This represents the current physical memory consumption of the running VM.
+        # 5a. Per-VM Hot Memory
+        # Working set memory actively used by the VM.
+        # Current physical memory consumption of the running VM.
         - record: openshift_vm_memory_bytes
           expr: |
             sum by (name, namespace, node) (
@@ -110,9 +123,10 @@ spec:
           labels:
             usage: "hot"
             workload_type: "vm"
+            unit: bytes
             DevelopmentPreview: "true"
 
-        # 5a-warm. Per-VM Warm Memory (Inactive File Cache)
+        # 5a-warm. Per-VM Warm Memory
         # Inactive file-backed pages for the VM.
         # Reclaimable with minimal performance impact. Typically very low for VMs.
         - record: openshift_vm_memory_bytes
@@ -130,25 +144,25 @@ spec:
           labels:
             usage: "warm"
             workload_type: "vm"
+            unit: bytes
             DevelopmentPreview: "true"
 
-        # 5b. Per-VM Reserved Memory (VM Infrastructure Overhead)
+        # 5b. Per-VM Reserved Memory
         # Fixed infrastructure memory overhead required to run the VM.
-        # This includes memory for QEMU, libvirt, cache, and other virtualization
-        # infrastructure components in the virt-launcher pod.
+        # Includes memory for QEMU, libvirt, cache, and other virtualization components.
         - record: openshift_vm_memory_bytes
           expr: |
             max by (name, namespace, node) (kubevirt_vmi_launcher_memory_overhead_bytes)
           labels:
             usage: "reserved"
             workload_type: "vm"
+            unit: bytes
             DevelopmentPreview: "true"
 
-        # 5c. Per-VM Remaining Memory (VM Growth Capacity)
+        # 5c. Per-VM Remaining Memory
         # Memory available for the VM to grow within its allocated capacity.
         # Calculated as: reserved + allocation - hot.
-        # Note: This can become negative when the VM uses all its allocated RAM and
-        # the hypervisor requires significant cache to support the VM.
+        # Can be negative when VM uses all allocated RAM and hypervisor requires significant cache.
         - record: openshift_vm_memory_bytes
           expr: |
             openshift_vm_memory_bytes{usage="reserved", workload_type="vm"}
@@ -159,16 +173,18 @@ spec:
           labels:
             usage: "remaining"
             workload_type: "vm"
+            unit: bytes
             DevelopmentPreview: "true"
 
         # 5d. Per-VM Committed Memory
         # Virtual memory allocated to the VM (domain capacity).
-        # This is what the guest sees as available RAM.
+        # What the guest sees as available RAM.
         - record: openshift_vm_memory_committed_bytes
           expr: |
             max by (name, namespace, node) (kubevirt_vmi_memory_domain_bytes)
           labels:
             workload_type: "vm"
+            unit: bytes
             DevelopmentPreview: "true"
 
         # 5e. Per-VM Commitment Ratio
@@ -181,6 +197,7 @@ spec:
             openshift_vm_memory_committed_bytes{workload_type="vm"}
           labels:
             workload_type: "vm"
+            unit: ratio
             DevelopmentPreview: "true"
 
     #
