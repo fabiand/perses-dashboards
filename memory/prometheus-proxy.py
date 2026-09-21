@@ -130,15 +130,26 @@ def proxy_request(endpoint, method='GET'):
 
     # Debug output
     print(f"{method} /api/v1/{endpoint}", file=sys.stderr)
+    if method == 'GET':
+        print(f"  Extracted params: {list(url_params.keys())}", file=sys.stderr)
+        if 'start' in url_params or 'end' in url_params:
+            print(f"    Time range: start={url_params.get('start')}, end={url_params.get('end')}", file=sys.stderr)
+    else:
+        print(f"  Extracted params: {list(body_params.keys())}", file=sys.stderr)
+        if 'start' in body_params or 'end' in body_params:
+            print(f"    Time range: start={body_params.get('start')}, end={body_params.get('end')}, step={body_params.get('step')}", file=sys.stderr)
     if query:
-        print(f"  Query: {query[:100]}...", file=sys.stderr)
+        print(f"  ORIGINAL QUERY:", file=sys.stderr)
+        print(f"    {query}", file=sys.stderr)
 
     # Only rewrite on query/query_range endpoints
     if endpoint in ['query', 'query_range'] and query:
         try:
             rewritten_query = rewrite(query)
             if rewritten_query != query:
-                print(f"  Rewritten: {rewritten_query[:100]}...", file=sys.stderr)
+                print(f"  REWRITTEN QUERY (full):", file=sys.stderr)
+                print(f"    {rewritten_query}", file=sys.stderr)
+                print(f"", file=sys.stderr)
             query = rewritten_query
             if method == 'GET':
                 url_params['query'] = query
@@ -159,13 +170,26 @@ def proxy_request(endpoint, method='GET'):
             print(f"  Warning: Query too large for GET ({len(query_str)} chars), switching to POST", file=sys.stderr)
             r = requests.post(url, data=url_params, headers=headers, verify=False)
         else:
+            print(f"  Forwarding GET params: {list(url_params.keys())}", file=sys.stderr)
             r = requests.get(url, params=url_params, headers=headers, verify=False)
     else:  # POST
         # Send as form-encoded data in the body (NOT URL params)
         # This avoids "header line too long" errors
+        print(f"  Forwarding POST params: {list(body_params.keys())}", file=sys.stderr)
+        # Debug: log the actual request
+        print(f"  POST URL: {url}", file=sys.stderr)
+        print(f"  POST data: {dict((k, str(v)[:80] + '...' if len(str(v)) > 80 else str(v)) for k, v in body_params.items())}", file=sys.stderr)
         r = requests.post(url, data=body_params, headers=headers, verify=False)
 
     print(f"  Response: {r.status_code}, {len(r.content)} bytes", file=sys.stderr)
+
+    # Debug: show response for small responses (likely errors or empty)
+    if len(r.content) < 200:
+        try:
+            response_json = json.loads(r.content)
+            print(f"  Response body: {json.dumps(response_json, indent=2)[:200]}", file=sys.stderr)
+        except:
+            print(f"  Response body: {r.content[:200]}", file=sys.stderr)
 
     # Ensure Content-Type is preserved from Thanos response
     response_headers = dict(r.headers)
