@@ -10,7 +10,8 @@ TOKEN := $(shell oc whoami -t)
 
 
 run-dashboard:
-	podman -r run --name perses --rm -p 127.0.0.1:8080:8080 persesdev/perses:latest
+	podman -r run --name perses --rm --net=host persesdev/perses:latest
+	#-p 127.0.0.1:8080:8080  persesdev/perses:latest
 
 import:
 	make get-dashboards
@@ -25,20 +26,13 @@ get-dashboards:
 	  percli get -o json dash $$DASH \
 	  | jq '.[] | .metadata.project = "{{PROJECT}}"' \
 	  | jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash-$$DASH.json.in ; \
-	  bash do-vars.sh query_to_vars "04-dash-$$DASH.json.in" ;  \
-	  make vars-to-rules ; \
 	done
-
-env-vars: FORCE
-	echo -n "$(URL)" > vars.d/URL
-	echo -n "$(TOKEN)" > vars.d/TOKEN
-	echo -n "$(PROJECT)" > vars.d/PROJECT
 
 apply: apply-prom apply-perses
 apply-prom:
 	-kubectl apply -f rules.yaml
 
-apply-perses: FORCE rules-to-vars env-vars $(jsons)
+apply-perses: FORCE $(jsons)
 	percli apply -f 01-project.json
 	percli project $(PROJECT)
 	for F in $(jsons) ; do ( set -x ; percli apply -f $$F ; ) ; done
@@ -50,19 +44,9 @@ docs: 04-dash-memory-summary.json.in 04-dash-memory-details.json.in
 url:
 	@echo "http://localhost:8080/projects/$(PROJECT)/dashboards/$$(basename $$PWD)"
 
-rules-to-vars: rules.yaml
-	./rules_to_vars.py export rules.yaml --output vars.d
-
-vars-to-rules:
-	./rules_to_vars.py import vars.d rules.yaml
-
-%.json: %.json.in
-	cp $< $@
-	bash do-vars.sh vars_to_query $@
-
 clean: $(jsons)
 	rm -v $(jsons)
 
 FORCE:
 
-.PHONY: FORCE import apply $(sources) inject-vars env-vars
+.PHONY: FORCE import apply $(sources)

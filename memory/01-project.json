@@ -2,7 +2,7 @@
   {
     "kind": "Project",
     "metadata": {
-      "name": "{{PROJECT}}"
+      "name": "openshift-cnv"
     },
     "spec": {
       "display": {

@@ -3,7 +3,7 @@
     "kind": "Datasource",
     "metadata": {
       "name": "default",
-      "project": "{{PROJECT}}"
+      "project": "openshift-cnv"
     },
     "spec": {
       "default": true,
@@ -44,7 +44,7 @@
                 }
               ],
               "secret": "default",
-              "url": "{{URL}}"
+              "url": "http://localhost:9090"
             }
           }
         }
