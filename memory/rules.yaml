@@ -15,9 +15,16 @@ spec:
         # Memory reserved for system and kubelet, outside allocatable space.
         - record: openshift_node_memory_bytes
           expr: |
-            kube_node_status_capacity{resource="memory"}
-            -
-            kube_node_status_allocatable{resource="memory"}
+            sum by (node) (
+              # FIXME requires k-s-m
+              (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
+              or
+              # Fallback
+              label_replace(
+                container_memory_working_set_bytes{id="/system.slice"},
+                "node", "$1", "instance", "(.+)"
+              )
+            )
           labels:
             usage: "reserved"
             scope: "system"
@@ -57,7 +64,15 @@ spec:
         # Calculated as allocatable minus hot working set.
         - record: openshift_node_memory_bytes
           expr: |
-            kube_node_status_allocatable{resource="memory"}
+            # FIXME requires k-s-m
+            sum by (node) (
+              (kube_node_status_allocatable{resource="memory"})
+              or
+              label_replace(
+                node_memory_MemTotal_bytes,
+                "node", "$1", "instance", "(.+)"
+              )
+            )
             -
             openshift_node_memory_bytes{usage="hot", scope="workload"}
           labels:
