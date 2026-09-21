@@ -33,7 +33,20 @@ spec:
             scope: "workload"
             DevelopmentPreview: "true"
 
-        # 3. Workload Safe Available Memory (Headroom)
+        # 2a. Node Warm Memory (Inactive File Cache)
+        # Inactive file-backed pages that are first candidates for eviction.
+        # Reclaimable with minimal performance impact.
+        - record: openshift_node_memory_bytes
+          expr: |
+            sum by (node) (
+              container_memory_total_inactive_file_bytes{container!="", id=~"/kubepods.*"}
+            )
+          labels:
+            usage: "warm"
+            scope: "workload"
+            DevelopmentPreview: "true"
+
+        # 3. Workload Safe Available Memory (Remaining)
         - record: openshift_node_memory_bytes
           expr: |
             kube_node_status_allocatable{resource="memory"}
@@ -96,6 +109,26 @@ spec:
             )
           labels:
             usage: "hot"
+            workload_type: "vm"
+            DevelopmentPreview: "true"
+
+        # 5a-warm. Per-VM Warm Memory (Inactive File Cache)
+        # Inactive file-backed pages for the VM.
+        # Reclaimable with minimal performance impact. Typically very low for VMs.
+        - record: openshift_vm_memory_bytes
+          expr: |
+            sum by (name, namespace, node) (
+              sum by (pod, namespace, node) (
+                container_memory_total_inactive_file_bytes{container="compute", pod=~"virt-launcher-.*"}
+              )
+              * on (namespace, pod) group_left(name)
+              label_replace(
+                max by (name, namespace, node, vmi_pod) (kubevirt_vmi_info{vmi_pod!=""}),
+                "pod", "$1", "vmi_pod", "(.*)"
+              )
+            )
+          labels:
+            usage: "warm"
             workload_type: "vm"
             DevelopmentPreview: "true"
 
