@@ -26,59 +26,90 @@ def rewrite(query):
     import re
     rules = load_rules()
 
-    # Check if query contains a bare recording rule metric (without labels)
+    # Pre-processing: Replace bare metric names with sum of all variants
+    # Group rules by metric name
+    metrics_map = {}
     for rule in rules:
         metric = rule['name']
+        if metric not in metrics_map:
+            metrics_map[metric] = []
+        metrics_map[metric].append(rule)
+
+    # For each metric with multiple variants, replace bare usage with sum
+    for metric, variants in metrics_map.items():
+        if len(variants) <= 1:
+            continue  # Single variant, no need to sum
+
         # Match bare metric at word boundary, not followed by {
         bare_pattern = rf'\b{re.escape(metric)}\b(?!\{{)'
         if re.search(bare_pattern, query):
-            # Found bare metric - check if there are multiple variants
-            variants = [r for r in rules if r['name'] == metric]
-            if len(variants) > 1:
-                # Multiple variants exist - error
-                label_sets = []
-                for v in variants:
-                    labels_str = ', '.join(f'{k}="{v["labels"][k]}"' for k in sorted(v['labels'].keys()) if k not in ['unit', 'DevelopmentPreview'])
-                    label_sets.append(f"  {metric}{{{labels_str}}}")
+            # Build sum of all variants with their labels
+            variant_selectors = []
+            for v in variants:
+                # Build label selector, excluding metadata labels
+                label_pairs = []
+                for k in sorted(v['labels'].keys()):
+                    if k not in ['unit', 'DevelopmentPreview']:
+                        label_pairs.append(f'{k}="{v["labels"][k]}"')
 
-                error_msg = f"Metric '{metric}' requires labels. Available variants:\n" + "\n".join(label_sets)
-                raise ValueError(error_msg)
+                if label_pairs:
+                    selector = f'{metric}{{{", ".join(label_pairs)}}}'
+                else:
+                    selector = metric
+                variant_selectors.append(selector)
 
-    # For each rule, try to find and replace metric{labels} with its expression
-    for rule in rules:
-        metric = rule['name']
-        rule_labels = rule['labels']
-        expr = rule['expr']
+            # Replace bare metric with sum of all variants
+            sum_expr = '(' + ' + '.join(variant_selectors) + ')'
+            query = re.sub(bare_pattern, sum_expr, query)
 
-        if metric not in query:
-            continue
+    # Loop and replace until no more recording rules are found
+    max_iterations = 20  # Prevent infinite loops
+    iteration = 0
 
-        # Find metric{...} pattern in query
-        pattern = rf'{re.escape(metric)}\{{([^}}]+)\}}'
-        match = re.search(pattern, query)
+    while iteration < max_iterations:
+        iteration += 1
+        replaced = False
 
-        if not match:
-            continue
+        # For each rule, try to find and replace metric{labels} with its expression
+        for rule in rules:
+            metric = rule['name']
+            rule_labels = rule['labels']
+            expr = rule['expr']
 
-        query_label_str = match.group(1)
+            if metric not in query:
+                continue
 
-        # Parse query labels into dict
-        query_labels = {}
-        for part in query_label_str.split(','):
-            if '=' in part:
-                k, v = part.strip().split('=', 1)
-                query_labels[k.strip()] = v.strip().strip('"')
+            # Find metric{...} pattern in query
+            pattern = rf'{re.escape(metric)}\{{([^}}]+)\}}'
+            match = re.search(pattern, query)
 
-        # Check if query labels match rule labels (subset match)
-        # Query labels must all be present in rule labels with same values
-        matches = all(
-            rule_labels.get(k) == v
-            for k, v in query_labels.items()
-        )
+            if not match:
+                continue
 
-        if matches:
-            # Replace this occurrence
-            query = query.replace(match.group(0), f'({expr})', 1)
+            query_label_str = match.group(1)
+
+            # Parse query labels into dict
+            query_labels = {}
+            for part in query_label_str.split(','):
+                if '=' in part:
+                    k, v = part.strip().split('=', 1)
+                    query_labels[k.strip()] = v.strip().strip('"')
+
+            # Check if query labels match rule labels (subset match)
+            # Query labels must all be present in rule labels with same values
+            matches = all(
+                rule_labels.get(k) == v
+                for k, v in query_labels.items()
+            )
+
+            if matches:
+                # Replace this occurrence
+                query = query.replace(match.group(0), f'({expr})', 1)
+                replaced = True
+                break  # Start over with new query
+
+        if not replaced:
+            # No more replacements found
             break
 
     return query
@@ -140,7 +171,9 @@ def proxy_request(endpoint, method='GET'):
             print(f"    Time range: start={body_params.get('start')}, end={body_params.get('end')}, step={body_params.get('step')}", file=sys.stderr)
     if query:
         print(f"  ORIGINAL QUERY:", file=sys.stderr)
-        print(f"    {query}", file=sys.stderr)
+        # Pretty-print by adding indentation to newlines
+        indented = query.replace('\n', '\n    ')
+        print(f"    {indented}", file=sys.stderr)
 
     # Only rewrite on query/query_range endpoints
     if endpoint in ['query', 'query_range'] and query:
@@ -148,7 +181,9 @@ def proxy_request(endpoint, method='GET'):
             rewritten_query = rewrite(query)
             if rewritten_query != query:
                 print(f"  REWRITTEN QUERY (full):", file=sys.stderr)
-                print(f"    {rewritten_query}", file=sys.stderr)
+                # Pretty-print by adding indentation to newlines
+                indented = rewritten_query.replace('\n', '\n    ')
+                print(f"    {indented}", file=sys.stderr)
                 print(f"", file=sys.stderr)
             query = rewritten_query
             if method == 'GET':
@@ -160,28 +195,22 @@ def proxy_request(endpoint, method='GET'):
             return make_error_response(str(e))
 
     # Forward to Thanos
+    # Always use POST to avoid URL length limits
     url = f"{THANOS}/api/v1/{endpoint}"
     headers = {'Authorization': f'Bearer {TOKEN}'}
 
-    if method == 'GET':
-        # For large queries, switch to POST to avoid header size limits
-        query_str = str(url_params.get('query', ''))
-        if len(query_str) > 4000:  # If query is large, use POST instead
-            print(f"  Warning: Query too large for GET ({len(query_str)} chars), switching to POST", file=sys.stderr)
-            r = requests.post(url, data=url_params, headers=headers, verify=False)
-        else:
-            print(f"  Forwarding GET params: {list(url_params.keys())}", file=sys.stderr)
-            r = requests.get(url, params=url_params, headers=headers, verify=False)
-    else:  # POST
-        # Send as form-encoded data in the body (NOT URL params)
-        # This avoids "header line too long" errors
-        print(f"  Forwarding POST params: {list(body_params.keys())}", file=sys.stderr)
-        # Debug: log the actual request
-        print(f"  POST URL: {url}", file=sys.stderr)
-        print(f"  POST data: {dict((k, str(v)[:80] + '...' if len(str(v)) > 80 else str(v)) for k, v in body_params.items())}", file=sys.stderr)
-        r = requests.post(url, data=body_params, headers=headers, verify=False)
+    # Use POST for all requests to avoid "header line too long" errors
+    # Convert GET params to POST body
+    params_to_send = body_params if method == 'POST' else url_params
+
+    print(f"  Forwarding as POST: {list(params_to_send.keys())}", file=sys.stderr)
+    if endpoint in ['query', 'query_range'] and params_to_send.get('query'):
+        print(f"  Query length: {len(str(params_to_send.get('query')))} chars", file=sys.stderr)
+
+    r = requests.post(url, data=params_to_send, headers=headers, verify=False)
 
     print(f"  Response: {r.status_code}, {len(r.content)} bytes", file=sys.stderr)
+    print(f"  Response headers: {list(r.headers.keys())}", file=sys.stderr)
 
     # Debug: show response for small responses (likely errors or empty)
     if len(r.content) < 200:
@@ -191,12 +220,33 @@ def proxy_request(endpoint, method='GET'):
         except:
             print(f"  Response body: {r.content[:200]}", file=sys.stderr)
 
-    # Ensure Content-Type is preserved from Thanos response
-    response_headers = dict(r.headers)
-    if 'Content-Type' not in response_headers:
-        response_headers['Content-Type'] = 'application/json'
+    # Only pass through essential headers to avoid "header line too long" errors
+    # Skip hop-by-hop headers, auth headers, and encoding headers
+    # Note: requests library automatically decompresses r.content, so we must
+    # not pass Content-Encoding header (it would cause double-decompression)
+    skip_headers = {
+        'Connection', 'Keep-Alive', 'Proxy-Authenticate',
+        'Proxy-Authorization', 'TE', 'Trailers', 'Transfer-Encoding',
+        'Upgrade', 'Authorization', 'Cookie', 'Set-Cookie',
+        'Content-Encoding',  # Skip because r.content is already decompressed
+    }
 
-    return Response(r.content, r.status_code, response_headers)
+    essential_headers = {}
+    for key, value in r.headers.items():
+        # Skip problematic headers
+        if key in skip_headers or key.lower() in {h.lower() for h in skip_headers}:
+            continue
+        # Skip very long headers that might cause issues
+        if len(value) > 8000:
+            print(f"  Skipping long header: {key} ({len(value)} bytes)", file=sys.stderr)
+            continue
+        essential_headers[key] = value
+
+    # Ensure Content-Type is set
+    if 'Content-Type' not in essential_headers:
+        essential_headers['Content-Type'] = 'application/json'
+
+    return Response(r.content, r.status_code, essential_headers)
 
 # Perses-required endpoints
 @app.route('/api/v1/query', methods=['GET', 'POST'])
