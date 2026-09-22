@@ -30,7 +30,17 @@ get-dashboards:
 
 apply: apply-prom apply-perses
 apply-prom:
-	-kubectl apply -f rules.yaml
+	# Create a Role with PrometheusRule permissions in current namespace
+	oc get role prometheus-rule-creator || oc create role prometheus-rule-creator \
+	  --verb=create,get,list,watch,update,patch,delete \
+	  --resource=prometheusrules.monitoring.coreos.com \
+	
+	# Bind the role to your user in current namespace
+	oc get rolebinding prometheus-rule-creator-$(oc whoami) || oc create rolebinding prometheus-rule-creator-binding \
+	  --role=prometheus-rule-creator \
+	  --user=$(oc whoami) \
+	
+	kubectl apply -f rules.yaml
 
 apply-perses: FORCE $(jsons)
 	percli apply -f 01-project.json
