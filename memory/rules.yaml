@@ -134,11 +134,9 @@ spec:
             scope: "workloads"
             unit: ratio
           expr: |
-            max by (node) (
-              openshift_node_memory_bytes{utilized="true", scope="workloads"}
-              / on (node)
-              kube_node_status_allocatable{resource="memory"}
-            )
+            sum by (node) (openshift_node_memory_bytes{utilized="true", scope="workloads"})
+            / on (node)
+            kube_node_status_allocatable{resource="memory"}
 
         - record: openshift_node_memory_overcommit_ratio
           labels:
