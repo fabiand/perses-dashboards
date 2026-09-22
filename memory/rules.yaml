@@ -102,6 +102,22 @@ spec:
 
         - record: openshift_node_memory_bytes
           labels:
+            tier: "2"
+            scope: "workloads"
+            utilized: "false"
+            unit: bytes
+          expr: |
+            sum by (node) (
+              label_replace(
+                node_memory_SwapTotal_bytes,
+                "node", "$1", "instance", "(.+)"
+              )
+              - on (node)
+              openshift_node_memory_bytes{tier="2", scope="workloads", utilized="true"}
+            )
+
+        - record: openshift_node_memory_bytes
+          labels:
             tier: "0"
             scope: "workloads"
             utilized: "false"
