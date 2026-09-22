@@ -378,7 +378,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\nsum(x_node_memory_MemNotAvailable_bytes_by_role)\n-\nx_kube_node_status_system_reserved_memory_by_role\n)\n\n/\n\n(\nsum(x_kube_node_status_allocatable_memory_by_role)\n)",
+                    "query": "sum(openshift_node_memory_bytes{scope=\"system\", usage=\"reserved\"} + openshift_node_memory_bytes{scope=\"workload\", usage=\"hot\"} + openshift_node_memory_bytes{scope=\"workload\", usage=\"warm\"}) / sum(openshift_node_memory_bytes)        #(sum(x_node_memory_MemNotAvailable_bytes_by_role) - x_kube_node_status_system_reserved_memory_by_role) / (sum(x_kube_node_status_allocatable_memory_by_role))",
                     "seriesNameFormat": "Physical Memory utilization"
                   }
                 }

@@ -11,92 +11,127 @@ spec:
   groups:
     - name: cluster_operator_node_memory.rules
       rules:
+        - record: openshift_node_memory_tier_info
+          expr: |
+            up * 0 + 1  # Constant 1
+          labels:
+            tier: "0"
+            technology: "dram"
+
+        - record: openshift_node_memory_tier_info
+          expr: |
+            up * 0 + 1  # Constant 1
+          labels:
+            tier: "2"
+            technology: "swap"
+
         - record: openshift_node_memory_bytes
+          labels:
+            tier: "0"
+            scope: "system"
+            utilized: "true"
+            temperature: "hot"
+            unit: bytes
           expr: |
             sum by (node) (
               container_memory_working_set_bytes{id="/system.slice"}
             )
-          labels:
-            scope: "system"
-            usage: "hot"
-            unit: bytes
 
         - record: openshift_node_memory_bytes
+          labels:
+            tier: "0"
+            scope: "system"
+            utilized: "true"
+            temperature: "warm"
+            unit: bytes
           expr: |
             sum by (node) (
               container_memory_total_inactive_file_bytes{id="/system.slice"}
             )
-          labels:
-            scope: "system"
-            usage: "warm"
-            unit: bytes
 
         - record: openshift_node_memory_bytes
+          labels:
+            tier: "0"
+            scope: "system"
+            utilized: "false"
+            unit: bytes
           expr: |
             max by (node) (
               (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
               - on (node) group_right()
-              openshift_node_memory_bytes{usage="hot", scope="system"}
+              openshift_node_memory_bytes{temperature="hot", scope="system"}
             )
-          labels:
-            scope: "system"
-            usage: "remaining"
-            unit: bytes
 
         - record: openshift_node_memory_bytes
+          labels:
+            tier: "0"
+            scope: "workloads"
+            utilized: "true"
+            temperature: "hot"
+            unit: bytes
           expr: |
             sum by (node) (
               # container_memory_working_set_bytes{container!="", id=~"/kubepods.*"}
               container_memory_working_set_bytes{id="/kubepods.slice"}
             )
-          labels:
-            scope: "workloads"
-            usage: "hot"
-            unit: bytes
 
         - record: openshift_node_memory_bytes
+          labels:
+            tier: "0"
+            scope: "workloads"
+            utilized: "true"
+            temperature: "warm"
+            unit: bytes
           expr: |
             sum by (node) (
               # container_memory_total_inactive_file_bytes{container!="", id=~"/kubepods.*"}
               container_memory_total_inactive_file_bytes{id="/kubepods.slice"}
             )
-          labels:
-            scope: "workloads"
-            usage: "warm"
-            unit: bytes
 
         - record: openshift_node_memory_bytes
+          labels:
+            tier: "2"
+            scope: "workloads"
+            utilized: "true"
+            temperature: "warm"
+            unit: bytes
+          expr: |
+            sum by (node) (
+              container_memory_swap{id="/kubepods.slice"}
+            )
+
+        - record: openshift_node_memory_bytes
+          labels:
+            tier: "0"
+            scope: "workloads"
+            utilized: "false"
+            unit: bytes
           expr: |
             max by (node) (
               kube_node_status_allocatable{resource="memory"}
               - on (node)
-              openshift_node_memory_bytes{usage="hot", scope="workloads"}
+              openshift_node_memory_bytes{temperature="hot", scope="workloads"}
             )
-          labels:
-            scope: "workloads"
-            usage: "remaining"
-            unit: bytes
 
         - record: openshift_node_memory_utilization_ratio
-          expr: |
-            max by (node) (
-              openshift_node_memory_bytes{usage="hot", scope="workloads"}
-              / on (node)
-              kube_node_status_allocatable{resource="memory"}
-            )
           labels:
             scope: "workloads"
             unit: ratio
+          expr: |
+            max by (node) (
+              openshift_node_memory_bytes{utilized="true", scope="workloads"}
+              / on (node)
+              kube_node_status_allocatable{resource="memory"}
+            )
 
         - record: openshift_node_memory_overcommit_ratio
           labels:
             scope: "workloads"
             unit: ratio
           expr: |
-            sum by (node) (openshift_vm_memory_bytes{usage="allocated"})
+            sum by (node) (openshift_vm_memory_virtual_committed_bytes)
             /
             kube_node_status_allocatable{resource="memory"}
-
 
     #
     #
@@ -108,8 +143,13 @@ spec:
     - name: cluster_operator_kubevirt_vm_memory.rules
       rules:
         - record: openshift_vm_memory_bytes
+          labels:
+            tier: "0"
+            utilized: "true"
+            temperature: "hot"
+            unit: bytes
           expr: |
-            sum by (name, namespace, node) (
+            max by (name, namespace, node) (
               max by (pod, namespace, node) (
                 container_memory_working_set_bytes{pod=~"virt-launcher-.*", container=""}
               )
@@ -119,19 +159,15 @@ spec:
                 "pod", "$1", "vmi_pod", "(.*)"
               )
             )
-          labels:
-            usage: "hot"
-            view: "measured"
-            unit: bytes
-            DevelopmentPreview: "true"
 
-        # 5a-warm. Per-VM Warm Memory
-        # Inactive file-backed pages for the VM.
-        # Reclaimable with minimal performance impact. Typically very low for VMs.
-        # Answers: Of the memory used by the VM, how much is supporting performance?
         - record: openshift_vm_memory_bytes
+          labels:
+            tier: "0"
+            utilized: "true"
+            temperature: "warm"
+            unit: bytes
           expr: |
-            sum by (name, namespace, node) (
+            max by (name, namespace, node) (
               max by (pod, namespace, node) (
                 container_memory_total_inactive_file_bytes{pod=~"virt-launcher-.*", container=""}
               )
@@ -141,73 +177,83 @@ spec:
                 "pod", "$1", "vmi_pod", "(.*)"
               )
             )
-          labels:
-            usage: "warm"
-            view: "measured"
-            unit: bytes
-            DevelopmentPreview: "true"
 
-        # 5b. Per-VM Remaining Memory
-        # Memory available for the VM to grow within its allocated capacity.
-        # Calculated as: reserved + allocation - hot.
-        # Can be negative when VM uses all allocated RAM and hypervisor requires significant cache.
-        # Answers: Of the memory allocated to the VM, how much is still unused?
         - record: openshift_vm_memory_bytes
+          labels:
+            tier: "0"
+            utilized: "false"
+            unit: bytes
           expr: |
             max by (name, namespace, node) (
-              openshift_vm_memory_bytes{usage="reserved"}
-              + on (name, namespace) group_left(node)
-              max by (name, namespace) (kubevirt_vmi_memory_domain_bytes)
-              - on (name, namespace)
-              openshift_vm_memory_bytes{usage="hot"}
+              openshift_vm_memory_requested_bytes
+              - on (name, namespace, node)
+              sum by (name, namespace, node) (openshift_vm_memory_bytes{utilized="true"})
             )
-          labels:
-            usage: "remaining"
-            view: "measured"
-            unit: bytes
-            DevelopmentPreview: "true"
 
-        # 5c. Per-VM Reserved Memory
-        # Fixed infrastructure memory overhead required to run the VM.
-        # Includes memory for QEMU, libvirt, cache, and other virtualization components.
-        # Answers: Of the memory used by the VM, how much memory is reserved?
         - record: openshift_vm_memory_bytes
-          expr: |
-            max by (name, namespace, node) (kubevirt_vmi_launcher_memory_overhead_bytes)
           labels:
-            usage: "reserved"
-            view: "spec"
+            tier: "2"
+            utilized: "true"
+            temperature: "warm"
             unit: bytes
-            DevelopmentPreview: "true"
-
-        # 5d. Per-VM Committed Memory
-        # Virtual memory allocated to the VM (domain capacity).
-        # What the guest sees as available RAM.
-        # Answers: How much virtual memory is allocated - and therefore committed - to the VM?
-        - record: openshift_vm_memory_bytes
-          expr: |
-            max by (name, namespace, node) (kubevirt_vmi_memory_domain_bytes)
-          labels:
-            usage: "allocated"
-            view: "spec"
-            unit: bytes
-            DevelopmentPreview: "true"
-
-        # 5e. Per-VM Commitment Ratio
-        # Actual VM memory usage vs allocated capacity.
-        # Shows how much of the VM's allocated memory is actively used.
-        - record: openshift_vm_memory_ratio
           expr: |
             max by (name, namespace, node) (
-              openshift_vm_memory_bytes{usage="hot"}
-              / on (name, namespace, node)
-              openshift_vm_memory_committed_bytes
+              max by (pod, namespace, node) (
+                container_memory_swap{pod=~"virt-launcher-.*", container=""}
+              )
+              * on (namespace, pod) group_left(name)
+              label_replace(
+                max by (name, namespace, node, vmi_pod) (kubevirt_vmi_info{vmi_pod!=""}),
+                "pod", "$1", "vmi_pod", "(.*)"
+              )
             )
+
+        - record: openshift_vm_memory_requested_bytes
           labels:
-            type: "utilization"
-            view: "measured"
+            unit: bytes
+          expr: |
+            sum by (name, namespace, node) (
+              # Get total pod memory requests for virt-launcher
+              sum by (pod, namespace, node) (
+                kube_pod_container_resource_requests{resource="memory", pod=~"virt-launcher-.*"}
+              )
+              # Join with VMI info to add VM name
+              * on (namespace, pod) group_left(name)
+              label_replace(
+                max by (name, namespace, node, vmi_pod) (kubevirt_vmi_info{vmi_pod!=""}),
+                "pod", "$1", "vmi_pod", "(.*)"
+              )
+            )
+
+        - record: openshift_vm_memory_virtual_committed_bytes
+          labels:
+            unit: bytes
+          expr: |
+            max by (name, namespace, node) (
+              kubevirt_vmi_launcher_memory_overhead_bytes
+              + on (name, namespace) group_right()
+              kubevirt_vmi_memory_domain_bytes
+            )
+
+        - record: openshift_vm_memory_utilization_ratio
+          labels:
             unit: ratio
-            DevelopmentPreview: "true"
+          expr: |
+            max by (name, namespace, node) (
+              sum by (name, namespace, node) (openshift_vm_memory_bytes{utilized="true"})
+              / on (name, namespace, node)
+              openshift_vm_memory_requested_bytes
+            )
+
+        - record: openshift_vm_memory_overcommit_ratio
+          labels:
+            unit: ratio
+          expr: |
+            max by (name, namespace, node) (
+              openshift_vm_memory_virtual_committed_bytes
+              / on (name, namespace, node)
+              openshift_vm_memory_requested_bytes
+            )
 
     #
     # VARS
