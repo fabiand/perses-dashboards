@@ -773,7 +773,7 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "System exceeding reservation",
+            "name": "Issues",
             "description": "This panel provides the precentage of nodes where core system (hypervisor) components are utilizing more than reserved memory. This should not happen, and is specifically critical for clusters under load. Keep it green."
           },
           "plugin": {
@@ -801,7 +801,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "count(ALERTS{alertname=\"SystemMemoryExceedsReservation\"}) OR vector(0)\n/\ncount(ALERTS{alertname=\"Watchdog\"})",
-                    "seriesNameFormat": "Issues"
+                    "seriesNameFormat": "System exceeding reservation"
                   }
                 }
               }
