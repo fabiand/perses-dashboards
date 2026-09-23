@@ -801,7 +801,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "count(ALERTS{alertname=\"SystemMemoryExceedsReservation\"}) OR vector(0)\n/\ncount(ALERTS{alertname=\"Watchdog\"})",
-                    "seriesNameFormat": "alertname"
+                    "seriesNameFormat": "System exceeding reservation"
                   }
                 }
               }
@@ -813,7 +813,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "count(ALERTS{alertname=\"TargetDown\", job=\"kube-state-metrics\"}) > 0",
-                    "seriesNameFormat": "TargetDown"
+                    "seriesNameFormat": "Invalid metrics (scrape target down)"
                   }
                 }
               }
@@ -825,7 +825,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "count(up{job=\"kubelet\",metrics_path=\"/metrics/cadvisor\"} == 0) > 0",
-                    "seriesNameFormat": "Kubelet cAdvisor Down"
+                    "seriesNameFormat": "Invalid metrics (kubelet cAdvisor down)"
                   }
                 }
               }
