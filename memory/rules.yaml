@@ -133,25 +133,27 @@ spec:
             utilized: "false"
             unit: bytes
           expr: |
-            kube_node_status_allocatable{resource="memory"}
-            - on (node)
-            (
-              # Hot: workload working set (same as openshift_node_memory_bytes{scope="workloads", tier="0", temperature="hot"})
-              sum by (node) (container_memory_working_set_bytes{id="/kubepods.slice"})
-              +
-              # Warm: workload inactive file cache (same as openshift_node_memory_bytes{scope="workloads", tier="0", temperature="warm"})
-              sum by (node) (container_memory_total_inactive_file_bytes{id="/kubepods.slice"})
-              +
-              # System overflow: when system uses more than reserved, subtract from workloads free
-              clamp_min(
-                (
-                  sum by (node) (container_memory_working_set_bytes{id="/system.slice"})
-                  +
-                  sum by (node) (container_memory_total_inactive_file_bytes{id="/system.slice"})
+            sum by (node) (
+              kube_node_status_allocatable{resource="memory"}
+              - on (node)
+              (
+                # Hot: workload working set (same as openshift_node_memory_bytes{scope="workloads", tier="0", temperature="hot"})
+                sum by (node) (container_memory_working_set_bytes{id="/kubepods.slice"})
+                +
+                # Warm: workload inactive file cache (same as openshift_node_memory_bytes{scope="workloads", tier="0", temperature="warm"})
+                sum by (node) (container_memory_total_inactive_file_bytes{id="/kubepods.slice"})
+                +
+                # System overflow: when system uses more than reserved, subtract from workloads free
+                clamp_min(
+                  (
+                    sum by (node) (container_memory_working_set_bytes{id="/system.slice"})
+                    +
+                    sum by (node) (container_memory_total_inactive_file_bytes{id="/system.slice"})
+                  )
+                  - on (node) group_left()
+                  (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}),
+                  0
                 )
-                - on (node) group_left()
-                (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}),
-                0
               )
             )
 
