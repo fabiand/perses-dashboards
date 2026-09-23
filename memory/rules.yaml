@@ -9,7 +9,7 @@ metadata:
     role: alert-rules
 spec:
   groups:
-    - name: cluster_operator_node_memory.rules
+    - name: cluster_operator_node_memory_base.rules
       rules:
         - record: openshift_node_memory_tier_info
           expr: |
@@ -52,19 +52,6 @@ spec:
         - record: openshift_node_memory_bytes
           labels:
             tier: "0"
-            scope: "system"
-            utilized: "false"
-            unit: bytes
-          expr: |
-            max by (node) (
-              (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
-              - on (node) group_right()
-              sum by (node) (openshift_node_memory_bytes{utilized="true", scope="system"})
-            )
-
-        - record: openshift_node_memory_bytes
-          labels:
-            tier: "0"
             scope: "workloads"
             utilized: "true"
             temperature: "hot"
@@ -100,6 +87,34 @@ spec:
               container_memory_swap{id="/kubepods.slice"}
             )
 
+    - name: cluster_operator_node_memory_derived.rules
+      rules:
+        - record: openshift_node_memory_bytes
+          labels:
+            tier: "0"
+            scope: "system"
+            utilized: "false"
+            unit: bytes
+          expr: |
+            max by (node) (
+              (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
+              - on (node) group_right()
+              sum by (node) (openshift_node_memory_bytes{utilized="true", scope="system"})
+            )
+
+        - record: openshift_node_memory_bytes
+          labels:
+            tier: "0"
+            scope: "workloads"
+            utilized: "false"
+            unit: bytes
+          expr: |
+            max by (node) (
+              kube_node_status_allocatable{resource="memory"}
+              - on (node)
+              sum by (node) (openshift_node_memory_bytes{utilized="true", scope="workloads", tier="0"})
+            )
+
         - record: openshift_node_memory_bytes
           labels:
             tier: "2"
@@ -114,19 +129,6 @@ spec:
               )
               - on (node)
               openshift_node_memory_bytes{tier="2", scope="workloads", utilized="true"}
-            )
-
-        - record: openshift_node_memory_bytes
-          labels:
-            tier: "0"
-            scope: "workloads"
-            utilized: "false"
-            unit: bytes
-          expr: |
-            max by (node) (
-              kube_node_status_allocatable{resource="memory"}
-              - on (node)
-              sum by (node) (openshift_node_memory_bytes{utilized="true", scope="workloads", tier="0"})
             )
 
         - record: openshift_node_memory_utilization_ratio
