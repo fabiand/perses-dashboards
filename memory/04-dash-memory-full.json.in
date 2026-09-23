@@ -293,8 +293,8 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{scope=\"system\", utilized=\"true\"} * on (node) group_left(role) kube_node_role{role=\"$role\", node=~\"$node\"})",
-                    "seriesNameFormat": "System"
+                    "query": "sum(openshift_node_memory_bytes{scope=\"system\"} * on (node) group_left(role) kube_node_role{role=\"$role\", node=~\"$node\"})",
+                    "seriesNameFormat": "System (reserved)"
                   }
                 }
               }
