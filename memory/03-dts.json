@@ -44,7 +44,7 @@
                 }
               ],
               "secret": "default",
-              "url": "http://localhost:9090"
+              "url": "https://prometheus-k8s-openshift-monitoring.apps.cnv2.engineering.redhat.com"
             }
           }
         }
