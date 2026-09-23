@@ -817,6 +817,18 @@
                   }
                 }
               }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "count(up{job=\"kubelet\",metrics_path=\"/metrics/cadvisor\"} == 0) > 0",
+                    "seriesNameFormat": "Kubelet cAdvisor Down"
+                  }
+                }
+              }
             }
           ],
           "links": [
