@@ -835,12 +835,12 @@
           ],
           "links": [
             {
-              "name": "Red Hat Customer Portal Article",
+              "name": "KCS SystemMemoryExceedsReservation",
               "url": "https://access.redhat.com/solutions/5788171",
               "targetBlank": true
             },
             {
-              "name": "Upstream OpenShift Alert Runbook",
+              "name": "Runbook SystemMemoryExceedsReservation",
               "url": "https://github.com/openshift/runbooks/blob/master/alerts/machine-config-operator/SystemMemoryExceedsReservation.md",
               "tooltip": "Runbook"
             }
