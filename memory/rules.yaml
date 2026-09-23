@@ -59,7 +59,7 @@ spec:
             max by (node) (
               (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
               - on (node) group_right()
-              openshift_node_memory_bytes{temperature="hot", scope="system"}
+              sum by (node) (openshift_node_memory_bytes{utilized="true", scope="system"})
             )
 
         - record: openshift_node_memory_bytes
@@ -126,7 +126,7 @@ spec:
             max by (node) (
               kube_node_status_allocatable{resource="memory"}
               - on (node)
-              openshift_node_memory_bytes{temperature="hot", scope="workloads"}
+              sum by (node) (openshift_node_memory_bytes{utilized="true", scope="workloads", tier="0"})
             )
 
         - record: openshift_node_memory_utilization_ratio
