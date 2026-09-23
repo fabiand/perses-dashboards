@@ -99,7 +99,13 @@ spec:
             max by (node) (
               (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
               - on (node) group_right()
-              sum by (node) (openshift_node_memory_bytes{utilized="true", scope="system"})
+              (
+                # Hot: system working set (same as openshift_node_memory_bytes{scope="system", temperature="hot"})
+                sum by (node) (container_memory_working_set_bytes{id="/system.slice"})
+                +
+                # Warm: system inactive file cache (same as openshift_node_memory_bytes{scope="system", temperature="warm"})
+                sum by (node) (container_memory_total_inactive_file_bytes{id="/system.slice"})
+              )
             )
 
         - record: openshift_node_memory_bytes
@@ -112,7 +118,13 @@ spec:
             max by (node) (
               kube_node_status_allocatable{resource="memory"}
               - on (node)
-              sum by (node) (openshift_node_memory_bytes{utilized="true", scope="workloads", tier="0"})
+              (
+                # Hot: workload working set (same as openshift_node_memory_bytes{scope="workloads", tier="0", temperature="hot"})
+                sum by (node) (container_memory_working_set_bytes{id="/kubepods.slice"})
+                +
+                # Warm: workload inactive file cache (same as openshift_node_memory_bytes{scope="workloads", tier="0", temperature="warm"})
+                sum by (node) (container_memory_total_inactive_file_bytes{id="/kubepods.slice"})
+              )
             )
 
         - record: openshift_node_memory_bytes
@@ -128,7 +140,8 @@ spec:
                 "node", "$1", "instance", "(.+)"
               )
               - on (node)
-              openshift_node_memory_bytes{tier="2", scope="workloads", utilized="true"}
+              # Swap used (same as openshift_node_memory_bytes{tier="2", scope="workloads", utilized="true"})
+              sum by (node) (container_memory_swap{id="/kubepods.slice"})
             )
 
         - record: openshift_node_memory_utilization_ratio
