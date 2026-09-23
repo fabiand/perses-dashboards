@@ -420,7 +420,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{utilized=\"true\", node=~\"$node\"} ) / sum(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"})",
+                    "query": "openshift_cluster_memory_utilization_ratio",
                     "seriesNameFormat": "Physical Memory utilization"
                   }
                 }
@@ -556,7 +556,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(sum(openshift_node_memory_bytes{temperature=\"hot\", node=~\"$node\"} \n)\n-\nx_kube_node_status_system_reserved_memory_by_role\n\n-\nsum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"})\n\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"}))\n/\n\n(\nsum(x_kube_node_status_allocatable_memory_by_role)\n)",
+                    "query": "openshift_cluster_memory_overcommit_ratio",
                     "seriesNameFormat": "Virtual Memory committment"
                   }
                 }
