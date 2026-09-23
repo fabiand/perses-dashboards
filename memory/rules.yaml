@@ -173,8 +173,27 @@ spec:
             unit: ratio
           expr: |
             sum by (node) (openshift_vm_memory_virtual_committed_bytes)
-            /
+            / on (node)
             kube_node_status_allocatable{resource="memory"}
+
+        - record: openshift_cluster_memory_utilization_ratio
+          labels:
+            tier: "1"
+            scope: "workloads"
+            unit: ratio
+          expr: |
+            sum(openshift_node_memory_bytes{utilized="true", scope="workloads"})
+            /
+            sum(kube_node_status_allocatable{resource="memory"})
+
+        - record: openshift_cluster_memory_overcommit_ratio
+          labels:
+            scope: "workloads"
+            unit: ratio
+          expr: |
+            sum(openshift_vm_memory_virtual_committed_bytes)
+            /
+            sum(kube_node_status_allocatable{resource="memory"})
 
     #
     # Tier 2 Rules
