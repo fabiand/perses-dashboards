@@ -179,7 +179,6 @@ spec:
 
         - record: openshift_cluster_memory_utilization_ratio
           labels:
-            tier: "1"
             scope: "workloads"
             unit: ratio
           expr: |
@@ -189,7 +188,6 @@ spec:
 
         - record: openshift_cluster_memory_overcommit_ratio
           labels:
-            tier: "1"
             scope: "workloads"
             unit: ratio
           expr: |
