@@ -33,18 +33,19 @@ apply-prom:
 	# Create a Role with PrometheusRule permissions in current namespace
 	oc get role prometheus-rule-creator || oc create role prometheus-rule-creator \
 	  --verb=create,get,list,watch,update,patch,delete \
-	  --resource=prometheusrules.monitoring.coreos.com \
+	  --resource=prometheusrules.monitoring.coreos.com
 	
 	# Bind the role to your user in current namespace
-	oc get rolebinding prometheus-rule-creator-$(oc whoami) || oc create rolebinding prometheus-rule-creator-binding \
+	oc get rolebinding prometheus-rule-creator || oc create rolebinding prometheus-rule-creator \
 	  --role=prometheus-rule-creator \
-	  --user=$(oc whoami) \
+	  --user=$$(oc whoami) \
 	
 	kubectl apply -f rules.yaml
 
 apply-perses: FORCE $(jsons)
 	percli apply -f 01-project.json
 	percli project $(PROJECT)
+	jq --arg token "$$(oc whoami -t)" '.[0].spec.authorization.credentials = $$token' 02-secret.json | percli apply -f -
 	for F in $(jsons) ; do ( set -x ; percli apply -f $$F ; ) ; done
 
 docs: 04-dash-memory-summary.json.in 04-dash-memory-details.json.in
