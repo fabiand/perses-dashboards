@@ -769,7 +769,7 @@
           ]
         }
       },
-      "NodeSystemExceedsReservationAlertNow": {
+      "IssueAlertHistory": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -801,7 +801,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "count(ALERTS{alertname=\"SystemMemoryExceedsReservation\"}) OR vector(0)\n/\ncount(ALERTS{alertname=\"Watchdog\"})",
-                    "seriesNameFormat": "System exceeding reservation"
+                    "seriesNameFormat": "Issues"
                   }
                 }
               }
@@ -1491,7 +1491,7 @@
               "width": 7,
               "height": 4,
               "content": {
-                "$ref": "#/spec/panels/NodeSystemExceedsReservationAlertNow"
+                "$ref": "#/spec/panels/IssueAlertHistory"
               }
             },
             {
@@ -1692,7 +1692,7 @@
               "width": 2,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/NodeSystemExceedsReservationAlertNow"
+                "$ref": "#/spec/panels/IssueAlertHistory"
               }
             },
             {
