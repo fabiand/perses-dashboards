@@ -83,6 +83,14 @@
                     "colorMode": "fixed",
                     "colorValue": "#EE6C6C",
                     "queryIndex": 3
+                  },
+                  {
+                    "queryIndex": 4,
+                    "lineStyle": "dotted",
+                    "format": {
+                      "unit": "milliseconds"
+                    },
+                    "stack": false
                   }
                 ],
                 "visual": {
@@ -150,6 +158,18 @@
                     "spec": {
                       "query": "(\nsum(rate(kme_system_block_io_latency_seconds_bucket{le=\"+Inf\"}[1m]))\n- sum(rate(kme_system_block_io_latency_seconds_bucket{le=\"1.0\"}[1m]))\n) / sum (rate(kme_system_block_io_latency_seconds_count[1m]))",
                       "seriesNameFormat": "> 1s"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "avg(\n  avg by (instance) (\n    (\n      rate(node_disk_read_time_seconds_total{device!~\"loop.*|ram.*\"}[1m]) +\n      rate(node_disk_write_time_seconds_total{device!~\"loop.*|ram.*\"}[1m]) +\n      rate(node_disk_flush_requests_time_seconds_total{device!~\"loop.*|ram.*\"}[1m])\n    ) > 0\n    /\n    (\n      rate(node_disk_reads_completed_total{device!~\"loop.*|ram.*\"}[1m]) +\n      rate(node_disk_writes_completed_total{device!~\"loop.*|ram.*\"}[1m]) +\n      rate(node_disk_flush_requests_total{device!~\"loop.*|ram.*\"}[1m])\n    ) > 0\n  )\n)",
+                      "seriesNameFormat": "AVG"
                     }
                   }
                 }
