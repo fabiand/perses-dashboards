@@ -21,6 +21,16 @@ spec:
             tier: "0"
             technology: "dram"
             latency_hint: "~100ns"
+            addressable: "true"
+
+        - record: openshift:node:memory:tier:info
+          expr: |
+            up * 0 + 1  # Constant 1
+          labels:
+            tier: "1"
+            technology: "cxl"
+            latency_hint: "~200ns"
+            addressable: "true"
 
         - record: openshift:node:memory:tier:info
           expr: |
@@ -29,6 +39,7 @@ spec:
             tier: "2"
             technology: "swap"
             latency_hint: "~ms"
+            addressable: "false"
 
     #
     # Tier 0 Rules
