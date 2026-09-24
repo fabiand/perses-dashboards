@@ -335,7 +335,7 @@
               {
                 "x": 0,
                 "y": 0,
-                "width": 22,
+                "width": 24,
                 "height": 13,
                 "content": {
                   "$ref": "#/spec/panels/859fb288b6a546a0bea31d734264727c"

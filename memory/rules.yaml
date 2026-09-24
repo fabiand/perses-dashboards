@@ -31,9 +31,9 @@ spec:
             latency_hint: "~ms"
 
     #
-    # Tier 1 Rules
+    # Tier 0 Rules
     #
-    - name: cluster_operator_node_memory_tier1.rules
+    - name: cluster_operator_node_memory_tier0.rules
       rules:
         - record: openshift:node:memory:bytes
           labels:
