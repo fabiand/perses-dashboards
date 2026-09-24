@@ -1442,7 +1442,7 @@
         "kind": "Grid",
         "spec": {
           "display": {
-            "title": "Summary",
+            "title": "Instant Status",
             "collapse": {
               "open": true
             }
@@ -1451,25 +1451,34 @@
             {
               "x": 0,
               "y": 0,
-              "width": 10,
+              "width": 6,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/ClusterUtilizationNow"
               }
             },
             {
-              "x": 10,
+              "x": 6,
               "y": 0,
-              "width": 6,
+              "width": 5,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/ClusterVirtualCommitedNow"
               }
             },
             {
-              "x": 16,
+              "x": 11,
               "y": 0,
               "width": 6,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/NodePressureMaxNow"
+              }
+            },
+            {
+              "x": 17,
+              "y": 0,
+              "width": 5,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/VmVirtualCommitedNow"
@@ -1500,15 +1509,6 @@
               "height": 4,
               "content": {
                 "$ref": "#/spec/panels/IssueAlertHistory"
-              }
-            },
-            {
-              "x": 10,
-              "y": 14,
-              "width": 5,
-              "height": 7,
-              "content": {
-                "$ref": "#/spec/panels/NodePressureMaxNow"
               }
             },
             {
