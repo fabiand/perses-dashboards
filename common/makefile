@@ -13,20 +13,8 @@ run-dashboard:
 	podman -r run --name perses --rm --net=host persesdev/perses:latest
 	#-p 127.0.0.1:8080:8080  persesdev/perses:latest
 
-import:
-	make get-dashboards
-
-	test -f 01-*.json && mv *.json .trash/ || :
-
-get-dashboards:
-	jq -r .metadata.name *dash*.in
-	for DASH in $$(jq -r .metadata.name *dash*.in); \
-	do \
-	  echo $$DASH; \
-	  percli get -o json dash $$DASH \
-	  | jq '.[] | .metadata.project = "{{PROJECT}}"' \
-	  | jq 'del(.metadata.createdAt, .metadata.updatedAt, .metadata.version)' > 04-dash-$$DASH.json.in ; \
-	done
+dashboard-url:
+	@echo "http://localhost:8080/projects/$(PROJECT)/dashboards/$$(basename $$PWD)"
 
 apply: apply-prom apply-perses
 apply-prom:
@@ -45,18 +33,13 @@ apply-prom:
 apply-perses: FORCE $(jsons)
 	percli apply -f 01-project.json
 	percli project $(PROJECT)
-	jq --arg token "$$(oc whoami -t)" '.[0].spec.authorization.credentials = $$token' 02-secret.json | percli apply -f -
+	jq --arg token "$(TOKEN)" '.[0].spec.authorization.credentials = $$token' 02-secret.json.in | percli apply -f -
+	jq --arg url "$(URL)" '.[0].spec.plugin.spec.proxy.spec.url = $$url' 03-dts.json.in | percli apply -f -
 	for F in $(jsons) ; do ( set -x ; percli apply -f $$F ; ) ; done
 
 docs: 04-dash-memory-summary.json.in 04-dash-memory-details.json.in
 	cp documentation.md.in documentation.md
 	cat $< | jq -re '[ .spec.panels[].spec.display ] | sort_by(.name) | .[] | "### " + .name + "\n" + (.description // "None") + "\n"' >> documentation.md
-
-url:
-	@echo "http://localhost:8080/projects/$(PROJECT)/dashboards/$$(basename $$PWD)"
-
-clean: $(jsons)
-	rm -v $(jsons)
 
 FORCE:
 
