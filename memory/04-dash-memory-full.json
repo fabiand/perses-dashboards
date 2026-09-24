@@ -1469,16 +1469,16 @@
             {
               "x": 10,
               "y": 0,
-              "width": 6,
+              "width": 5,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/NodePressureMaxNow"
               }
             },
             {
-              "x": 16,
+              "x": 15,
               "y": 0,
-              "width": 4,
+              "width": 5,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/VmVirtualCommitedNow"
@@ -1487,7 +1487,7 @@
             {
               "x": 20,
               "y": 0,
-              "width": 2,
+              "width": 4,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/IssueAlertHistory"
@@ -1496,8 +1496,8 @@
             {
               "x": 0,
               "y": 7,
-              "width": 22,
-              "height": 7,
+              "width": 24,
+              "height": 9,
               "content": {
                 "$ref": "#/spec/panels/ClusterUtilizationHistorySummary"
               }
