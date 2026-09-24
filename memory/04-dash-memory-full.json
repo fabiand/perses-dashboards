@@ -778,23 +778,27 @@
             "description": "This panel provides the precentage of nodes where core system (hypervisor) components are utilizing more than reserved memory. This should not happen, and is specifically critical for clusters under load. Keep it green."
           },
           "plugin": {
-            "kind": "StatChart",
+            "kind": "TimeSeriesChart",
             "spec": {
-              "calculation": "last-number",
-              "format": {
-                "decimalPlaces": 0,
-                "unit": "decimal"
+              "legend": {
+                "position": "bottom"
               },
-              "sparkline": {},
-              "thresholds": {
-                "steps": [
-                  {
-                    "color": "#EE6C6C",
-                    "value": 1
-                  }
-                ]
+              "visual": {
+                "areaOpacity": 0,
+                "connectNulls": false,
+                "display": "line",
+                "lineWidth": 2,
+                "pointRadius": 0
               },
-              "legendMode": "on"
+              "yAxis": {
+                "format": {
+                  "unit": "decimal"
+                },
+                "min": 0,
+                "max": 1,
+                "label": "Issue Present",
+                "show": true
+              }
             }
           },
           "queries": [
@@ -804,7 +808,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "count(ALERTS{alertname=\"SystemMemoryExceedsReservation\"}) OR vector(0)\n/\ncount(ALERTS{alertname=\"Watchdog\"})",
+                    "query": "count(ALERTS{alertname=\"SystemMemoryExceedsReservation\"}) > 0",
                     "seriesNameFormat": "System exceeding reservation"
                   }
                 }
