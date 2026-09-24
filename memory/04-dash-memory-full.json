@@ -242,33 +242,39 @@
                 },
                 {
                   "colorMode": "fixed",
-                  "colorValue": "#EA4747",
-                  "queryIndex": 1
+                  "colorValue": "#B83232",
+                  "queryIndex": 1,
+                  "lineStyle": "dotted"
                 },
                 {
                   "colorMode": "fixed",
-                  "colorValue": "#FF9F1C",
+                  "colorValue": "#EA4747",
                   "queryIndex": 2
                 },
                 {
                   "colorMode": "fixed",
-                  "colorValue": "#59CC8D",
+                  "colorValue": "#FF9F1C",
                   "queryIndex": 3
                 },
                 {
                   "colorMode": "fixed",
-                  "colorValue": "#FF9F1C",
+                  "colorValue": "#59CC8D",
                   "queryIndex": 4
                 },
                 {
                   "colorMode": "fixed",
-                  "colorValue": "#59CC8D",
+                  "colorValue": "#FF9F1C",
                   "queryIndex": 5
                 },
                 {
                   "colorMode": "fixed",
+                  "colorValue": "#59CC8D",
+                  "queryIndex": 6
+                },
+                {
+                  "colorMode": "fixed",
                   "colorValue": "#6BB6FF",
-                  "queryIndex": 6,
+                  "queryIndex": 7,
                   "lineStyle": "dashed",
                   "stack": false,
                   "areaOpacity": 0
@@ -304,6 +310,18 @@
                   "spec": {
                     "query": "sum(openshift:node:memory:bytes{scope=\"system\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Tier 0 - System"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"0\", utilized=\"true\", usage=\"overflow\"} and on (node) kube_node_role{role=~\"$role\"}) > 0",
+                    "seriesNameFormat": "Tier 0 - System Overflow"
                   }
                 }
               }
