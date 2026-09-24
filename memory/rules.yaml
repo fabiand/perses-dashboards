@@ -84,29 +84,6 @@ spec:
             tier: "0"
             scope: "workloads"
             utilized: "true"
-            usage: "system-overflow"
-            unit: bytes
-          expr: |
-            clamp_min(
-              (
-                # System total usage
-                # Hot: system working set (same as openshift:node:memory:bytes{scope="system", temperature="hot"})
-                sum by (node) (container_memory_working_set_bytes{id="/system.slice"})
-                +
-                # Warm: system inactive file cache (same as openshift:node:memory:bytes{scope="system", temperature="warm"})
-                sum by (node) (container_memory_total_inactive_file_bytes{id="/system.slice"})
-              )
-              - on (node) group_left()
-              # System reserved amount
-              (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}),
-              0
-            )
-
-        - record: openshift:node:memory:bytes
-          labels:
-            tier: "0"
-            scope: "workloads"
-            utilized: "true"
             temperature: "hot"
             unit: bytes
           expr: |
