@@ -618,7 +618,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "decimalPlaces": 3,
+                "decimalPlaces": 1,
                 "unit": "decimal"
               },
               "max": 1,
@@ -646,7 +646,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "topk(1, (sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~\"$node\"}[1m]@end()))))",
-                    "seriesNameFormat": "instance"
+                    "seriesNameFormat": "{{instance}}"
                   }
                 }
               }
