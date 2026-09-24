@@ -187,7 +187,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{temperature=\"hot\", node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:node:memory:bytes{temperature=\"hot\", node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Utilization - Node memory utilization (with virt)"
                   }
                 }
@@ -199,7 +199,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{temperature=\"hot\", node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"}) - sum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:node:memory:bytes{temperature=\"hot\", node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"}) - sum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Utilization - Node memory utilization (without virt)"
                   }
                 }
@@ -301,7 +301,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{scope=\"system\"} and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:node:memory:bytes{scope=\"system\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Tier 0 - System"
                   }
                 }
@@ -313,7 +313,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{scope=\"workloads\", tier=\"0\", temperature=\"hot\", utilized=\"true\"} and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"0\", temperature=\"hot\", utilized=\"true\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Tier 0 - Hot"
                   }
                 }
@@ -325,7 +325,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{scope=\"workloads\", tier=\"0\", temperature=\"warm\", utilized=\"true\"} and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"0\", temperature=\"warm\", utilized=\"true\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Tier 0 - Warm"
                   }
                 }
@@ -337,7 +337,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{scope=\"workloads\", tier=\"0\", utilized=\"false\"} and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"0\", utilized=\"false\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Tier 0 - Free"
                   }
                 }
@@ -349,7 +349,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{scope=\"workloads\", tier=\"2\", temperature=\"warm\", utilized=\"true\"} and on (node) kube_node_role{role=~\"$role\"}) > 0",
+                    "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"2\", temperature=\"warm\", utilized=\"true\"} and on (node) kube_node_role{role=~\"$role\"}) > 0",
                     "seriesNameFormat": "Tier 2 - Warm (Swap used)"
                   }
                 }
@@ -361,7 +361,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{scope=\"workloads\", tier=\"2\", utilized=\"false\"} and on (node) kube_node_role{role=~\"$role\"}) > 0",
+                    "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"2\", utilized=\"false\"} and on (node) kube_node_role{role=~\"$role\"}) > 0",
                     "seriesNameFormat": "Tier 2 - Free (Swap free)"
                   }
                 }
@@ -373,7 +373,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_vm_memory_virtual_committed_bytes and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:vm:memory:virtual_committed:bytes and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Committed"
                   }
                 }
@@ -420,7 +420,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{utilized=\"true\", scope=\"workloads\"} and on (node) kube_node_role{role=~\"$role\"}) / sum(kube_node_status_allocatable{resource=\"memory\"} and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:node:memory:bytes{utilized=\"true\", scope=\"workloads\"} and on (node) kube_node_role{role=~\"$role\"}) / sum(kube_node_status_allocatable{resource=\"memory\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Physical Memory utilization"
                   }
                 }
@@ -500,7 +500,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{temperature=\"hot\", node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})\n-\nx_kube_node_status_system_reserved_memory_by_role\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:node:memory:bytes{temperature=\"hot\", node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})\n-\nx_kube_node_status_system_reserved_memory_by_role\n+\nsum(kubevirt_vmi_memory_domain_bytes{node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Plan - VM assigned virtual memory"
                   }
                 }
@@ -512,7 +512,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_node_memory_bytes{temperature=\"hot\", node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})\n-\nsum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:node:memory:bytes{temperature=\"hot\", node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})\n-\nsum(kubevirt_vmi_memory_used_bytes{node=~\"$node\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Utilization - Node memory utilization (without virt)"
                   }
                 }
@@ -556,7 +556,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift_vm_memory_virtual_committed_bytes and on (node) kube_node_role{role=~\"$role\"}) / sum(kube_node_status_allocatable{resource=\"memory\"} and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "sum(openshift:vm:memory:virtual_committed:bytes and on (node) kube_node_role{role=~\"$role\"}) / sum(kube_node_status_allocatable{resource=\"memory\"} and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Virtual Memory committment"
                   }
                 }
@@ -998,7 +998,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum by (node) (openshift_node_memory_bytes{scope=\"workloads\", temperature=\"hot\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"}) / on (node) (kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})",
+                    "query": "sum by (node) (openshift:node:memory:bytes{scope=\"workloads\", temperature=\"hot\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"}) / on (node) (kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})",
                     "seriesNameFormat": "{{node}}"
                   }
                 }
@@ -1043,7 +1043,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "max(sum by (node) (openshift_node_memory_bytes{scope=\"workloads\", temperature=\"hot\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"}) / on (node) (kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"}))",
+                    "query": "max(sum by (node) (openshift:node:memory:bytes{scope=\"workloads\", temperature=\"hot\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"}) / on (node) (kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"}))",
                     "seriesNameFormat": "Max"
                   }
                 }
@@ -1089,7 +1089,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "min(sum by (node) (openshift_node_memory_bytes{scope=\"workloads\", temperature=\"hot\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"}) / on (node) (kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"}))",
+                    "query": "min(sum by (node) (openshift:node:memory:bytes{scope=\"workloads\", temperature=\"hot\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"}) / on (node) (kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"}))",
                     "seriesNameFormat": "Min"
                   }
                 }
@@ -1161,7 +1161,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "min((sum by (node) (openshift_node_memory_bytes{scope=\"workloads\", temperature=\"hot\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"}) + sum by (node) (kubevirt_vmi_memory_domain_bytes)) / on (node) (kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"}))",
+                    "query": "min((sum by (node) (openshift:node:memory:bytes{scope=\"workloads\", temperature=\"hot\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"}) + sum by (node) (kubevirt_vmi_memory_domain_bytes)) / on (node) (kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"}))",
                     "seriesNameFormat": "{{node}}"
                   }
                 }
@@ -1173,7 +1173,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "max((sum by (node) (openshift_node_memory_bytes{scope=\"workloads\", temperature=\"hot\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"}) + sum by (node) (kubevirt_vmi_memory_domain_bytes)) / on (node) (kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"}))",
+                    "query": "max((sum by (node) (openshift:node:memory:bytes{scope=\"workloads\", temperature=\"hot\"} * on (node) kube_node_role{role=~\"$role\", node=~\"$node\"}) + sum by (node) (kubevirt_vmi_memory_domain_bytes)) / on (node) (kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"}))",
                     "seriesNameFormat": "{{node}}"
                   }
                 }
@@ -1286,7 +1286,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "(\n(\nsum by (node) (openshift_node_memory_bytes{utilized=\"true\", node=~\"$node\"} )\n- on (node)\n(\nsum by (node) (x_kube_node_status_capacity_memory_by_role)\n-\nsum by (node) (x_kube_node_status_allocatable_memory_by_role)\n)\n)\n+\nsum by (node) (0-kubevirt_vmi_memory_used_bytes + kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})",
+                    "query": "(\n(\nsum by (node) (openshift:node:memory:bytes{utilized=\"true\", node=~\"$node\"} )\n- on (node)\n(\nsum by (node) (x_kube_node_status_capacity_memory_by_role)\n-\nsum by (node) (x_kube_node_status_allocatable_memory_by_role)\n)\n)\n+\nsum by (node) (0-kubevirt_vmi_memory_used_bytes + kubevirt_vmi_memory_domain_bytes)\n)\n\n\n/\n\n(kube_node_status_allocatable{resource=\"memory\"} * on (node) kube_node_role{role=\"worker\"})",
                     "seriesNameFormat": "node - Virtual Memory committment"
                   }
                 }
@@ -1427,7 +1427,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "avg(openshift_vm_memory_overcommit_ratio and on (node) kube_node_role{role=~\"$role\"})",
+                    "query": "avg(openshift:vm:memory:overcommit:ratio and on (node) kube_node_role{role=~\"$role\"})",
                     "seriesNameFormat": "Average VM overcommit ratio"
                   }
                 }
