@@ -161,7 +161,7 @@ spec:
 
         - record: openshift:node:memory:utilization:ratio
           labels:
-            tier: "1"
+            tier: "0"
             scope: "workloads"
             unit: ratio
           expr: |
@@ -171,7 +171,6 @@ spec:
 
         - record: openshift:node:memory:overcommit:ratio
           labels:
-            tier: "1"
             scope: "workloads"
             unit: ratio
           expr: |
@@ -190,6 +189,7 @@ spec:
 
         - record: openshift:cluster:memory:utilization:ratio
           labels:
+            tier: "0"
             scope: "workloads"
             unit: ratio
           expr: |
