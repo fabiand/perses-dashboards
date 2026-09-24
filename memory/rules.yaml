@@ -179,6 +179,15 @@ spec:
             / on (node)
             kube_node_status_allocatable{resource="memory"}
 
+        - record: openshift:node:memory:pressure:ratio
+          labels:
+            unit: ratio
+          expr: |
+            label_replace(
+              rate(node_pressure_memory_waiting_seconds_total[5m]),
+              "node", "$1", "instance", "(.+)"
+            )
+
         - record: openshift:cluster:memory:utilization:ratio
           labels:
             scope: "workloads"
