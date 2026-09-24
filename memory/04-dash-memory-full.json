@@ -609,7 +609,7 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Node PSI - max",
+            "name": "Node Pressure - max",
             "description": "Memory PSI (pressure Stall Informations)"
           },
           "plugin": {
@@ -1482,24 +1482,6 @@
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/VmVirtualCommitedNow"
-              }
-            },
-            {
-              "x": 0,
-              "y": 14,
-              "width": 5,
-              "height": 7,
-              "content": {
-                "$ref": "#/spec/panels/NodeUtilizationMinNow"
-              }
-            },
-            {
-              "x": 5,
-              "y": 14,
-              "width": 5,
-              "height": 7,
-              "content": {
-                "$ref": "#/spec/panels/NodeUtilizationMaxNow"
               }
             },
             {
