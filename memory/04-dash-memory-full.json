@@ -1451,28 +1451,37 @@
             {
               "x": 0,
               "y": 0,
-              "width": 6,
+              "width": 4,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/ClusterUtilizationNow"
               }
             },
             {
-              "x": 6,
+              "x": 4,
               "y": 0,
-              "width": 5,
+              "width": 4,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/ClusterVirtualCommitedNow"
               }
             },
             {
-              "x": 11,
+              "x": 8,
               "y": 0,
-              "width": 6,
+              "width": 5,
               "height": 7,
               "content": {
                 "$ref": "#/spec/panels/NodePressureMaxNow"
+              }
+            },
+            {
+              "x": 13,
+              "y": 0,
+              "width": 4,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/VmVirtualCommitedNow"
               }
             },
             {
@@ -1480,15 +1489,6 @@
               "y": 0,
               "width": 5,
               "height": 7,
-              "content": {
-                "$ref": "#/spec/panels/VmVirtualCommitedNow"
-              }
-            },
-            {
-              "x": 15,
-              "y": 14,
-              "width": 7,
-              "height": 4,
               "content": {
                 "$ref": "#/spec/panels/IssueAlertHistory"
               }
