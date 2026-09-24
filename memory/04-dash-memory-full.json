@@ -795,7 +795,8 @@
                     "value": 1
                   }
                 ]
-              }
+              },
+              "legendMode": "on"
             }
           },
           "queries": [
@@ -805,7 +806,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "count(ALERTS{alertname=\"SystemMemoryExceedsReservation\"})",
+                    "query": "count(ALERTS{alertname=\"SystemMemoryExceedsReservation\"}) > 0",
                     "seriesNameFormat": "System exceeding reservation"
                   }
                 }
@@ -817,7 +818,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "count(ALERTS{alertname=\"TargetDown\", job=\"kube-state-metrics\"})",
+                    "query": "count(ALERTS{alertname=\"TargetDown\", job=\"kube-state-metrics\"}) > 0",
                     "seriesNameFormat": "Invalid metrics (scrape target down)"
                   }
                 }
@@ -829,7 +830,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "count(up{job=\"kubelet\",metrics_path=\"/metrics/cadvisor\"} == 0)",
+                    "query": "count(up{job=\"kubelet\",metrics_path=\"/metrics/cadvisor\"} == 0) > 0",
                     "seriesNameFormat": "Invalid metrics (kubelet cAdvisor down)"
                   }
                 }
@@ -841,7 +842,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "count(node_memory_MemTotal_bytes) - count(sum by (node) (openshift:node:memory:bytes))",
+                    "query": "(count(node_memory_MemTotal_bytes) - count(sum by (node) (openshift:node:memory:bytes))) > 0",
                     "seriesNameFormat": "Missing node series"
                   }
                 }
@@ -1511,7 +1512,7 @@
               "x": 0,
               "y": 15,
               "width": 24,
-              "height": 6,
+              "height": 4,
               "content": {
                 "$ref": "#/spec/panels/IssueAlertHistory"
               }
