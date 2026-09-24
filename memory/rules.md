@@ -67,17 +67,23 @@ openshift:node:memory:bytes{scope="workloads", tier="2"}
 
 #### System Overflow Accounting
 
-System can consume more memory than reserved. System free tracks only the reserved portion - it shows how much is available within the reservation and bottoms out at 0. Any usage beyond reservation is borrowed from workloads space:
+System can consume more memory than reserved. When this happens:
 
-- System free cannot go negative (reflects only the reserved portion)
-- Overflow is tracked separately on the workloads side (where it's borrowed from)
-- This preserves the accounting invariant
+- **System free goes negative** - showing how much beyond reservation is being used
+- **Overflow is exposed as a separate series** - making over-subscription visible
+- **Overflow is also subtracted from workloads free** - reflecting reduced available space
+- This preserves the accounting invariant: sum of all series equals capacity
+- **Scope sums remain stable**: system scope always sums to reservation, workloads scope always sums to allocatable
 
 ##### Example
 
 ```promql
-# System overflow amount
-openshift:node:memory:bytes{scope="workloads", usage="system-overflow"}
+# System overflow amount (memory borrowed from workloads)
+openshift:node:memory:bytes{scope="workloads", utilized="true", usage="overflow"}
+
+# System free memory (can be negative when over-subscribed)
+openshift:node:memory:bytes{scope="system", utilized="false"}
+# When negative: system is using (reservation + abs(free)) bytes total
 ```
 
 ### Utilization
@@ -171,7 +177,7 @@ openshift:vm:memory:overcommit:ratio
 - **scope**: `system`, `workloads`
 - **utilized**: `true` (used), `false` (free)
 - **temperature**: `hot` (working_set), `warm` (inactive_file) - page access frequency
-- **usage**: `system-overflow` (system borrowing from workloads)
+- **usage**: `overflow` (system memory borrowed from workloads space)
 
 ## Query Patterns
 
@@ -227,16 +233,19 @@ sum(openshift:node:memory:bytes{scope="system", utilized="true"})
 sum(openshift:node:memory:bytes{scope="workloads", utilized="true"})
 ```
 
-**Why**: Identify if system or workloads are consuming memory. Helps detect system overflow scenarios.
+**Why**: Identify if system or workloads are consuming memory.
 
-**Use-case**: Detect system overflow.
+**Use-case**: Detect system overflow and over-subscription.
 
 ```promql
-# Nodes where system exceeds reservation
-openshift:node:memory:bytes{scope="workloads", utilized="true", usage="system-overflow"} > 0
+# Nodes where system exceeds reservation (overflow > 0)
+openshift:node:memory:bytes{scope="workloads", utilized="true", usage="overflow"} > 0
+
+# Nodes with negative system free (same information, different view)
+openshift:node:memory:bytes{scope="system", utilized="false"} < 0
 ```
 
-**Why**: Alert when system components borrow from workloads space. This triggers `SystemMemoryExceedsReservation` alert.
+**Why**: Alert when system components borrow from workloads space. This triggers `SystemMemoryExceedsReservation` alert. The overflow series and negative system_free show the same condition from different perspectives.
 
 ### 4. Combine dimensions
 
@@ -266,6 +275,6 @@ openshift:cluster:memory:overcommit:ratio
 
 ## Important Notes
 
-- **Recording rules**: Recording rules must not reference other recording rules - this leads to inconsistent data. Always use base metrics directly.
+- **Recording rules and data lag**: Recording rules can reference other recording rules, but this creates time lag between when base metrics update and when dependent rules evaluate. To avoid inconsistencies, complex rules expand other recording rules inline (using base metrics directly). Comments mark these expansions with "same as openshift:..." to document which recording rule is being inlined.
 - **Role filtering**: Dashboard queries use `and on (node) kube_node_role{role=~"$role"}` for role filtering. Recording rules don't pre-filter by role (dynamic dashboard variable).
 - **Cluster ratios**: Can't average per-node ratios. Must compute `sum(numerator) / sum(denominator)` for capacity-weighted cluster-wide ratios.
