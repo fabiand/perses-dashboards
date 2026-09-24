@@ -1,7 +1,6 @@
 # 	vim: noexpandtab:
 
-sources := $(wildcard *.json.in)
-jsons := $(patsubst %.json.in,%.json,$(sources))
+jsons := $(wildcard *.json *.json.in)
 
 #URL=https://prometheus-k8s-openshift-monitoring.apps.cnv2.engineering.redhat.com
 PROJECT := openshift-cnv
@@ -35,7 +34,7 @@ apply-perses: FORCE $(jsons)
 	percli project $(PROJECT)
 	jq --arg token "$(TOKEN)" '.[0].spec.authorization.credentials = $$token' 02-secret.json.in | percli apply -f -
 	jq --arg url "$(URL)" '.[0].spec.plugin.spec.proxy.spec.url = $$url' 03-dts.json.in | percli apply -f -
-	for F in $(jsons) ; do ( set -x ; percli apply -f $$F ; ) ; done
+	percli apply -f 04-dash-memory-full.json
 
 docs: 04-dash-memory-summary.json.in 04-dash-memory-details.json.in
 	cp documentation.md.in documentation.md
@@ -43,4 +42,4 @@ docs: 04-dash-memory-summary.json.in 04-dash-memory-details.json.in
 
 FORCE:
 
-.PHONY: FORCE import apply $(sources)
+.PHONY: FORCE import apply $(jsons)
