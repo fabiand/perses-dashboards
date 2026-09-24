@@ -237,7 +237,8 @@
                 {
                   "colorMode": "fixed",
                   "colorValue": "#B83232",
-                  "queryIndex": 0
+                  "queryIndex": 0,
+                  "lineStyle": "dotted"
                 },
                 {
                   "colorMode": "fixed",
@@ -266,7 +267,7 @@
                 },
                 {
                   "colorMode": "fixed",
-                  "colorValue": "#FFCC00",
+                  "colorValue": "#6BB6FF",
                   "queryIndex": 6,
                   "lineStyle": "dashed",
                   "stack": false,
