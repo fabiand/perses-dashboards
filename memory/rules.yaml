@@ -66,16 +66,37 @@ spec:
             utilized: "false"
             unit: bytes
           expr: |
+            (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
+
+            - on (node)
+            # Hot: system working set (same as openshift:node:memory:bytes{scope="system", temperature="hot"})
+            sum by (node) (container_memory_working_set_bytes{id="/system.slice"})
+
+            - on (node)
+            # Warm: system inactive file cache (same as openshift:node:memory:bytes{scope="system", temperature="warm"})
+            sum by (node) (container_memory_total_inactive_file_bytes{id="/system.slice"})
+
+        - record: openshift:node:memory:bytes
+          labels:
+            tier: "0"
+            scope: "workloads"
+            utilized: "true"
+            usage: "overflow"
+            unit: bytes
+          expr: |
             clamp_min(
-              (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
-              - on (node)
-              (
-                # Hot: system working set (same as openshift:node:memory:bytes{scope="system", temperature="hot"})
-                sum by (node) (container_memory_working_set_bytes{id="/system.slice"})
-                +
-                # Warm: system inactive file cache (same as openshift:node:memory:bytes{scope="system", temperature="warm"})
-                sum by (node) (container_memory_total_inactive_file_bytes{id="/system.slice"})
-              ),
+              # System total usage: hot + warm
+
+              # Hot: system working set (same as openshift:node:memory:bytes{scope="system", temperature="hot"})
+              sum by (node) (container_memory_working_set_bytes{id="/system.slice"})
+
+              + on (node)
+              # Warm: system inactive file cache (same as openshift:node:memory:bytes{scope="system", temperature="warm"})
+              sum by (node) (container_memory_total_inactive_file_bytes{id="/system.slice"})
+
+              - on (node) group_left()
+              # System reserved amount
+              (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}),
               0
             )
 
@@ -112,28 +133,27 @@ spec:
             utilized: "false"
             unit: bytes
           expr: |
-            sum by (node) (
-              kube_node_status_allocatable{resource="memory"}
-              - on (node)
-              (
-                # Hot: workload working set (same as openshift:node:memory:bytes{scope="workloads", tier="0", temperature="hot"})
-                sum by (node) (container_memory_working_set_bytes{id="/kubepods.slice"})
-                +
-                # Warm: workload inactive file cache (same as openshift:node:memory:bytes{scope="workloads", tier="0", temperature="warm"})
-                sum by (node) (container_memory_total_inactive_file_bytes{id="/kubepods.slice"})
-                +
-                # System overflow: when system uses more than reserved, subtract from workloads free
-                clamp_min(
-                  (
-                    sum by (node) (container_memory_working_set_bytes{id="/system.slice"})
-                    +
-                    sum by (node) (container_memory_total_inactive_file_bytes{id="/system.slice"})
-                  )
-                  - on (node) group_left()
-                  (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}),
-                  0
-                )
-              )
+            kube_node_status_allocatable{resource="memory"}
+
+            - on (node)
+            # Hot: workload working set (same as openshift:node:memory:bytes{scope="workloads", tier="0", temperature="hot"})
+            sum by (node) (container_memory_working_set_bytes{id="/kubepods.slice"})
+
+            - on (node)
+            # Warm: workload inactive file cache (same as openshift:node:memory:bytes{scope="workloads", tier="0", temperature="warm"})
+            sum by (node) (container_memory_total_inactive_file_bytes{id="/kubepods.slice"})
+
+            - on (node)
+            # System overflow: when system uses more than reserved, subtract from workloads free
+            clamp_min(
+              sum by (node) (container_memory_working_set_bytes{id="/system.slice"})
+
+              + on (node)
+              sum by (node) (container_memory_total_inactive_file_bytes{id="/system.slice"})
+
+              - on (node) group_left()
+              (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}),
+              0
             )
 
         - record: openshift:node:memory:utilization:ratio
@@ -142,7 +162,9 @@ spec:
             scope: "workloads"
             unit: ratio
           expr: |
+            # Workloads memory in use: hot + warm + overflow (same as openshift:node:memory:bytes{tier="0", utilized="true", scope="workloads"})
             sum by (node) (openshift:node:memory:bytes{utilized="true", scope="workloads"})
+
             / on (node)
             kube_node_status_allocatable{resource="memory"}
 
@@ -151,7 +173,9 @@ spec:
             scope: "workloads"
             unit: ratio
           expr: |
+            # VM virtual memory committed (same as openshift:vm:memory:virtual_committed:bytes)
             sum by (node) (openshift:vm:memory:virtual_committed:bytes)
+
             / on (node)
             kube_node_status_allocatable{resource="memory"}
 
@@ -170,7 +194,10 @@ spec:
             scope: "workloads"
             unit: ratio
           expr: |
+
+            # Workloads memory in use: hot + warm + overflow (same as openshift:node:memory:bytes{tier="0", utilized="true", scope="workloads"})
             sum(openshift:node:memory:bytes{utilized="true", scope="workloads"})
+
             /
             sum(kube_node_status_allocatable{resource="memory"})
 
@@ -179,7 +206,10 @@ spec:
             scope: "workloads"
             unit: ratio
           expr: |
+
+            # VM virtual memory committed (same as openshift:vm:memory:virtual_committed:bytes)
             sum(openshift:vm:memory:virtual_committed:bytes)
+
             /
             sum(kube_node_status_allocatable{resource="memory"})
 
@@ -210,15 +240,14 @@ spec:
             utilized: "false"
             unit: bytes
           expr: |
-            sum by (node) (
-              label_replace(
-                node_memory_SwapTotal_bytes,
-                "node", "$1", "instance", "(.+)"
-              )
-              - on (node)
-              # Swap used (same as openshift:node:memory:bytes{tier="2", scope="workloads", utilized="true"})
-              sum by (node) (container_memory_swap{id="/kubepods.slice"})
+            label_replace(
+              node_memory_SwapTotal_bytes,
+              "node", "$1", "instance", "(.+)"
             )
+
+            - on (node)
+            # Swap used (same as openshift:node:memory:bytes{tier="2", scope="workloads", utilized="true"})
+            sum by (node) (container_memory_swap{id="/kubepods.slice"})
 
     #
     #
@@ -273,7 +302,9 @@ spec:
           expr: |
             max by (name, namespace, node) (
               openshift:vm:memory:requested:bytes
+
               - on (name, namespace, node)
+              # VM memory in use: hot + warm (same as openshift:vm:memory:bytes{tier="0", utilized="true"})
               sum by (name, namespace, node) (openshift:vm:memory:bytes{utilized="true"})
             )
 
@@ -327,8 +358,13 @@ spec:
             unit: ratio
           expr: |
             max by (name, namespace, node) (
+
+              # VM memory in use: hot + warm (same as openshift:vm:memory:bytes{utilized="true"})
               sum by (name, namespace, node) (openshift:vm:memory:bytes{utilized="true"})
+
               / on (name, namespace, node)
+
+              # VM memory requested (same as openshift:vm:memory:requested:bytes)
               openshift:vm:memory:requested:bytes
             )
 
@@ -337,8 +373,13 @@ spec:
             unit: ratio
           expr: |
             max by (name, namespace, node) (
+
+              # VM virtual memory committed (same as openshift:vm:memory:virtual_committed:bytes)
               openshift:vm:memory:virtual_committed:bytes
+
               / on (name, namespace, node)
+
+              # VM memory requested (same as openshift:vm:memory:requested:bytes)
               openshift:vm:memory:requested:bytes
             )
 
