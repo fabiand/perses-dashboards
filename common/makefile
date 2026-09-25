@@ -20,12 +20,12 @@ apply-prom:
 	# Create a Role with PrometheusRule permissions in current namespace
 	oc get role prometheus-rule-creator || oc create role prometheus-rule-creator \
 	  --verb=create,get,list,watch,update,patch,delete \
-	  --resource=prometheusrules.monitoring.coreos.com
+	  --resource=prometheusrules.monitoring.coreos.com &
 	
 	# Bind the role to your user in current namespace
 	oc get rolebinding prometheus-rule-creator || oc create rolebinding prometheus-rule-creator \
 	  --role=prometheus-rule-creator \
-	  --user=$$(oc whoami) \
+	  --user=$$(oc whoami) &
 	
 	kubectl apply -f rules.yaml
 
