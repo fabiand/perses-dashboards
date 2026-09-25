@@ -690,7 +690,7 @@
         "spec": {
           "display": {
             "name": "Node Memory Imbalance",
-            "description": "Coefficient of Variation for memory utilization across nodes. Measures how evenly memory is distributed across the cluster. Lower values indicate balanced distribution; higher values mean some nodes are heavily loaded while others are underutilized. Threshold: <0.3 good (balanced), 0.6-0.8 yellow (uneven), >0.8 red (severely imbalanced). High imbalance reduces effective capacity.\n\nAnswers: How balanced is memory utilization across nodes?"
+            "description": "Coefficient of Variation for memory utilization across nodes. Measures how evenly memory is distributed across the cluster. Lower values indicate balanced distribution; higher values mean some nodes are heavily loaded while others are underutilized. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance). High imbalance reduces effective capacity.\n\nAnswers: How balanced is memory utilization across nodes?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -704,15 +704,16 @@
               "thresholds": {
                 "steps": [
                   {
-                    "value": 0.3
+                    "value": 0,
+                    "color": "#59CC8D"
                   },
                   {
                     "color": "#FFB249",
-                    "value": 0.6
+                    "value": 0.3
                   },
                   {
                     "color": "#EE6C6C",
-                    "value": 0.8
+                    "value": 0.6
                   }
                 ]
               }
