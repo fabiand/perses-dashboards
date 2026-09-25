@@ -17,7 +17,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Latency Alerts"
+              "name": "Latency Alerts",
+              "description": "Percentage of nodes currently firing storage latency alerts. Shows cluster-wide health: 0% is healthy (no nodes with high latency), higher percentages indicate widespread I/O performance issues."
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -55,7 +56,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Max IO PSI Pressure"
+              "name": "Max IO PSI Pressure",
+              "description": "Maximum I/O Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for I/O to complete. Higher values indicate I/O contention and performance degradation. Threshold: >10% moderate, >30% severe."
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -95,11 +97,85 @@
             ]
           }
         },
+        "latency_quantiles_gauge": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Latency Quantiles",
+              "description": "Storage I/O latency percentiles: p50 shows typical latency (50% of operations complete within this time), p95 indicates SLA performance (95% complete within this time), p99 shows tail latency (worst-case for 99% of operations). Lower is better."
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "calculation": "last-number",
+                "format": {
+                  "unit": "milliseconds"
+                },
+                "max": 100,
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0,
+                      "color": "#59CC8D"
+                    },
+                    {
+                      "color": "#FFB249",
+                      "value": 30
+                    },
+                    {
+                      "color": "#EE6C6C",
+                      "value": 60
+                    }
+                  ]
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency:p50 * 1000",
+                      "seriesNameFormat": "p50 (median)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency:p95 * 1000",
+                      "seriesNameFormat": "p95"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency:p99 * 1000",
+                      "seriesNameFormat": "p99"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
         "859fb288b6a546a0bea31d734264727c": {
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "IO Host-To-Device Latency Distribution"
+              "name": "IO Host-To-Device Latency Distribution",
+              "description": "Percentage distribution of I/O operations by latency buckets. Stacked areas show what portion of operations complete in each time range. Ideal: most operations in 0-10ms (green), minimal in >100ms (red). Shift toward slower buckets indicates storage performance degradation."
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -127,14 +203,6 @@
                     "colorMode": "fixed",
                     "colorValue": "#EE6C6C",
                     "queryIndex": 3
-                  },
-                  {
-                    "queryIndex": 4,
-                    "lineStyle": "dotted",
-                    "format": {
-                      "unit": "milliseconds"
-                    },
-                    "stack": false
                   }
                 ],
                 "visual": {
@@ -205,18 +273,6 @@
                     }
                   }
                 }
-              },
-              {
-                "kind": "TimeSeriesQuery",
-                "spec": {
-                  "plugin": {
-                    "kind": "PrometheusTimeSeriesQuery",
-                    "spec": {
-                      "query": "avg(\n  avg by (instance) (\n    (\n      rate(node_disk_read_time_seconds_total{device!~\"loop.*|ram.*\"}[1m]) +\n      rate(node_disk_write_time_seconds_total{device!~\"loop.*|ram.*\"}[1m]) +\n      rate(node_disk_flush_requests_time_seconds_total{device!~\"loop.*|ram.*\"}[1m])\n    ) > 0\n    /\n    (\n      rate(node_disk_reads_completed_total{device!~\"loop.*|ram.*\"}[1m]) +\n      rate(node_disk_writes_completed_total{device!~\"loop.*|ram.*\"}[1m]) +\n      rate(node_disk_flush_requests_total{device!~\"loop.*|ram.*\"}[1m])\n    ) > 0\n  )\n)",
-                      "seriesNameFormat": "AVG"
-                    }
-                  }
-                }
               }
             ]
           }
@@ -225,7 +281,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Seconds spent on IO with Host-To-Device latency > 10ms"
+              "name": "Seconds spent on IO with Host-To-Device latency > 10ms",
+              "description": "Per-node rate of I/O operations experiencing latency over 10ms. Shows which nodes are handling slow I/O operations. Higher values indicate problematic storage devices or heavy I/O load on specific nodes. Use to identify nodes requiring investigation."
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -254,7 +311,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "IO Latency alerts over time"
+              "name": "IO Latency alerts over time",
+              "description": "Historical view of storage latency alerts per node. Shows when and which nodes experienced high latency. Stacked areas indicate multiple nodes firing simultaneously. Use to correlate latency issues with specific events or changes."
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -295,7 +353,7 @@
           "kind": "Grid",
           "spec": {
             "display": {
-              "title": "Panel Group",
+              "title": "At a Glance",
               "collapse": {
                 "open": true
               }
@@ -304,16 +362,25 @@
               {
                 "x": 0,
                 "y": 0,
-                "width": 12,
+                "width": 8,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/latency_quantiles_gauge"
+                }
+              },
+              {
+                "x": 8,
+                "y": 0,
+                "width": 8,
                 "height": 6,
                 "content": {
                   "$ref": "#/spec/panels/53d12c6d478148e7b910be6a52e0ef52"
                 }
               },
               {
-                "x": 12,
+                "x": 16,
                 "y": 0,
-                "width": 12,
+                "width": 8,
                 "height": 6,
                 "content": {
                   "$ref": "#/spec/panels/a7c3d8e1f2b4456789abcdef01234567"
@@ -326,7 +393,7 @@
           "kind": "Grid",
           "spec": {
             "display": {
-              "title": "Cluster",
+              "title": "Latency Distribution",
               "collapse": {
                 "open": true
               }
