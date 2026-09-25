@@ -628,29 +628,30 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Node Pressure - max",
-            "description": "Memory PSI (pressure Stall Informations)"
+            "name": "Memory Pressure (PSI)",
+            "description": "Maximum Memory Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for memory to complete. Higher values indicate memory contention and performance degradation. Threshold: >10% moderate, >30% severe."
           },
           "plugin": {
             "kind": "GaugeChart",
             "spec": {
               "calculation": "last-number",
               "format": {
-                "decimalPlaces": 1,
-                "unit": "decimal"
+                "unit": "percent-decimal"
               },
               "max": 1,
               "thresholds": {
                 "steps": [
                   {
-                    "value": 0.1
+                    "value": 0,
+                    "color": "#59CC8D"
                   },
                   {
-                    "value": 0.25
+                    "value": 0.1,
+                    "color": "#FFB249"
                   },
                   {
-                    "color": "#EE6C6C",
-                    "value": 0.5
+                    "value": 0.3,
+                    "color": "#EE6C6C"
                   }
                 ]
               }
