@@ -687,7 +687,7 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Memory Imbalance",
+            "name": "Node Memory Imbalance",
             "description": "Coefficient of Variation for memory utilization across nodes. Higher values indicate uneven workload distribution."
           },
           "plugin": {
