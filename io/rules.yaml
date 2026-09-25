@@ -1,0 +1,75 @@
+#apiVersion: monitoring.rhobs/v1
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: storage-latency-rules
+  labels:
+    prometheus: k8s
+    role: alert-rules
+spec:
+  groups:
+    - name: storage_latency.rules
+      rules:
+        # Per-node latency histogram rate
+        - record: openshift:node:storage:latency:rate
+          expr: |
+            rate(kme_system_block_io_latency_seconds_bucket[1m])
+
+        # Cluster-wide latency distribution: 0-10ms
+        - record: openshift:cluster:storage:latency_bucket:ratio
+          labels:
+            le: "0.01"
+            unit: ratio
+          expr: |
+            sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.01"}[1m]))
+            /
+            sum(rate(kme_system_block_io_latency_seconds_count[1m]))
+
+        # Cluster-wide latency distribution: 10-100ms
+        - record: openshift:cluster:storage:latency_bucket:ratio
+          labels:
+            le: "0.1"
+            g: "0.01"
+            unit: ratio
+          expr: |
+            (
+              sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.1"}[1m]))
+              - sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.01"}[1m]))
+            )
+            /
+            sum(rate(kme_system_block_io_latency_seconds_count[1m]))
+
+        # Cluster-wide latency distribution: 100ms-1s
+        - record: openshift:cluster:storage:latency_bucket:ratio
+          labels:
+            le: "1.0"
+            g: "0.1"
+            unit: ratio
+          expr: |
+            (
+              sum(rate(kme_system_block_io_latency_seconds_bucket{le="1.0"}[1m]))
+              - sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.1"}[1m]))
+            )
+            /
+            sum(rate(kme_system_block_io_latency_seconds_count[1m]))
+
+        # Cluster-wide latency distribution: >1s
+        - record: openshift:cluster:storage:latency_bucket:ratio
+          labels:
+            le: "+Inf"
+            g: "1.0"
+            unit: ratio
+          expr: |
+            (
+              sum(rate(kme_system_block_io_latency_seconds_bucket{le="+Inf"}[1m]))
+              - sum(rate(kme_system_block_io_latency_seconds_bucket{le="1.0"}[1m]))
+            )
+            /
+            sum(rate(kme_system_block_io_latency_seconds_count[1m]))
+
+        # Native histogram (if available)
+        - record: openshift:cluster:storage:latency:histogram
+          labels:
+            unit: seconds
+          expr: |
+            sum(rate(kme_system_block_io_latency_seconds[1m]))

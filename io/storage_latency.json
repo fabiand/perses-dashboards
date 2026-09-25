@@ -164,7 +164,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "(\nsum(rate(kme_system_block_io_latency_seconds_bucket{le=\"0.01\"}[1m]))\n) / sum (rate(kme_system_block_io_latency_seconds_count[1m]))",
+                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"0.01\"}",
                       "seriesNameFormat": "0ms - 10ms"
                     }
                   }
@@ -176,7 +176,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "(\nsum(rate(kme_system_block_io_latency_seconds_bucket{le=\"0.1\"}[1m]))\n- sum(rate(kme_system_block_io_latency_seconds_bucket{le=\"0.01\"}[1m]))\n) / sum (rate(kme_system_block_io_latency_seconds_count[1m]))",
+                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"0.1\",g=\"0.01\"}",
                       "seriesNameFormat": "10ms - 100ms"
                     }
                   }
@@ -188,7 +188,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "(\nsum(rate(kme_system_block_io_latency_seconds_bucket{le=\"1.0\"}[1m]))\n- sum(rate(kme_system_block_io_latency_seconds_bucket{le=\"0.1\"}[1m]))\n) / sum (rate(kme_system_block_io_latency_seconds_count[1m]))",
+                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"1.0\",g=\"0.1\"}",
                       "seriesNameFormat": "100ms - 1s"
                     }
                   }
@@ -200,7 +200,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "(\nsum(rate(kme_system_block_io_latency_seconds_bucket{le=\"+Inf\"}[1m]))\n- sum(rate(kme_system_block_io_latency_seconds_bucket{le=\"1.0\"}[1m]))\n) / sum (rate(kme_system_block_io_latency_seconds_count[1m]))",
+                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"+Inf\",g=\"1.0\"}",
                       "seriesNameFormat": "> 1s"
                     }
                   }
