@@ -726,7 +726,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "openshift:cluster:memory:imbalance:ratio",
+                    "query": "openshift:cluster:memory:imbalance:ratio{scope=\"workloads\"}",
                     "seriesNameFormat": "Coefficient of Variation"
                   }
                 }
