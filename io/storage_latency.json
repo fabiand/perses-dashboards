@@ -18,7 +18,7 @@
           "spec": {
             "display": {
               "name": "Nodes with Latency Alerts",
-              "description": "Percentage of nodes currently firing storage latency alerts. Shows cluster-wide health: 0% is healthy (no nodes with high latency), higher percentages indicate widespread I/O performance issues."
+              "description": "Percentage of nodes currently firing storage latency alerts. Shows cluster-wide health: 0% is healthy (no nodes with high latency), higher percentages indicate widespread I/O performance issues. Answers: What percentage of nodes are experiencing high storage latency?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -66,7 +66,7 @@
           "spec": {
             "display": {
               "name": "IO Pressure (PSI)",
-              "description": "Maximum I/O Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for I/O to complete. Higher values indicate I/O contention and performance degradation. Threshold: >10% moderate, >30% severe."
+              "description": "Maximum I/O Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for I/O to complete. Higher values indicate I/O contention and performance degradation. Threshold: >10% moderate, >30% severe. Answers: How much time are tasks waiting for I/O?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -114,7 +114,7 @@
           "spec": {
             "display": {
               "name": "Latency Quantiles",
-              "description": "Storage I/O latency percentiles: p50 shows typical latency (50% of operations complete within this time), p95 indicates SLA performance (95% complete within this time), p99 shows tail latency (worst-case for 99% of operations). Lower is better."
+              "description": "Storage I/O latency percentiles: p50 shows typical latency (50% of operations complete within this time), p95 indicates SLA performance (95% complete within this time), p99 shows tail latency (worst-case for 99% of operations). Lower is better. Answers: What are the current storage latency percentiles?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -187,7 +187,7 @@
           "spec": {
             "display": {
               "name": "Latency Distribution",
-              "description": "Percentage distribution of I/O operations by latency buckets (host-to-device). Stacked areas show what portion of operations complete in each time range. Ideal: most operations in 0-10ms (green), minimal in >100ms (red). Shift toward slower buckets indicates storage performance degradation."
+              "description": "Percentage distribution of I/O operations by latency buckets (host-to-device). Stacked areas show what portion of operations complete in each time range. Ideal: most operations in 0-10ms (green), minimal in >100ms (red). Shift toward slower buckets indicates storage performance degradation. Answers: How are I/O operations distributed across latency buckets?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -294,7 +294,7 @@
           "spec": {
             "display": {
               "name": "Latency Quantiles History",
-              "description": "Historical trend of storage I/O latency percentiles over time. Shows how p50 (median), p95, and p99 latencies evolve, helping identify performance degradation patterns and track the impact of changes. Rising trends indicate worsening storage performance."
+              "description": "Historical trend of storage I/O latency percentiles over time. Shows how p50 (median), p95, and p99 latencies evolve, helping identify performance degradation patterns and track the impact of changes. Rising trends indicate worsening storage performance. Answers: How have storage latency percentiles changed over time?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -380,7 +380,7 @@
           "spec": {
             "display": {
               "name": "Latency Alerts History",
-              "description": "Historical view of storage latency alerts per node. Shows when and which nodes experienced high latency. Stacked areas indicate multiple nodes firing simultaneously. Use to correlate latency issues with specific events or changes."
+              "description": "Historical view of storage latency alerts per node. Shows when and which nodes experienced high latency. Stacked areas indicate multiple nodes firing simultaneously. Use to correlate latency issues with specific events or changes. Answers: Which nodes have experienced latency alerts and when?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
