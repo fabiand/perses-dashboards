@@ -61,7 +61,7 @@
         "spec": {
           "display": {
             "name": "Cluster - Memory Pressure",
-            "description": "The pressure is indicating if workloads are waiting for memory."
+            "description": "Memory Pressure Stall Information (PSI) showing time tasks spend waiting for and stalled on memory allocation. Waiting indicates tasks are delayed but making progress; stalled means completely blocked. Higher values indicate memory contention. Threshold: >10% moderate, >25% severe.\n\nAnswers: Are workloads experiencing memory contention?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -128,7 +128,7 @@
         "spec": {
           "display": {
             "name": "Physical memory utilization & requests",
-            "description": "This is showing the total system utilization (split between virt and non virt workloads). In addition the current plan (requests) are shown in order to to show how much available memory the scheduler is seeing."
+            "description": "Total cluster physical memory utilization split between virtualization and non-virtualization workloads, compared against node capacity and memory requests. Shows actual memory usage versus what the scheduler sees as available. Gap between utilization and requests indicates unused reserved memory. Keep utilization below capacity; requests below 90% of capacity allows room for scheduling.\n\nAnswers: How much physical memory are workloads using compared to requests?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -225,7 +225,7 @@
         "spec": {
           "display": {
             "name": "Cluster Utilization",
-            "description": "The virtual memory assignment is showing the worst-case scenario if all virtual memory was used right now. The assigned virtual memory is shown on top of the non virtualization related memory utilization. The current utiliztaion plus worst-case virtual memory utilization is indiacting the worst case memor overcommittment."
+            "description": "Stacked view of cluster memory utilization across tiers: Tier 0 shows system reserved and workload memory (hot, warm, free); Tier 2 shows swap usage when present. The committed line represents worst-case VM memory usage if all virtual memory were fully utilized. Exceeding capacity indicates overcommitment. Green (free) is healthy; minimal red (hot) headroom requires attention.\n\nAnswers: What is the current cluster memory utilization breakdown and overcommitment risk?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -406,7 +406,7 @@
         "spec": {
           "display": {
             "name": "Cluster Utilization",
-            "description": "This panel is providing the aggregated memory utilization of all nodes of the cluster. This value is more helpful, the more balanced the memory utilization of all nodes is.\nKeep it green."
+            "description": "Aggregated physical memory utilization across all cluster nodes as a percentage of allocatable memory. Most useful when node utilization is balanced (check Node Memory Imbalance). Threshold: <70% green (healthy), 80-90% yellow (monitor), >90% red (critical). Keep it green.\n\nAnswers: What is the overall cluster memory utilization?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -453,7 +453,7 @@
         "spec": {
           "display": {
             "name": "Virtual Memory assignment",
-            "description": "The virtual memory assignment is showing the worst-case scenario if all virtual memory was used right now. The assigned virtual memory is shown on top of the non virtualization related memory utilization. The current utiliztaion plus worst-case virtual memory utilization is indiacting the worst case memor overcommittment."
+            "description": "Historical trend of virtual memory assignment for VMs versus node capacity and actual utilization (excluding VMs). Shows worst-case scenario if all VMs utilized their full assigned virtual memory simultaneously. VM assigned virtual memory on top of non-virtualization utilization indicates total memory demand. Exceeding node capacity indicates overcommitment risk.\n\nAnswers: How much virtual memory is assigned to VMs compared to physical capacity?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -545,7 +545,7 @@
         "spec": {
           "display": {
             "name": "Cluster Virtual Commited",
-            "description": "This panel shows the amount of committed virtual memory as a percentage of the allocatable physical memory. Overcommit occurs whenever the values goes beyond 100%."
+            "description": "Total committed virtual memory as a percentage of allocatable physical memory. Values >100% indicate memory overcommitment. Threshold: <120% acceptable (VMs rarely use full allocation), 120-150% yellow (monitor VM usage), >150% red (high overcommitment risk). Overcommitment is safe only if VMs don't simultaneously reach peak usage.\n\nAnswers: Is the cluster overcommitting virtual memory?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -588,7 +588,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Node - Pressure"
+            "name": "Node - Pressure",
+            "description": "Memory Pressure Stall Information (PSI) per node showing the rate of time tasks spend waiting for memory. Each line represents a node; higher values indicate that node is experiencing memory contention. Use to identify which specific nodes have memory pressure issues. Threshold: >0.1 moderate, >0.3 severe.\n\nAnswers: Which nodes are experiencing memory pressure?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -629,7 +630,7 @@
         "spec": {
           "display": {
             "name": "Memory Pressure (PSI)",
-            "description": "Maximum Memory Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for memory to complete. Higher values indicate memory contention and performance degradation. Threshold: >10% moderate, >30% severe."
+            "description": "Maximum Memory Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for memory to complete. Higher values indicate memory contention and performance degradation. Threshold: >10% moderate, >30% severe.\n\nAnswers: What is the maximum memory pressure across nodes?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -689,7 +690,7 @@
         "spec": {
           "display": {
             "name": "Node Memory Imbalance",
-            "description": "Coefficient of Variation for memory utilization across nodes. Higher values indicate uneven workload distribution."
+            "description": "Coefficient of Variation for memory utilization across nodes. Measures how evenly memory is distributed across the cluster. Lower values indicate balanced distribution; higher values mean some nodes are heavily loaded while others are underutilized. Threshold: <0.3 good (balanced), 0.6-0.8 yellow (uneven), >0.8 red (severely imbalanced). High imbalance reduces effective capacity.\n\nAnswers: How balanced is memory utilization across nodes?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -737,7 +738,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Plan - Pod requests per Node"
+            "name": "Plan - Pod requests per Node",
+            "description": "Memory requests per node as a percentage of allocatable memory. Shows what the scheduler has reserved for pods on each node, not actual usage. Each line is a node; crossing thresholds means the node has little room to schedule new pods. Threshold: <80% healthy, 80-90% yellow (limited capacity), >90% red (nearly full).\n\nAnswers: How much memory is requested on each node?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -786,7 +788,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Node requests - min/max"
+            "name": "Node requests - min/max",
+            "description": "Minimum and maximum memory request percentages across all nodes. Shows the spread between the least and most requested nodes. Large gaps indicate imbalanced scheduling. Threshold: >80% on max node means limited scheduling capacity; large min/max gap suggests poor workload distribution.\n\nAnswers: What is the range of memory requests across nodes?"
           },
           "plugin": {
             "kind": "StatChart",
@@ -843,7 +846,7 @@
         "spec": {
           "display": {
             "name": "Issues",
-            "description": "This panel provides the precentage of nodes where core system (hypervisor) components are utilizing more than reserved memory. This should not happen, and is specifically critical for clusters under load. Keep it green."
+            "description": "Count of active memory-related issues: nodes where system components exceed reserved memory (SystemMemoryExceedsReservation), metric collection failures (scrape targets down, kubelet/cAdvisor down), or missing metrics (node series). Any non-zero value indicates problems. System exceeding reservation is critical for loaded clusters as it risks system stability. Keep it at zero.\n\nAnswers: Are there any memory-related system issues or metric collection problems?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -957,7 +960,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Utilization - min/max"
+            "name": "Utilization - min/max",
+            "description": "Minimum and maximum system reserved memory utilization across nodes. Shows the range of how much of the reserved system memory (for OS, kubelet, container runtime) is actually being used. Threshold: >90% yellow (approaching limit), >100% red (exceeding reservation - triggers SystemMemoryExceedsReservation alert). Values >100% put system stability at risk.\n\nAnswers: What is the range of system reserved memory usage across nodes?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -1013,7 +1017,7 @@
         "spec": {
           "display": {
             "name": "Utilization - Utilization of reserved system memory",
-            "description": "This graph is showing the utilization of the hypervisor system reserved memory. The utilization must stay below 100%, otherwise the hypervisor is using more memory for system processes then what was reserved. This is putting system processes at risk."
+            "description": "System reserved memory utilization per node (top 5) showing how much of the reserved memory for OS, kubelet, and container runtime is actually being used. Must stay below 100%; exceeding means the system is using more than reserved, putting system processes and cluster stability at risk. Threshold: <90% healthy, >90% yellow (approaching limit), >100% red (critical - triggers alert).\n\nAnswers: Are system components staying within their reserved memory allocation?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -1062,7 +1066,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Utilization - Actual overcommit level"
+            "name": "Utilization - Actual overcommit level",
+            "description": "Actual memory utilization per node as a percentage of allocatable memory. Shows real memory consumption (not requests). Each line is a node; this reveals which nodes are actually under memory pressure versus just having high requests. Threshold: <80% healthy, 80-90% yellow (monitor), >90% red (memory pressure risk).\n\nAnswers: What is the actual memory utilization on each node?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -1111,7 +1116,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Node Utilization - max"
+            "name": "Node Utilization - max",
+            "description": "Maximum actual memory utilization across all nodes. Shows the most heavily loaded node's memory consumption. High values indicate at least one node is under memory pressure. Threshold: <70% green, 70-80% acceptable, 80-90% yellow, >90% red (critical).\n\nAnswers: What is the highest memory utilization on any node?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -1157,7 +1163,7 @@
         "spec": {
           "display": {
             "name": "Node Utilization - min",
-            "description": "This panel is showing the node memory utilization of the node with the lowest memory utilization in the cluster."
+            "description": "Minimum actual memory utilization across all nodes. Shows the least loaded node's memory consumption. Compare with max utilization to assess cluster balance. Very low values with high max utilization indicate poor workload distribution. Threshold: same as max, but focus on the min/max gap rather than absolute value.\n\nAnswers: What is the lowest memory utilization on any node?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -1202,7 +1208,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Number of running VMs"
+            "name": "Number of running VMs",
+            "description": "Total count of running virtual machines in the cluster. Use to understand VM workload density and correlate VM count changes with memory utilization and overcommitment trends.\n\nAnswers: How many VMs are currently running?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -1227,7 +1234,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Node virtual - min/max"
+            "name": "Node virtual - min/max",
+            "description": "Minimum and maximum virtual memory commitment per node (workload utilization + VM virtual assignments). Shows the spread of worst-case memory demand if all VMs used their full allocation. Threshold: <120% acceptable, 120-150% yellow, 150-200% orange, >200% red (severe overcommitment). Large spread indicates uneven VM distribution.\n\nAnswers: What is the range of virtual memory commitment across nodes?"
           },
           "plugin": {
             "kind": "StatChart",
@@ -1286,7 +1294,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Cluster - Aggregated Swap"
+            "name": "Cluster - Aggregated Swap",
+            "description": "Total swap space available and used across all nodes. Swap provides tier-2 memory but with performance penalties. Used swap indicates memory pressure; workloads are spilling to disk. High swap usage degrades performance. Keep used swap minimal; presence indicates the cluster needs more physical memory or workload reduction.\n\nAnswers: How much swap is available and being used?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -1347,7 +1356,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Plan - Virtual memory commit level"
+            "name": "Plan - Virtual memory commit level",
+            "description": "Virtual memory commitment per node showing actual utilization plus uncommitted VM virtual memory (VM assigned minus VM used). Represents worst-case scenario for each node if all VMs reached full allocation. Threshold: <120% acceptable, 120-150% yellow, 150-200% orange, >200% red. Values >100% indicate overcommitment.\n\nAnswers: What is the virtual memory commitment level on each node?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -1400,7 +1410,7 @@
         "spec": {
           "display": {
             "name": "VM overcommit ratio",
-            "description": "Any value larger than 1 shows that the VM is using more memory than it requested"
+            "description": "Per-VM ratio of assigned virtual memory to pod memory request. Values >100% indicate the VM has more virtual memory assigned than the virt-launcher pod requested. Values >100% are expected and normal for VM overcommitment; this allows VMs to use more memory than requested from Kubernetes. Monitor VMs with very high ratios (>200%) during memory pressure.\n\nAnswers: Which VMs are overcommitting their pod requests?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -1444,7 +1454,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "VM virtual memory utiliztaion vs host vm urilization"
+            "name": "VM virtual memory utiliztaion vs host vm urilization",
+            "description": "Ratio of VM-reported memory usage (from inside the VM) to host-side container memory usage (top 10 VMs). Values around 1.0 indicate VM and host see similar memory usage. Values <1.0 suggest the VM is using less than the host measures (caching, buffers). Values >1.0 may indicate measurement discrepancies. Use to validate memory accounting and identify VMs with unusual memory patterns.\n\nAnswers: Do VM internal and host-side memory measurements agree?"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -1497,7 +1508,8 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "VM Virtual commited"
+            "name": "VM Virtual commited",
+            "description": "Average VM memory overcommit ratio across nodes. Shows the typical level of VM virtual memory assignment relative to actual VM memory usage. Threshold: <150% healthy, 150-175% yellow (moderate overcommit), >175% red (aggressive overcommit). Higher values indicate VMs are assigned significantly more memory than they're using.\n\nAnswers: What is the average VM overcommit level?"
           },
           "plugin": {
             "kind": "GaugeChart",
