@@ -146,6 +146,7 @@ openshift:node:memory:bytes{temperature="warm", scope="workloads", tier="2"}
 | `utilization` | Fraction of workloads memory currently used | Capacity planning and threshold alerts. Values approaching 1.0 signal the cluster needs more memory or workload reduction | 0.7 - 0.8 |
 | `pressure` | Fraction of time spent waiting for memory to become available | Detect memory contention before OOM. Workloads competing for cache/buffers even if utilization looks acceptable | < 0.1 |
 | `overcommit` | Virtual memory assigned to VMs vs physical memory allocated | Track VM memory safety margin. Values >1 are normal, but high values increase OOM risk if VMs consume full allocation | < 1.5 |
+| `imbalance` | Coefficient of Variation of memory utilization across nodes | Detect uneven workload distribution. Measures relative spread of utilization. Higher values indicate poor balance | < 0.3 (balanced), 0.3-0.6 (moderate), >0.6 (high imbalance) |
 
 #### Example
 
@@ -158,6 +159,9 @@ openshift:node:memory:pressure:ratio
 
 # Per-VM overcommit
 openshift:vm:memory:overcommit:ratio
+
+# Cluster workload imbalance
+openshift:cluster:memory:imbalance:ratio
 ```
 
 ## Recording Rule Structure
@@ -168,6 +172,7 @@ All rules use **colon hierarchy** (Prometheus convention for recording rules):
 openshift:node:memory:bytes{scope, tier, utilized, temperature, usage}
 openshift:node:memory:utilization:ratio
 openshift:cluster:memory:utilization:ratio
+openshift:cluster:memory:imbalance:ratio
 openshift:vm:memory:overcommit:ratio
 ```
 
@@ -272,6 +277,15 @@ openshift:cluster:memory:overcommit:ratio
 ```
 
 **Why**: Track virtual memory assignment vs physical allocation. Values >1 indicate overcommit.
+
+**Use-case**: Memory utilization imbalance detection.
+
+```promql
+# Cluster-wide memory imbalance (Coefficient of Variation)
+openshift:cluster:memory:imbalance:ratio
+```
+
+**Why**: Detect uneven workload distribution across nodes. Computed as `stddev(utilization) / avg(utilization)`. Values <0.3 indicate balanced distribution, 0.3-0.6 moderate imbalance, >0.6 high imbalance requiring workload rebalancing.
 
 ## Important Notes
 

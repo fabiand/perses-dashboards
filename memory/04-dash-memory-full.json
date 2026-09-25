@@ -683,6 +683,55 @@
           ]
         }
       },
+      "MemoryImbalance": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Memory Imbalance",
+            "description": "Coefficient of Variation for memory utilization across nodes. Higher values indicate uneven workload distribution."
+          },
+          "plugin": {
+            "kind": "GaugeChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "decimalPlaces": 2,
+                "unit": "decimal"
+              },
+              "max": 1,
+              "thresholds": {
+                "steps": [
+                  {
+                    "value": 0.3
+                  },
+                  {
+                    "color": "#FFB249",
+                    "value": 0.6
+                  },
+                  {
+                    "color": "#EE6C6C",
+                    "value": 0.8
+                  }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "openshift:cluster:memory:imbalance:ratio",
+                    "seriesNameFormat": "Coefficient of Variation"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
       "NodeRequestsHistory": {
         "kind": "Panel",
         "spec": {
@@ -1501,34 +1550,43 @@
             {
               "x": 0,
               "y": 0,
-              "width": 6,
+              "width": 5,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/ClusterUtilizationNow"
               }
             },
             {
-              "x": 6,
+              "x": 5,
               "y": 0,
-              "width": 6,
+              "width": 5,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/ClusterVirtualCommitedNow"
               }
             },
             {
-              "x": 12,
+              "x": 10,
               "y": 0,
-              "width": 6,
+              "width": 5,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/NodePressureMaxNow"
               }
             },
             {
-              "x": 18,
+              "x": 15,
               "y": 0,
-              "width": 6,
+              "width": 5,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/MemoryImbalance"
+              }
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "width": 4,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/VmVirtualCommitedNow"

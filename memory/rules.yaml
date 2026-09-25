@@ -224,6 +224,17 @@ spec:
             /
             sum(kube_node_status_allocatable{resource="memory"})
 
+        - record: openshift:cluster:memory:imbalance:ratio
+          labels:
+            scope: "workloads"
+            unit: ratio
+          expr: |
+            # Coefficient of Variation: measures relative spread of memory utilization across nodes
+            # Values: <0.3 = balanced, 0.3-0.6 = moderate imbalance, >0.6 = high imbalance
+            stddev(openshift:node:memory:utilization:ratio{tier="0", scope="workloads"})
+            /
+            avg(openshift:node:memory:utilization:ratio{tier="0", scope="workloads"})
+
     #
     # Tier 2 Rules
     #
