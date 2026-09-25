@@ -20,6 +20,10 @@ Multiple dimensions slice the same memory resource to address different operatio
 
 Each dimension provides a different lens on the same physical memory.
 
+# Nodes
+
+Node-level recording rules aggregate memory metrics across all workloads running on a node, providing a system-wide view of memory consumption and availability.
+
 ### Tiers
 
 The rules are designed to cover multiple memory tiers in a system:
@@ -292,3 +296,235 @@ openshift:cluster:memory:imbalance:ratio
 - **Recording rules and data lag**: Recording rules can reference other recording rules, but this creates time lag between when base metrics update and when dependent rules evaluate. To avoid inconsistencies, complex rules expand other recording rules inline (using base metrics directly). Comments mark these expansions with "same as openshift:..." to document which recording rule is being inlined.
 - **Role filtering**: Dashboard queries use `and on (node) kube_node_role{role=~"$role"}` for role filtering. Recording rules don't pre-filter by role (dynamic dashboard variable).
 - **Cluster ratios**: Can't average per-node ratios. Must compute `sum(numerator) / sum(denominator)` for capacity-weighted cluster-wide ratios.
+
+# VMs
+
+VM-level recording rules track memory metrics for individual virtual machines running on KubeVirt, providing per-VM visibility into memory consumption, allocation, and overcommit behavior.
+
+Unlike node-level metrics that aggregate across all workloads, VM metrics expose each virtual machine's memory usage with **per-VM cardinality** using `{name, namespace, node}` labels. This granularity enables tracking individual VM resource consumption and detecting VMs at risk of memory pressure.
+
+### Tiers
+
+VMs use the same memory tier concept as nodes:
+
+| Tier | Technology | Access Pattern |
+|------|------------|----------------|
+| `0`  | DRAM (main memory) | Hot and warm memory |
+| `2`  | Swap (disk-backed memory) | Warm memory only |
+
+Where:
+- **Tier 0**: VM memory backed by physical DRAM on the host node
+- **Tier 2**: VM memory swapped to disk
+
+#### Example
+
+```promql
+# VM DRAM memory
+openshift:vm:memory:bytes{tier="0"}
+
+# VM swap memory
+openshift:vm:memory:bytes{tier="2"}
+```
+
+### Utilization
+
+VM memory is categorized by utilization state:
+
+| State | Description |
+|-------|-------------|
+| `utilized="true"` | Memory actively in use by the VM |
+| `utilized="false"` | Free memory available within the VM's allocation |
+
+The free memory represents the headroom between the VM's current usage and its requested capacity.
+
+#### Example
+
+```promql
+# Memory in use by a VM
+openshift:vm:memory:bytes{utilized="true"}
+
+# Free memory available to a VM
+openshift:vm:memory:bytes{utilized="false"}
+```
+
+### Temperature
+
+VM memory in use is characterized by access pattern:
+
+| Temperature | Description | Source Metric |
+|-------------|-------------|---------------|
+| `hot` | Working set - actively accessed pages | `container_memory_working_set_bytes` |
+| `warm` | Inactive file cache - reclaimable pages | `container_memory_total_inactive_file_bytes` |
+
+Temperature helps distinguish critical working set memory from cache that can be reclaimed under pressure.
+
+#### Example
+
+```promql
+# VM hot memory (working set)
+openshift:vm:memory:bytes{temperature="hot", tier="0"}
+
+# VM warm memory (inactive cache)
+openshift:vm:memory:bytes{temperature="warm", tier="0"}
+
+# VM swap (always warm)
+openshift:vm:memory:bytes{temperature="warm", tier="2"}
+```
+
+### Recording Rules
+
+VM-specific recording rules follow the same colon hierarchy as node rules:
+
+```
+openshift:vm:memory:bytes{name, namespace, node, tier, utilized, temperature}
+openshift:vm:memory:requested:bytes{name, namespace, node}
+openshift:vm:memory:virtual_committed:bytes{name, namespace, node}
+openshift:vm:memory:utilization:ratio{name, namespace, node}
+openshift:vm:memory:overcommit:ratio{name, namespace, node}
+```
+
+#### Rule Definitions
+
+| Rule | Purpose |
+|------|---------|
+| `openshift:vm:memory:bytes` | VM memory consumption across tiers and utilization states |
+| `openshift:vm:memory:requested:bytes` | VM capacity (pod memory requests for virt-launcher) |
+| `openshift:vm:memory:virtual_committed:bytes` | Virtual memory assigned to VM (domain + overhead) |
+| `openshift:vm:memory:utilization:ratio` | Fraction of requested capacity in use |
+| `openshift:vm:memory:overcommit:ratio` | Virtual memory vs physical allocation |
+
+### Label Dimensions
+
+VM metrics use these label dimensions:
+
+- **name**: VM name (from `kubevirt_vmi_info`)
+- **namespace**: Kubernetes namespace containing the VM
+- **node**: Host node running the VM
+- **tier**: `0` (DRAM), `2` (swap)
+- **utilized**: `true` (used), `false` (free)
+- **temperature**: `hot` (working_set), `warm` (inactive_file)
+
+Note: VM metrics do not use the `scope` label. All VM memory is implicitly workload memory.
+
+### Ratios
+
+VM ratios track memory allocation efficiency and safety margins:
+
+| Ratio | Formula | Purpose | Typical Range |
+|-------|---------|---------|---------------|
+| `utilization` | utilized / requested | Fraction of VM capacity in use | 0.0 - 1.0 |
+| `overcommit` | virtual_committed / requested | Virtual memory vs physical allocation | > 1.0 (normal) |
+
+#### Utilization Ratio
+
+Tracks how much of the VM's requested capacity is currently in use:
+
+```promql
+openshift:vm:memory:utilization:ratio
+```
+
+Calculated as:
+```
+(hot + warm memory in tier 0) / requested:bytes
+```
+
+Values approaching 1.0 indicate the VM is consuming most of its allocation and may need more memory or workload reduction.
+
+#### Overcommit Ratio
+
+Tracks virtual memory assigned to the VM vs physical memory allocated:
+
+```promql
+openshift:vm:memory:overcommit:ratio
+```
+
+Calculated as:
+```
+virtual_committed:bytes / requested:bytes
+```
+
+Where `virtual_committed:bytes = kubevirt_vmi_memory_domain_bytes + kubevirt_vmi_launcher_memory_overhead_bytes`.
+
+**Overcommit values > 1.0 are normal** because VMs are assigned virtual address space larger than their physical allocation. However, high overcommit ratios increase OOM risk if the VM attempts to use its full virtual allocation.
+
+### Query Patterns
+
+#### 1. Per-VM Memory Consumption
+
+**Use-case**: Track memory usage for specific VMs.
+
+```promql
+# Total memory used by a VM (DRAM)
+sum by (name, namespace) (openshift:vm:memory:bytes{tier="0", utilized="true"})
+
+# VM capacity
+openshift:vm:memory:requested:bytes
+```
+
+**Why**: Monitor individual VM resource consumption and identify VMs consuming excessive memory.
+
+#### 2. VM Utilization Monitoring
+
+**Use-case**: Identify VMs approaching their memory limits.
+
+```promql
+# VMs with high utilization (>80%)
+openshift:vm:memory:utilization:ratio > 0.8
+
+# VMs with low utilization (<20%)
+openshift:vm:memory:utilization:ratio < 0.2
+```
+
+**Why**: High utilization indicates VMs at risk of memory pressure. Low utilization suggests over-allocation and capacity optimization opportunities.
+
+#### 3. VM Overcommit Tracking
+
+**Use-case**: Monitor virtual memory assignment vs physical allocation.
+
+```promql
+# Per-VM overcommit
+openshift:vm:memory:overcommit:ratio
+
+# VMs with high overcommit (>1.5)
+openshift:vm:memory:overcommit:ratio > 1.5
+```
+
+**Why**: Track VM memory safety margins. High overcommit ratios are normal but increase OOM risk if VMs consume their full virtual allocation.
+
+#### 4. VM Memory by Temperature
+
+**Use-case**: Distinguish critical working set from reclaimable cache.
+
+```promql
+# VM hot memory (working set)
+openshift:vm:memory:bytes{temperature="hot", tier="0"}
+
+# VM warm memory (cache)
+openshift:vm:memory:bytes{temperature="warm", tier="0"}
+```
+
+**Why**: Hot memory must remain available or the VM risks OOM. Warm memory can be reclaimed under pressure with performance impact but no availability risk.
+
+#### 5. Aggregate VM Memory per Node
+
+**Use-case**: Total memory consumed by all VMs on a node.
+
+```promql
+# Total VM memory per node
+sum by (node) (openshift:vm:memory:bytes{tier="0", utilized="true"})
+```
+
+**Why**: Understand VM memory footprint on each host node for capacity planning.
+
+### Key Differences from Node Metrics
+
+| Aspect | Nodes | VMs |
+|--------|-------|-----|
+| **Cardinality** | Per-node aggregates | Per-VM granularity |
+| **Labels** | `{node, scope, tier, ...}` | `{name, namespace, node, tier, ...}` |
+| **Scope** | `system` vs `workloads` | No scope (implicitly workloads) |
+| **Capacity** | Node allocatable memory | VM requested bytes (pod requests) |
+| **Overcommit** | Not tracked at node level | Tracked per-VM (virtual vs physical) |
+| **Data Source** | Node exporter + cgroup metrics | Container metrics for virt-launcher pods |
+
+**Key Insight**: VM metrics expose per-workload memory behavior while node metrics show system-wide resource availability. VM utilization approaching 1.0 signals an individual VM needs more memory. Node utilization approaching 1.0 signals the entire node is running out of allocatable space.
