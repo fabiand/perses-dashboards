@@ -67,9 +67,29 @@ spec:
             /
             sum(rate(kme_system_block_io_latency_seconds_count[1m]))
 
-        # Native histogram (if available)
-        - record: openshift:cluster:storage:latency:histogram
+        # Cluster-wide p50 (median) latency
+        - record: openshift:cluster:storage:latency:p50
           labels:
             unit: seconds
           expr: |
-            sum(rate(kme_system_block_io_latency_seconds[1m]))
+            histogram_quantile(0.5,
+              sum(rate(kme_system_block_io_latency_seconds_bucket[1m])) by (le)
+            )
+
+        # Cluster-wide p95 latency
+        - record: openshift:cluster:storage:latency:p95
+          labels:
+            unit: seconds
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(kme_system_block_io_latency_seconds_bucket[1m])) by (le)
+            )
+
+        # Cluster-wide p99 latency
+        - record: openshift:cluster:storage:latency:p99
+          labels:
+            unit: seconds
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(kme_system_block_io_latency_seconds_bucket[1m])) by (le)
+            )
