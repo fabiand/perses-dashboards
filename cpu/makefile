@@ -1,1 +1,1 @@
-../makefile
+../common/makefile
