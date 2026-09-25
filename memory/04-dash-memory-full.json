@@ -796,25 +796,42 @@
             "description": "This panel provides the precentage of nodes where core system (hypervisor) components are utilizing more than reserved memory. This should not happen, and is specifically critical for clusters under load. Keep it green."
           },
           "plugin": {
-            "kind": "StatChart",
+            "kind": "TimeSeriesChart",
             "spec": {
-              "calculation": "last-number",
-              "format": {
-                "unit": "decimal"
+              "querySettings": [
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#EE6C6C",
+                  "queryIndex": 0
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#FF6B35",
+                  "queryIndex": 1
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#C92A2A",
+                  "queryIndex": 2
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#FF4500",
+                  "queryIndex": 3
+                }
+              ],
+              "visual": {
+                "display": "line",
+                "lineWidth": 1.25,
+                "lineStyle": "solid",
+                "areaOpacity": 0.3,
+                "pointRadius": 2.75,
+                "connectNulls": false,
+                "stack": "all"
               },
-              "sparkline": {},
-              "thresholds": {
-                "steps": [
-                  {
-                    "value": 0
-                  },
-                  {
-                    "color": "#EE6C6C",
-                    "value": 1
-                  }
-                ]
-              },
-              "legendMode": "on"
+              "legend": {
+                "position": "bottom"
+              }
             }
           },
           "queries": [
@@ -1530,7 +1547,7 @@
               "x": 0,
               "y": 15,
               "width": 24,
-              "height": 4,
+              "height": 5,
               "content": {
                 "$ref": "#/spec/panels/IssueAlertHistory"
               }
