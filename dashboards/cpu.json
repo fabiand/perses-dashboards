@@ -130,14 +130,15 @@
           "spec": {
             "display": {
               "name": "Cluster CPU Utilization",
-              "description": "Percentage of allocatable CPU cores currently requested by workloads cluster-wide. Below 70% indicates healthy capacity (green), 70-85% shows high utilization (yellow), and above 85% indicates near-capacity requiring attention (red).\n\nAnswers: What percentage of cluster CPU capacity is currently utilized?"
+              "description": "Percentage of cluster CPU capacity currently in use by workloads. Shows aggregate utilization across all nodes. Threshold: <70% green (healthy capacity), 70-85% yellow (monitor usage), >85% red (high utilization).\n\nAnswers: How much of the cluster's CPU is being used?"
             },
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
                 "format": {
-                  "unit": "percent-decimal"
+                  "unit": "percent-decimal",
+                  "decimalPlaces": 1
                 },
                 "thresholds": {
                   "steps": [
@@ -164,8 +165,201 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:cpu:utilization:ratio",
+                      "query": "openshift:cluster:cpu:utilization:ratio{scope=\"workloads\"}",
                       "seriesNameFormat": "CPU utilization"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "node_cpu_imbalance": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Node CPU Imbalance",
+              "description": "Coefficient of variation for CPU allocation across nodes. Measures how evenly CPU load is distributed. Lower values indicate balanced distribution; higher values mean some nodes are heavily loaded while others are underutilized. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is CPU allocation across nodes?"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "calculation": "last-number",
+                "format": {
+                  "unit": "decimal",
+                  "decimalPlaces": 1
+                },
+                "max": 1,
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0,
+                      "color": "#59CC8D"
+                    },
+                    {
+                      "value": 0.3,
+                      "color": "#FFB249"
+                    },
+                    {
+                      "value": 0.6,
+                      "color": "#EE6C6C"
+                    }
+                  ]
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:cpu:imbalance:ratio{scope=\"workloads\"}",
+                      "seriesNameFormat": "CPU imbalance"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "cpu_pressure": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "CPU Pressure (PSI)",
+              "description": "Maximum CPU Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for CPU on the most pressured node. Higher values indicate CPU contention and performance degradation. Threshold: <10% green (healthy), 10-30% yellow (moderate pressure), >30% red (high contention).\n\nAnswers: What is the worst-case CPU pressure in the cluster?"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "calculation": "last-number",
+                "format": {
+                  "unit": "percent-decimal",
+                  "decimalPlaces": 1
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0,
+                      "color": "#59CC8D"
+                    },
+                    {
+                      "value": 0.1,
+                      "color": "#FFB249"
+                    },
+                    {
+                      "value": 0.3,
+                      "color": "#EE6C6C"
+                    }
+                  ]
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:cpu:pressure:ratio{severity=\"some\"}",
+                      "seriesNameFormat": "CPU pressure"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "vcpu_overcommit": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "vCPU Overcommit",
+              "description": "Total virtual CPUs assigned to VMs as a percentage of physical CPU capacity. Values >100% indicate CPU overcommitment. Threshold: <120% green (acceptable), 120-150% yellow (monitor VM usage), >150% red (high overcommit risk). Overcommitment is safe when VMs don't simultaneously reach peak CPU usage.\n\nAnswers: Is the cluster overcommitting virtual CPUs?"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "calculation": "last-number",
+                "format": {
+                  "unit": "percent",
+                  "decimalPlaces": 1
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0,
+                      "color": "#59CC8D"
+                    },
+                    {
+                      "value": 120,
+                      "color": "#FFB249"
+                    },
+                    {
+                      "value": 150,
+                      "color": "#EE6C6C"
+                    }
+                  ]
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:cpu:overcommit:ratio{scope=\"virtual\"} * 100",
+                      "seriesNameFormat": "vCPU overcommit"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "cluster_cpu_utilization_history": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Cluster CPU Utilization History",
+              "description": "Historical trend of cluster-wide CPU utilization. Shows how CPU consumption changes over time, helping identify usage patterns and capacity planning needs. Rising trends indicate growing CPU demand.\n\nAnswers: How has cluster CPU utilization changed over time?"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "bottom"
+                },
+                "visual": {
+                  "connectNulls": false,
+                  "display": "line",
+                  "lineStyle": "solid",
+                  "lineWidth": 1.5,
+                  "pointRadius": 0
+                },
+                "yAxis": {
+                  "format": {
+                    "unit": "percent-decimal"
+                  },
+                  "label": "CPU Utilization",
+                  "show": true
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:cpu:utilization:ratio{scope=\"workloads\"}",
+                      "seriesNameFormat": "CPU Utilization"
                     }
                   }
                 }
@@ -326,7 +520,7 @@
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/cluster_cpu_capacity"
+                  "$ref": "#/spec/panels/cluster_cpu_utilization"
                 }
               },
               {
@@ -335,7 +529,7 @@
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/cluster_vcpu_count"
+                  "$ref": "#/spec/panels/node_cpu_imbalance"
                 }
               },
               {
@@ -344,7 +538,7 @@
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/cluster_cpu_overcommit"
+                  "$ref": "#/spec/panels/cpu_pressure"
                 }
               },
               {
@@ -353,7 +547,16 @@
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/cluster_cpu_utilization"
+                  "$ref": "#/spec/panels/vcpu_overcommit"
+                }
+              },
+              {
+                "x": 0,
+                "y": 6,
+                "width": 24,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/cluster_cpu_utilization_history"
                 }
               }
             ]
