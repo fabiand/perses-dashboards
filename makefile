@@ -4,8 +4,8 @@ jsons := $(wildcard */*.json)
 
 #URL=https://prometheus-k8s-openshift-monitoring.apps.cnv2.engineering.redhat.com
 PROJECT := openshift-cnv
-URL := https://$(shell oc get route -n openshift-monitoring prometheus-k8s -o jsonpath='{.status.ingress[0].host}')
-TOKEN := $(shell oc whoami -t)
+PROM_URL ?= https://$(shell oc get route -n openshift-monitoring prometheus-k8s -o jsonpath='{.status.ingress[0].host}')
+TOKEN ?= $(shell oc whoami -t)
 
 
 run-dashboard:
@@ -26,13 +26,15 @@ apply-prom:
 	  --role=prometheus-rule-creator \
 	  --user=$$(oc whoami)
 	
-	for C in memory cpu io; do percli apply -f $$C/dashboard.json ; oc apply -f $$C/rules.yaml ; done
+	for R in rules/*.yaml ; do oc apply -f $$R ; done
 
 apply-perses: FORCE $(jsons)
 	percli apply -f 01-project.json
 	percli project $(PROJECT)
 	jq --arg token "$(TOKEN)" '.[0].spec.authorization.credentials = $$token' 02-secret.json.in | percli apply -f -
-	jq --arg url "$(URL)" '.[0].spec.plugin.spec.proxy.spec.url = $$url' 03-dts.json.in | percli apply -f -
+	jq --arg url "$(PROM_URL)" '.[0].spec.plugin.spec.proxy.spec.url = $$url' 03-dts.json.in | percli apply -f -
+	
+	for D in dashboards/*.json ; do percli apply -f $$D ; done
 
 docs: 04-dash-memory-summary.json.in 04-dash-memory-details.json.in
 	cp documentation.md.in documentation.md

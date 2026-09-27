@@ -1,0 +1,519 @@
+[
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "storage_latency",
+      "createdAt": "2026-09-18T14:33:54.933644325Z",
+      "updatedAt": "2026-09-18T15:00:27.127455287Z",
+      "version": 1,
+      "project": "openshift-cnv"
+    },
+    "spec": {
+      "display": {
+        "name": "Storage Latency"
+      },
+      "panels": {
+        "53d12c6d478148e7b910be6a52e0ef52": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Nodes with Latency Alerts",
+              "description": "Percentage of nodes currently firing storage latency alerts. Shows cluster-wide health: 0% is healthy (no nodes with high latency), higher percentages indicate widespread I/O performance issues.\n\nAnswers: What percentage of nodes are experiencing high storage latency?"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "calculation": "last-number",
+                "format": {
+                  "unit": "percent-decimal"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0,
+                      "color": "#59CC8D"
+                    },
+                    {
+                      "value": 0.01,
+                      "color": "#FFB249"
+                    },
+                    {
+                      "value": 0.1,
+                      "color": "#EE6C6C"
+                    }
+                  ]
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "count by (instance) (ALERTS{alertname=~\".*Latency.*High\"}) / count(kube_node_info)",
+                      "seriesNameFormat": "Percentage of nodes with IO latency alerts"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "a7c3d8e1f2b4456789abcdef01234567": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "IO Pressure (PSI)",
+              "description": "Maximum I/O Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for I/O to complete. Higher values indicate I/O contention and performance degradation. Threshold: >10% moderate, >30% severe.\n\nAnswers: How much time are tasks waiting for I/O?"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "calculation": "last-number",
+                "format": {
+                  "unit": "percent-decimal"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0,
+                      "color": "#59CC8D"
+                    },
+                    {
+                      "value": 0.1,
+                      "color": "#FFB249"
+                    },
+                    {
+                      "value": 0.3,
+                      "color": "#EE6C6C"
+                    }
+                  ]
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "max(rate(node_pressure_io_waiting_seconds_total[1m]))",
+                      "seriesNameFormat": "Max IO pressure (tasks waiting)"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "latency_quantiles_gauge": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Latency Quantiles",
+              "description": "Storage I/O latency percentiles: p50 shows typical latency (50% of operations complete within this time), p95 indicates SLA performance (95% complete within this time), p99 shows tail latency (worst-case for 99% of operations). Lower is better.\n\nAnswers: What are the current storage latency percentiles?"
+            },
+            "plugin": {
+              "kind": "GaugeChart",
+              "spec": {
+                "calculation": "last-number",
+                "format": {
+                  "unit": "milliseconds"
+                },
+                "max": 100,
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 0,
+                      "color": "#59CC8D"
+                    },
+                    {
+                      "color": "#FFB249",
+                      "value": 30
+                    },
+                    {
+                      "color": "#EE6C6C",
+                      "value": 60
+                    }
+                  ]
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency:p50 * 1000",
+                      "seriesNameFormat": "p50 (median)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency:p95 * 1000",
+                      "seriesNameFormat": "p95"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency:p99 * 1000",
+                      "seriesNameFormat": "p99"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "859fb288b6a546a0bea31d734264727c": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Latency Distribution",
+              "description": "Percentage distribution of I/O operations by latency buckets (host-to-device). Stacked areas show what portion of operations complete in each time range. Ideal: most operations in 0-10ms (green), minimal in >100ms (red). Shift toward slower buckets indicates storage performance degradation.\n\nAnswers: How are I/O operations distributed across latency buckets?"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "bottom"
+                },
+                "querySettings": [
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#59CC8D",
+                    "queryIndex": 0
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#FFCC00",
+                    "queryIndex": 1
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#FFB249",
+                    "queryIndex": 2
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#EE6C6C",
+                    "queryIndex": 3
+                  }
+                ],
+                "visual": {
+                  "areaOpacity": 0.3,
+                  "connectNulls": false,
+                  "display": "line",
+                  "lineStyle": "solid",
+                  "lineWidth": 1.25,
+                  "pointRadius": 2.75,
+                  "stack": "all"
+                },
+                "yAxis": {
+                  "format": {
+                    "unit": "percent-decimal"
+                  },
+                  "label": "",
+                  "max": 1,
+                  "min": 0,
+                  "show": true
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"0.01\"}",
+                      "seriesNameFormat": "0ms - 10ms"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"0.1\",g=\"0.01\"}",
+                      "seriesNameFormat": "10ms - 100ms"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"1.0\",g=\"0.1\"}",
+                      "seriesNameFormat": "100ms - 1s"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"+Inf\",g=\"1.0\"}",
+                      "seriesNameFormat": "> 1s"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "latency_quantiles_history": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Latency Quantiles History",
+              "description": "Historical trend of storage I/O latency percentiles over time. Shows how p50 (median), p95, and p99 latencies evolve, helping identify performance degradation patterns and track the impact of changes. Rising trends indicate worsening storage performance.\n\nAnswers: How have storage latency percentiles changed over time?"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "bottom"
+                },
+                "querySettings": [
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#59CC8D",
+                    "queryIndex": 0
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#FFB249",
+                    "queryIndex": 1
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#EE6C6C",
+                    "queryIndex": 2
+                  }
+                ],
+                "visual": {
+                  "connectNulls": false,
+                  "display": "line",
+                  "lineStyle": "solid",
+                  "lineWidth": 1.5,
+                  "pointRadius": 0
+                },
+                "yAxis": {
+                  "format": {
+                    "unit": "milliseconds"
+                  },
+                  "label": "",
+                  "show": true
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency:p50 * 1000",
+                      "seriesNameFormat": "p50 (median)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency:p95 * 1000",
+                      "seriesNameFormat": "p95"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:storage:latency:p99 * 1000",
+                      "seriesNameFormat": "p99"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "bb254c2f0b9c4fd5bc45f03e39813b16": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Latency Alerts History",
+              "description": "Historical view of storage latency alerts per node. Shows when and which nodes experienced high latency. Stacked areas indicate multiple nodes firing simultaneously. Use to correlate latency issues with specific events or changes.\n\nAnswers: Which nodes have experienced latency alerts and when?"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "bottom"
+                },
+                "visual": {
+                  "areaOpacity": 0.3,
+                  "connectNulls": false,
+                  "display": "line",
+                  "lineStyle": "solid",
+                  "lineWidth": 1.25,
+                  "pointRadius": 2.75,
+                  "stack": "all"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "count by (instance) (ALERTS{alertname=~\".*Latency.*High\"})",
+                      "seriesNameFormat": "{{instance}}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "At a Glance",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 8,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/latency_quantiles_gauge"
+                }
+              },
+              {
+                "x": 8,
+                "y": 0,
+                "width": 8,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/53d12c6d478148e7b910be6a52e0ef52"
+                }
+              },
+              {
+                "x": 16,
+                "y": 0,
+                "width": 8,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/a7c3d8e1f2b4456789abcdef01234567"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Latency Distribution",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 24,
+                "height": 13,
+                "content": {
+                  "$ref": "#/spec/panels/859fb288b6a546a0bea31d734264727c"
+                }
+              },
+              {
+                "x": 0,
+                "y": 13,
+                "width": 24,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/latency_quantiles_history"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Nodes",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 24,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/bb254c2f0b9c4fd5bc45f03e39813b16"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "duration": "1h",
+      "refreshInterval": "15s",
+      "timezone": "local"
+    }
+  }
+]
