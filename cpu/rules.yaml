@@ -12,54 +12,72 @@ spec:
     #
     - name: cluster_operator_node_cpu.rules
       rules:
-        # Physical CPU capacity per node
-        # Source: kube_node_status_capacity{resource="cpu"}
-        # This represents the total number of physical CPU cores available on the node
-        - record: openshift:node:cpu:capacity:count
-          labels:
-            scope: "physical"
-            unit: count
-          expr: |
-            kube_node_status_capacity{resource="cpu"}
-
-        # Allocatable CPU cores per node
-        # Source: kube_node_status_allocatable{resource="cpu"}
-        # This is the amount of CPU available for workloads after system reservations
-        - record: openshift:node:cpu:allocatable:count
-          labels:
-            scope: "workloads"
-            unit: count
-          expr: |
-            kube_node_status_allocatable{resource="cpu"}
-
-        # System reserved CPU per node
-        # This is the CPU reserved for OS and system services
-        - record: openshift:node:cpu:reserved:count
+        - record: openshift:node:cpu:count
           labels:
             scope: "system"
             unit: count
           expr: |
             kube_node_status_capacity{resource="cpu"} - kube_node_status_allocatable{resource="cpu"}
 
-        # Virtual CPU count per node (total vCPUs from VMs)
-        # Source: kubevirt_vmi_info joined with vCPU topology
-        # Sum of all VM vCPUs running on each node
-        - record: openshift:node:cpu:vcpu:count
+        - record: openshift:node:cpu:seconds
           labels:
-            scope: "virtual"
+            scope: "system"
+            utilized: "true"
+            unit: seconds
+          expr: |
+            sum by (node) {
+              (1 - avg by (node) (label_replace(rate(node_cpu_seconds_total{mode="idle"}[1m]), "node", "$1", "instance", "(.*)")))
+              #container_cpu_usage_seconds_total{id="/system.slice"}
+            }
+
+        - record: openshift:node:cpu:seconds
+          labels:
+            scope: "system"
+            utilized: "false"
+            unit: seconds
+          expr: |
+              avg by (node) (label_replace(rate(node_cpu_seconds_total{mode="idle"}[1m]), "node", "$1", "instance", "(.*)"))
+
+
+        - record: openshift:node:cpu:count
+          labels:
+            scope: "workloads"
             unit: count
           expr: |
-            sum by (node) (
-              max by (name, namespace, node) (
-                kubevirt_vmi_info{vmi_pod!=""}
-                * on (name, namespace) group_left()
-                kubevirt_vmi_vcpu_seconds < inf
-              )
-              * 0 + 1
-            ) or
-            sum by (node) (
-              kubevirt_vmi_info{vmi_pod!=""} * 0
-            )
+            kube_node_status_allocatable{resource="cpu"}
+
+        - record: openshift:node:cpu:seconds
+          labels:
+            scope: "workloads"
+            utilized: "true"
+            unit: seconds
+          expr: |
+            sum by (node) {
+              (1 - avg by (node) (label_replace(rate(node_cpu_seconds_total{mode="idle"}[1m]), "node", "$1", "instance", "(.*)")))
+              #container_cpu_usage_seconds_total{id="/system.slice"}
+            }
+
+        - record: openshift:node:cpu:seconds
+          labels:
+            scope: "workloads"
+            utilized: "false"
+            unit: seconds
+          expr: |
+            kube_node_status_allocatable{resource="cpu"}
+            - on (node)
+            avg by (node) (label_replace(rate(node_cpu_seconds_total{mode="idle"}[1m]), "node", "$1", "instance", "(.*)"))
+
+
+        - record: openshift:node:cpu:overcommit:ratio
+          labels:
+            scope: "workloads"
+            unit: ratio
+          expr: |
+            # VM virtual CPU committed (same as openshift:vm:cpu:virtual_committed:count)
+            sum by (node) (openshift:vm:cpu:virtual_committed:count)
+
+            / on (node)
+            kube_node_status_allocatable{resource="cpu"}
 
         # vCPU overcommit ratio per node
         # Ratio of virtual CPUs to physical CPUs
@@ -70,12 +88,7 @@ spec:
             unit: ratio
           expr: |
             sum by (node) (
-              max by (name, namespace, node) (
-                label_replace(
-                  kubevirt_vmi_vcpu_seconds < inf,
-                  "vcpus", "1", "", ""
-                )
-              )
+              count by (name, namespace, node) (kubevirt_vmi_vcpu_seconds_total)
             )
             / on (node)
             kube_node_status_capacity{resource="cpu"}
@@ -217,14 +230,7 @@ spec:
           labels:
             unit: count
           expr: |
-            max by (name, namespace, node) (
-              kubevirt_vmi_info{vmi_pod!=""}
-              * on (name, namespace) group_left()
-              label_replace(
-                kubevirt_vmi_vcpu_seconds < inf,
-                "vcpus", "1", "", ""
-              )
-            ) * 0 + 1
+            count by (name, namespace) (kubevirt_vmi_vcpu_seconds_total)
 
         # CPU request per VM (in cores)
         # Total CPU requested by the virt-launcher pod
