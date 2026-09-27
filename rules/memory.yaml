@@ -44,7 +44,7 @@ spec:
     #
     # Tier 0 Rules
     #
-    - name: cluster_operator_node_memory_tier0.rules
+    - name: cluster_operator_memory_tier0.rules
       rules:
         - record: openshift:node:memory:bytes
           labels:
@@ -92,7 +92,7 @@ spec:
             tier: "0"
             scope: "workloads"
             utilized: "true"
-            usage: "overflow"
+            usage: "system-overflow"
             unit: bytes
           expr: |
             clamp_min(
@@ -173,87 +173,28 @@ spec:
             scope: "workloads"
             unit: ratio
           expr: |
-            # Workloads memory in use: hot + warm + overflow (same as openshift:node:memory:bytes{tier="0", utilized="true", scope="workloads"})
             sum by (node) (openshift:node:memory:bytes{utilized="true", scope="workloads"})
 
             / on (node)
+
             kube_node_status_allocatable{resource="memory"}
 
-        - record: openshift:node:memory:overcommit:ratio
-          labels:
-            scope: "workloads"
-            unit: ratio
-          expr: |
-            # VM virtual memory committed (same as openshift:vm:memory:virtual_committed:bytes)
-            sum by (node) (openshift:vm:memory:virtual_committed:bytes)
-
-            / on (node)
-            kube_node_status_allocatable{resource="memory"}
-
-        - record: openshift:node:memory:pressure:ratio
-          labels:
-            unit: ratio
-          expr: |
-            label_replace(
-              rate(node_pressure_memory_waiting_seconds_total[5m]),
-              "node", "$1", "instance", "(.+)"
-            )
-
-        - record: openshift:cluster:memory:utilization:ratio
-          labels:
-            tier: "0"
-            scope: "workloads"
-            unit: ratio
-          expr: |
-
-            # Workloads memory in use: hot + warm + overflow (same as openshift:node:memory:bytes{tier="0", utilized="true", scope="workloads"})
-            sum(openshift:node:memory:bytes{utilized="true", scope="workloads"})
-
-            /
-            sum(kube_node_status_allocatable{resource="memory"})
-
-        - record: openshift:cluster:memory:overcommit:ratio
-          labels:
-            scope: "workloads"
-            unit: ratio
-          expr: |
-
-            # VM virtual memory committed (same as openshift:vm:memory:virtual_committed:bytes)
-            sum(openshift:vm:memory:virtual_committed:bytes)
-
-            /
-            sum(kube_node_status_allocatable{resource="memory"})
-
-        - record: openshift:cluster:memory:imbalance:ratio
-          labels:
-            scope: "workloads"
-            unit: ratio
-          expr: |
-            # Coefficient of Variation: measures relative spread of memory utilization across nodes
-            # Values: <0.3 = balanced, 0.3-0.6 = moderate imbalance, >0.6 = high imbalance
-            stddev(openshift:node:memory:utilization:ratio{scope="workloads"})
-            /
-            avg(openshift:node:memory:utilization:ratio{scope="workloads"})
 
     #
     # Tier 2 Rules
     #
-    - name: cluster_operator_node_memory_tier2.rules
+    - name: cluster_operator_memory_tier2.rules
       rules:
         - record: openshift:node:memory:bytes
           labels:
             tier: "2"
             scope: "workloads"
             utilized: "true"
-            temperature: "warm"
             unit: bytes
           expr: |
             sum by (node) (
               container_memory_swap{id="/kubepods.slice"}
             )
-
-    - name: cluster_operator_node_memory_derived.rules
-      rules:
 
         - record: openshift:node:memory:bytes
           labels:
@@ -268,8 +209,86 @@ spec:
             )
 
             - on (node)
+
             # Swap used (same as openshift:node:memory:bytes{tier="2", scope="workloads", utilized="true"})
             sum by (node) (container_memory_swap{id="/kubepods.slice"})
+
+
+    #
+    # Ratio Rules
+    #
+    - name: cluster_operator_memory_ratio.rules
+      rules:
+        - record: openshift:node:memory:pressure:ratio
+          labels:
+            severity: "some"
+            unit: ratio
+          expr: |
+            label_replace(
+              rate(node_pressure_memory_waiting_seconds_total[1m]),
+              "node", "$1", "instance", "(.+)"
+            ) > 0.1
+
+        - record: openshift:cluster:memory:utilization:ratio
+          labels:
+            tier: "0"
+            scope: "workloads"
+            unit: ratio
+          expr: |
+            sum(openshift:node:memory:bytes{utilized="true", scope="workloads"})
+
+            /
+
+            sum(kube_node_status_allocatable{resource="memory"})
+
+        - record: openshift:cluster:memory:imbalance:ratio
+          labels:
+            scope: "workloads"
+            unit: ratio
+          expr: |
+            # Coefficient of Variation: measures relative spread of memory utilization across nodes
+            # Values: <0.3 = balanced, 0.3-0.6 = moderate imbalance, >0.6 = high imbalance
+            stddev(openshift:node:memory:utilization:ratio{scope="workloads"})
+
+            /
+
+            avg(openshift:node:memory:utilization:ratio{scope="workloads"})
+
+        - record: openshift:cluster:memory:overcommit:ratio
+          labels:
+            scope: "workloads"
+            unit: ratio
+          expr: |
+            sum(openshift:vm:virtual:memory:bytes)
+
+            /
+
+            sum(kube_node_status_allocatable{resource="memory"})
+
+        - record: openshift:node:memory:overcommit:ratio
+          labels:
+            scope: "workloads"
+            unit: ratio
+          expr: |
+            sum by (node) (openshift:vm:virtual:memory:bytes)
+
+            / on (node)
+
+            kube_node_status_allocatable{resource="memory"}
+
+
+    #
+    # Virtual Memory Rules
+    #
+    - name: cluster_operator_virtual_memory.rules
+      rules:
+        - record: openshift:cluster:virtual:memory:bytes
+          labels:
+            scope: "workloads"
+            unit: ratio
+          expr: |
+            sum(openshift:vm:virtual:memory:bytes)
+
 
     #
     #
@@ -326,7 +345,7 @@ spec:
               openshift:vm:memory:requested:bytes
 
               - on (name, namespace, node)
-              # VM memory in use: hot + warm (same as openshift:vm:memory:bytes{tier="0", utilized="true"})
+
               sum by (name, namespace, node) (openshift:vm:memory:bytes{utilized="true"})
             )
 
@@ -334,7 +353,6 @@ spec:
           labels:
             tier: "2"
             utilized: "true"
-            temperature: "warm"
             unit: bytes
           expr: |
             max by (name, namespace, node) (
@@ -353,11 +371,9 @@ spec:
             unit: bytes
           expr: |
             sum by (name, namespace, node) (
-              # Get total pod memory requests for virt-launcher
               sum by (pod, namespace, node) (
                 kube_pod_container_resource_requests{resource="memory", pod=~"virt-launcher-.*"}
               )
-              # Join with VMI info to add VM name
               * on (namespace, pod) group_left(name)
               label_replace(
                 max by (name, namespace, node, vmi_pod) (kubevirt_vmi_info{vmi_pod!=""}),
@@ -365,13 +381,11 @@ spec:
               )
             )
 
-        - record: openshift:vm:memory:virtual_committed:bytes
+        - record: openshift:vm:virtual:memory:bytes
           labels:
             unit: bytes
           expr: |
             max by (name, namespace, node) (
-              kubevirt_vmi_launcher_memory_overhead_bytes
-              + on (name, namespace) group_right()
               kubevirt_vmi_memory_domain_bytes
             )
 
@@ -395,59 +409,12 @@ spec:
             unit: ratio
           expr: |
             max by (name, namespace, node) (
-
-              # VM virtual memory committed (same as openshift:vm:memory:virtual_committed:bytes)
-              openshift:vm:memory:virtual_committed:bytes
+              openshift:vm:virtual:memory:bytes
 
               / on (name, namespace, node)
 
-              # VM memory requested (same as openshift:vm:memory:requested:bytes)
               openshift:vm:memory:requested:bytes
             )
-
-    #
-    # VARS
-    #
-    - name: cluster_operator_dashboard_variables.rules
-      rules:
-        # Dashboard query variables for memory metrics
-        # These use template variables ($node, $role) that are substituted by the dashboard
-
-        - record: x_kube_node_status_allocatable_memory_by_role
-          expr: |
-            (
-            kube_node_status_allocatable{resource="memory", node=~"$node"} * on (node) kube_node_role{role="$role", node=~"$node"}
-            )
-          labels:
-            DevelopmentPreview: "true"
-
-        - record: x_kube_node_status_capacity_memory_by_role
-          expr: |
-            (
-            kube_node_status_capacity{resource="memory", node=~"$node"} * on (node) kube_node_role{role="$role", node=~"$node"}
-            )
-          labels:
-            DevelopmentPreview: "true"
-
-        - record: x_kube_node_status_system_reserved_memory_by_role
-          expr: |
-            (
-            sum(x_kube_node_status_capacity_memory_by_role) - sum(x_kube_node_status_allocatable_memory_by_role)
-            )
-          labels:
-            DevelopmentPreview: "true"
-
-        - record: x_node_memory_MemNotAvailable_bytes_by_role
-          expr: |
-            (
-            label_replace(
-              (node_memory_MemTotal_bytes{instance=~"$node"} - node_memory_MemAvailable_bytes{instance=~"$node"}),
-              "node", "$1",
-              "instance", "(.+)"
-            ) * on (node) kube_node_role{role="$role", node=~"$node"}
-            )
-          labels:
-            DevelopmentPreview: "true"
 
     #
     # LEGACY
@@ -512,13 +479,13 @@ spec:
             unit: bytes
             DevelopmentPreview: "true"
 
-        - record: openshift:node:virtualization:memory:allocated
+        - record: openshift:node:virtual:memory:bytes
+          labels:
+            scope: "workloads"
+            unit: bytes
           expr: |
             sum(kubevirt_vmi_memory_domain_bytes)
             by (node, prometheus)
-          labels:
-            unit: bytes
-            DevelopmentPreview: "true"
 
         #
         # Overcommittment
