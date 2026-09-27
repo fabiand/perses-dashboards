@@ -69,21 +69,21 @@ openshift:node:memory:bytes{scope="workloads"}
 openshift:node:memory:bytes{scope="workloads", tier="2"}
 ```
 
-#### System Overflow Accounting
+#### System-Overflow Accounting
 
 System can consume more memory than reserved. When this happens:
 
 - **System free goes negative** - showing how much beyond reservation is being used
-- **Overflow is exposed as a separate series** - making over-subscription visible
-- **Overflow is also subtracted from workloads free** - reflecting reduced available space
+- **System-overflow is exposed as a separate series** - making over-subscription visible
+- **System-overflow is also subtracted from workloads free** - reflecting reduced available space
 - This preserves the accounting invariant: sum of all series equals capacity
 - **Scope sums remain stable**: system scope always sums to reservation, workloads scope always sums to allocatable
 
 ##### Example
 
 ```promql
-# System overflow amount (memory borrowed from workloads)
-openshift:node:memory:bytes{scope="workloads", utilized="true", usage="overflow"}
+# System-overflow amount (memory borrowed from workloads)
+openshift:node:memory:bytes{scope="workloads", utilized="true", usage="system-overflow"}
 
 # System free memory (can be negative when over-subscribed)
 openshift:node:memory:bytes{scope="system", utilized="false"}
@@ -186,7 +186,7 @@ openshift:vm:memory:overcommit:ratio
 - **scope**: `system`, `workloads`
 - **utilized**: `true` (used), `false` (free)
 - **temperature**: `hot` (working_set), `warm` (inactive_file) - page access frequency
-- **usage**: `overflow` (system memory borrowed from workloads space)
+- **usage**: `system-overflow` (system memory borrowed from workloads space)
 
 ## Query Patterns
 
@@ -244,17 +244,17 @@ sum(openshift:node:memory:bytes{scope="workloads", utilized="true"})
 
 **Why**: Identify if system or workloads are consuming memory.
 
-**Use-case**: Detect system overflow and over-subscription.
+**Use-case**: Detect system-overflow and over-subscription.
 
 ```promql
-# Nodes where system exceeds reservation (overflow > 0)
-openshift:node:memory:bytes{scope="workloads", utilized="true", usage="overflow"} > 0
+# Nodes where system exceeds reservation (system-overflow > 0)
+openshift:node:memory:bytes{scope="workloads", utilized="true", usage="system-overflow"} > 0
 
 # Nodes with negative system free (same information, different view)
 openshift:node:memory:bytes{scope="system", utilized="false"} < 0
 ```
 
-**Why**: Alert when system components borrow from workloads space. This triggers `SystemMemoryExceedsReservation` alert. The overflow series and negative system_free show the same condition from different perspectives.
+**Why**: Alert when system components borrow from workloads space. This triggers `SystemMemoryExceedsReservation` alert. The system-overflow series and negative system_free show the same condition from different perspectives.
 
 ### 4. Combine dimensions
 
