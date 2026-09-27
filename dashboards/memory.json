@@ -1548,46 +1548,37 @@
             {
               "x": 0,
               "y": 0,
-              "width": 5,
+              "width": 6,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/ClusterUtilizationNow"
               }
             },
             {
-              "x": 5,
+              "x": 6,
               "y": 0,
-              "width": 5,
+              "width": 6,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/ClusterVirtualCommitedNow"
               }
             },
             {
-              "x": 10,
+              "x": 12,
               "y": 0,
-              "width": 5,
+              "width": 6,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/NodePressureMaxNow"
               }
             },
             {
-              "x": 15,
+              "x": 18,
               "y": 0,
-              "width": 5,
+              "width": 6,
               "height": 6,
               "content": {
                 "$ref": "#/spec/panels/MemoryImbalance"
-              }
-            },
-            {
-              "x": 20,
-              "y": 0,
-              "width": 4,
-              "height": 6,
-              "content": {
-                "$ref": "#/spec/panels/VmVirtualCommitedNow"
               }
             },
             {
