@@ -327,7 +327,7 @@
           "spec": {
             "display": {
               "name": "Cluster CPU Utilization History",
-              "description": "Historical trend of cluster-wide CPU utilization. Shows how CPU consumption changes over time, helping identify usage patterns and capacity planning needs. Rising trends indicate growing CPU demand.\n\nAnswers: How has cluster CPU utilization changed over time?"
+              "description": "Historical trend of cluster-wide CPU utilization broken down by system and workloads. Stacked areas show CPU time consumed by system components (orange) and workload processes (green). Rising trends indicate growing CPU demand.\n\nAnswers: How has cluster CPU utilization changed over time for system and workloads?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -335,16 +335,29 @@
                 "legend": {
                   "position": "bottom"
                 },
+                "querySettings": [
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#FF9F1C",
+                    "queryIndex": 0
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#59CC8D",
+                    "queryIndex": 1
+                  }
+                ],
                 "visual": {
+                  "areaOpacity": 0.2,
                   "connectNulls": false,
                   "display": "line",
-                  "lineStyle": "solid",
                   "lineWidth": 1.5,
-                  "pointRadius": 0
+                  "pointRadius": 0,
+                  "stack": "all"
                 },
                 "yAxis": {
                   "format": {
-                    "unit": "percent-decimal"
+                    "unit": "seconds"
                   },
                   "label": "CPU Utilization",
                   "show": true
@@ -358,8 +371,20 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:cpu:utilization:ratio{scope=\"workloads\"}",
-                      "seriesNameFormat": "CPU Utilization"
+                      "query": "sum(openshift:node:cpu:seconds{scope=\"system\", utilized=\"true\"})",
+                      "seriesNameFormat": "System"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "sum(openshift:node:cpu:seconds{scope=\"workloads\", utilized=\"true\"})",
+                      "seriesNameFormat": "Workloads"
                     }
                   }
                 }
