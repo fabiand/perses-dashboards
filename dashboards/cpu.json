@@ -365,7 +365,7 @@
             "display": {
               "title": "Per Node",
               "collapse": {
-                "open": true
+                "open": false
               }
             },
             "items": [
@@ -396,7 +396,7 @@
             "display": {
               "title": "VMs",
               "collapse": {
-                "open": true
+                "open": false
               }
             },
             "items": [
