@@ -327,7 +327,7 @@
           "spec": {
             "display": {
               "name": "Cluster CPU Utilization History",
-              "description": "Historical trend of cluster-wide CPU utilization broken down by system, workloads, and virtual CPUs. Stacked areas show CPU time consumed by system components (orange), workload processes (green), and virtual CPUs committed to VMs (yellow). The committed line shows worst-case CPU demand if all VMs used their full vCPU allocation. Rising trends indicate growing CPU demand.\n\nAnswers: How has cluster CPU utilization changed over time for system, workloads, and committed virtual CPUs?"
+              "description": "Historical trend of cluster-wide CPU utilization showing busy and idle CPU time. Stacked areas show CPU time consumed by system components (red), workload processes (orange), and idle workload capacity (green). The blue dashed line shows committed virtual CPUs - worst-case demand if all VMs used their full vCPU allocation. Rising busy trends indicate growing CPU demand.\n\nAnswers: How has cluster CPU utilization changed over time for system and workloads?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -338,18 +338,23 @@
                 "querySettings": [
                   {
                     "colorMode": "fixed",
-                    "colorValue": "#FF9F1C",
+                    "colorValue": "#EE6C6C",
                     "queryIndex": 0
                   },
                   {
                     "colorMode": "fixed",
-                    "colorValue": "#59CC8D",
+                    "colorValue": "#FF9F1C",
                     "queryIndex": 1
                   },
                   {
                     "colorMode": "fixed",
+                    "colorValue": "#59CC8D",
+                    "queryIndex": 2
+                  },
+                  {
+                    "colorMode": "fixed",
                     "colorValue": "#6BB6FF",
-                    "queryIndex": 2,
+                    "queryIndex": 3,
                     "lineStyle": "dashed",
                     "stack": false,
                     "areaOpacity": 0
@@ -380,7 +385,7 @@
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
                       "query": "openshift:cluster:cpu:seconds{scope=\"system\", utilized=\"true\"}",
-                      "seriesNameFormat": "System"
+                      "seriesNameFormat": "System - Busy"
                     }
                   }
                 }
@@ -392,7 +397,19 @@
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
                       "query": "openshift:cluster:cpu:seconds{scope=\"workloads\", utilized=\"true\"}",
-                      "seriesNameFormat": "Workloads"
+                      "seriesNameFormat": "Workloads - Busy"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "openshift:cluster:cpu:seconds{scope=\"workloads\", utilized=\"false\"}",
+                      "seriesNameFormat": "Workloads - Idle"
                     }
                   }
                 }
