@@ -378,7 +378,7 @@ VM-specific recording rules follow the same colon hierarchy as node rules:
 ```
 openshift:vm:memory:bytes{name, namespace, node, tier, utilized, temperature}
 openshift:vm:memory:requested:bytes{name, namespace, node}
-openshift:vm:memory:virtual_committed:bytes{name, namespace, node}
+openshift:vm:virtual:memory:bytes{name, namespace, node}
 openshift:vm:memory:utilization:ratio{name, namespace, node}
 openshift:vm:memory:overcommit:ratio{name, namespace, node}
 ```
@@ -389,7 +389,7 @@ openshift:vm:memory:overcommit:ratio{name, namespace, node}
 |------|---------|
 | `openshift:vm:memory:bytes` | VM memory consumption across tiers and utilization states |
 | `openshift:vm:memory:requested:bytes` | VM capacity (pod memory requests for virt-launcher) |
-| `openshift:vm:memory:virtual_committed:bytes` | Virtual memory assigned to VM (domain + overhead) |
+| `openshift:vm:virtual:memory:bytes` | Virtual memory assigned to VM (domain bytes) |
 | `openshift:vm:memory:utilization:ratio` | Fraction of requested capacity in use |
 | `openshift:vm:memory:overcommit:ratio` | Virtual memory vs physical allocation |
 
@@ -413,7 +413,7 @@ VM ratios track memory allocation efficiency and safety margins:
 | Ratio | Formula | Purpose | Typical Range |
 |-------|---------|---------|---------------|
 | `utilization` | utilized / requested | Fraction of VM capacity in use | 0.0 - 1.0 |
-| `overcommit` | virtual_committed / requested | Virtual memory vs physical allocation | > 1.0 (normal) |
+| `overcommit` | virtual:memory / requested | Virtual memory vs physical allocation | > 1.0 (normal) |
 
 #### Utilization Ratio
 
@@ -440,10 +440,10 @@ openshift:vm:memory:overcommit:ratio
 
 Calculated as:
 ```
-virtual_committed:bytes / requested:bytes
+virtual:memory:bytes / requested:bytes
 ```
 
-Where `virtual_committed:bytes = kubevirt_vmi_memory_domain_bytes + kubevirt_vmi_launcher_memory_overhead_bytes`.
+Where `virtual:memory:bytes = kubevirt_vmi_memory_domain_bytes` (the virtual address space assigned to the VM).
 
 **Overcommit values > 1.0 are normal** because VMs are assigned virtual address space larger than their physical allocation. However, high overcommit ratios increase OOM risk if the VM attempts to use its full virtual allocation.
 

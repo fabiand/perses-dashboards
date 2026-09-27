@@ -372,7 +372,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift:vm:memory:virtual_committed:bytes)",
+                    "query": "sum(openshift:vm:virtual:memory:bytes)",
                     "seriesNameFormat": "Committed"
                   }
                 }
@@ -393,6 +393,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
+                "decimalPlaces": 1,
                 "unit": "percent-decimal"
               },
               "thresholds": {
@@ -532,6 +533,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
+                "decimalPlaces": 1,
                 "unit": "percent-decimal"
               },
               "max": 2,
@@ -555,7 +557,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift:vm:memory:virtual_committed:bytes) / sum(kube_node_status_allocatable{resource=\"memory\"})",
+                    "query": "sum(openshift:vm:virtual:memory:bytes) / sum(kube_node_status_allocatable{resource=\"memory\"})",
                     "seriesNameFormat": "Virtual Memory committment"
                   }
                 }
@@ -617,6 +619,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
+                "decimalPlaces": 1,
                 "unit": "percent-decimal"
               },
               "max": 1,
@@ -677,7 +680,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "decimalPlaces": 2,
+                "decimalPlaces": 1,
                 "unit": "decimal"
               },
               "max": 1,
@@ -1497,6 +1500,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
+                "decimalPlaces": 1,
                 "unit": "percent-decimal"
               },
               "max": 2,
