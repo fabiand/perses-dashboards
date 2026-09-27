@@ -327,7 +327,7 @@
           "spec": {
             "display": {
               "name": "Cluster CPU Utilization History",
-              "description": "Historical trend of cluster-wide CPU utilization broken down by system and workloads. Stacked areas show CPU time consumed by system components (orange) and workload processes (green). Rising trends indicate growing CPU demand.\n\nAnswers: How has cluster CPU utilization changed over time for system and workloads?"
+              "description": "Historical trend of cluster-wide CPU utilization broken down by system, workloads, and virtual CPUs. Stacked areas show CPU time consumed by system components (orange), workload processes (green), and virtual CPUs committed to VMs (yellow). The committed line shows worst-case CPU demand if all VMs used their full vCPU allocation. Rising trends indicate growing CPU demand.\n\nAnswers: How has cluster CPU utilization changed over time for system, workloads, and committed virtual CPUs?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -345,6 +345,11 @@
                     "colorMode": "fixed",
                     "colorValue": "#59CC8D",
                     "queryIndex": 1
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#FFCC00",
+                    "queryIndex": 2
                   }
                 ],
                 "visual": {
@@ -385,6 +390,18 @@
                     "spec": {
                       "query": "sum(openshift:node:cpu:seconds{scope=\"workloads\", utilized=\"true\"})",
                       "seriesNameFormat": "Workloads"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "sum(openshift:cluster:virtual:cpu:seconds)",
+                      "seriesNameFormat": "Committed"
                     }
                   }
                 }
