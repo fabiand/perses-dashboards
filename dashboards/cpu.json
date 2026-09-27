@@ -348,8 +348,11 @@
                   },
                   {
                     "colorMode": "fixed",
-                    "colorValue": "#FFCC00",
-                    "queryIndex": 2
+                    "colorValue": "#6BB6FF",
+                    "queryIndex": 2,
+                    "lineStyle": "dashed",
+                    "stack": false,
+                    "areaOpacity": 0
                   }
                 ],
                 "visual": {
