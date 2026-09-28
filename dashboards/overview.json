@@ -27,7 +27,7 @@
                 "name": "View Memory Dashboard",
                 "tooltip": "Drill down to Memory dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/memory"
+                "url": "/projects/openshift-cnv/dashboards/memory"
               }
             ],
             "plugin": {
@@ -87,7 +87,7 @@
                 "name": "View Memory Dashboard",
                 "tooltip": "Drill down to Memory dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/memory"
+                "url": "/projects/openshift-cnv/dashboards/memory"
               }
             ],
             "plugin": {
@@ -147,7 +147,7 @@
                 "name": "View Memory Dashboard",
                 "tooltip": "Drill down to Memory dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/memory"
+                "url": "/projects/openshift-cnv/dashboards/memory"
               }
             ],
             "plugin": {
@@ -207,7 +207,7 @@
                 "name": "View Memory Dashboard",
                 "tooltip": "Drill down to Memory dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/memory"
+                "url": "/projects/openshift-cnv/dashboards/memory"
               }
             ],
             "plugin": {
@@ -267,7 +267,7 @@
                 "name": "View CPU Dashboard",
                 "tooltip": "Drill down to CPU dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/cpu"
+                "url": "/projects/openshift-cnv/dashboards/cpu"
               }
             ],
             "plugin": {
@@ -327,7 +327,7 @@
                 "name": "View CPU Dashboard",
                 "tooltip": "Drill down to CPU dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/cpu"
+                "url": "/projects/openshift-cnv/dashboards/cpu"
               }
             ],
             "plugin": {
@@ -387,7 +387,7 @@
                 "name": "View CPU Dashboard",
                 "tooltip": "Drill down to CPU dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/cpu"
+                "url": "/projects/openshift-cnv/dashboards/cpu"
               }
             ],
             "plugin": {
@@ -447,7 +447,7 @@
                 "name": "View CPU Dashboard",
                 "tooltip": "Drill down to CPU dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/cpu"
+                "url": "/projects/openshift-cnv/dashboards/cpu"
               }
             ],
             "plugin": {
@@ -507,7 +507,7 @@
                 "name": "View I/O Dashboard",
                 "tooltip": "Drill down to I/O dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/io"
+                "url": "/projects/openshift-cnv/dashboards/io"
               }
             ],
             "plugin": {
@@ -567,7 +567,7 @@
                 "name": "View I/O Dashboard",
                 "tooltip": "Drill down to I/O dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/io"
+                "url": "/projects/openshift-cnv/dashboards/io"
               }
             ],
             "plugin": {
@@ -627,7 +627,7 @@
                 "name": "View I/O Dashboard",
                 "tooltip": "Drill down to I/O dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/io"
+                "url": "/projects/openshift-cnv/dashboards/io"
               }
             ],
             "plugin": {
@@ -687,7 +687,7 @@
                 "name": "View I/O Dashboard",
                 "tooltip": "Drill down to I/O dashboard",
                 "targetBlank": false,
-                "url": "/dashboards/openshift-cnv/io"
+                "url": "/projects/openshift-cnv/dashboards/io"
               }
             ],
             "plugin": {
