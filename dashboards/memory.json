@@ -366,7 +366,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "decimalPlaces": 1,
+                "decimalPlaces": 0,
                 "unit": "percent-decimal"
               },
               "thresholds": {
@@ -506,7 +506,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "decimalPlaces": 1,
+                "decimalPlaces": 0,
                 "unit": "percent-decimal"
               },
               "thresholds": {
@@ -596,7 +596,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "decimalPlaces": 1,
+                "decimalPlaces": 0,
                 "unit": "percent-decimal"
               },
               "max": 1,

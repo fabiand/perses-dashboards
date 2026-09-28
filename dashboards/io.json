@@ -80,7 +80,7 @@
                 "calculation": "last-number",
                 "format": {
                   "unit": "percent-decimal",
-                  "decimalPlaces": 1
+                  "decimalPlaces": 0
                 },
                 "thresholds": {
                   "steps": [
@@ -203,7 +203,7 @@
                 "calculation": "last-number",
                 "format": {
                   "unit": "percent-decimal",
-                  "decimalPlaces": 1
+                  "decimalPlaces": 0
                 },
                 "thresholds": {
                   "steps": [
