@@ -241,18 +241,21 @@ spec:
 
             sum(kube_node_status_allocatable{resource="memory"})
 
-        - record: openshift:cluster:memory:imbalance:ratio
+        - record: openshift:cluster:memory:imbalance:p80distance
           labels:
             scope: "workloads"
             unit: ratio
           expr: |
-            # Quantile ratio: p95/p50 shows how much more loaded the busiest nodes are vs median
-            # Values: <1.5 = balanced, 1.5-2.5 = moderate imbalance, >2.5 = high imbalance
-            quantile(0.95, openshift:node:memory:utilization:ratio{scope="workloads"})
-
-            /
-
-            quantile(0.5, openshift:node:memory:utilization:ratio{scope="workloads"})
+            # p80 quantile of percentage point distance from mean
+            # Shows the spread: 80% of nodes are within this many percentage points of the mean
+            # Values: <0.10 (±10pp) = well balanced, 0.10-0.15 = moderate, 0.15-0.20 = significant, >0.20 = severe imbalance
+            quantile(0.80,
+              abs(
+                openshift:node:memory:utilization:ratio{scope="workloads"}
+                -
+                scalar(avg(openshift:node:memory:utilization:ratio{scope="workloads"}))
+              )
+            )
 
         - record: openshift:cluster:memory:overcommit:ratio
           labels:

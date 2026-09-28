@@ -186,16 +186,21 @@ spec:
             sum(openshift:node:cpu:seconds{scope="workloads"})
 
         # Cluster-wide CPU utilization imbalance
-        # Quantile ratio: p95/p50 shows how much more loaded the busiest nodes are vs median
-        # Values: <1.5 = balanced, 1.5-2.5 = moderate imbalance, >2.5 = high imbalance
-        - record: openshift:cluster:cpu:imbalance:ratio
+        # p80 quantile of percentage point distance from mean
+        # Shows the spread: 80% of nodes are within this many percentage points of the mean
+        # Values: <0.10 (±10pp) = well balanced, 0.10-0.15 = moderate, 0.15-0.20 = significant, >0.20 = severe imbalance
+        - record: openshift:cluster:cpu:imbalance:p80distance
           labels:
             scope: "workloads"
             unit: ratio
           expr: |
-            quantile(0.95, openshift:node:cpu:utilization:ratio{scope="workloads"})
-            /
-            quantile(0.5, openshift:node:cpu:utilization:ratio{scope="workloads"})
+            quantile(0.80,
+              abs(
+                openshift:node:cpu:utilization:ratio{scope="workloads"}
+                -
+                scalar(avg(openshift:node:cpu:utilization:ratio{scope="workloads"}))
+              )
+            )
 
     #
     # VM-level CPU Rules

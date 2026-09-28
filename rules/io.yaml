@@ -147,17 +147,24 @@ spec:
             )
 
         # Cluster-wide I/O latency imbalance
-        # Quantile ratio: p95/p50 shows how much slower the slowest nodes are vs median
-        # Values: <2.0 = balanced, 2.0-4.0 = moderate imbalance, >4.0 = high imbalance
-        - record: openshift:cluster:io:latency:imbalance:ratio
+        # p80 quantile of percentage distance from mean latency (normalized)
+        # Shows the spread: 80% of nodes are within this percentage of the mean
+        # Values: <0.10 (±10%) = well balanced, 0.10-0.15 = moderate, 0.15-0.20 = significant, >0.20 = severe imbalance
+        - record: openshift:cluster:io:latency:imbalance:p80distance
           labels:
             segment: "host_to_device"
             protocol: "block"
             unit: ratio
           expr: |
-            quantile(0.95, openshift:node:io:latency:p95)
-            /
-            quantile(0.5, openshift:node:io:latency:p95)
+            quantile(0.80,
+              abs(
+                openshift:node:io:latency:p95
+                -
+                scalar(avg(openshift:node:io:latency:p95))
+              )
+              /
+              scalar(avg(openshift:node:io:latency:p95))
+            )
 
         # Per-node I/O pressure (PSI)
         # Shows fraction of time tasks are waiting for I/O (some pressure)
