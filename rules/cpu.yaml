@@ -197,15 +197,6 @@ spec:
             /
             avg(openshift:node:cpu:overcommit:ratio{scope="workloads"})
 
-        # Maximum CPU pressure across all nodes (top-1)
-        # Shows worst-case CPU contention in the cluster
-        - record: openshift:cluster:cpu:pressure:ratio
-          labels:
-            severity: "some"
-            unit: ratio
-          expr: |
-            max(openshift:node:cpu:pressure:ratio{severity="some"})
-
     #
     # VM-level CPU Rules
     #

@@ -276,13 +276,6 @@ spec:
 
             kube_node_status_allocatable{resource="memory"}
 
-        - record: openshift:cluster:memory:pressure:ratio
-          labels:
-            severity: "some"
-            unit: ratio
-          expr: |
-            max(openshift:node:memory:pressure:ratio{severity="some"})
-
 
     #
     # Virtual Memory Rules

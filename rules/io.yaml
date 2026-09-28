@@ -158,3 +158,15 @@ spec:
             stddev(openshift:node:io:latency:p95)
             /
             avg(openshift:node:io:latency:p95)
+
+        # Per-node I/O pressure (PSI)
+        # Shows fraction of time tasks are waiting for I/O (some pressure)
+        - record: openshift:node:io:pressure:ratio
+          labels:
+            severity: "some"
+            unit: ratio
+          expr: |
+            label_replace(
+              rate(node_pressure_io_waiting_seconds_total[2m]),
+              "node", "$1", "instance", "(.+)"
+            )
