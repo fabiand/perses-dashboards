@@ -19,7 +19,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Utilization",
+              "name": "Memory - Utilization",
               "description": "Aggregated physical memory utilization across all cluster nodes as a percentage of allocatable memory. Threshold: <70% green (healthy), 80-90% yellow (monitor), >90% red (critical).\n\nAnswers: What is the overall cluster memory utilization?"
             },
             "links": [
@@ -79,7 +79,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Max Pressure (PSI)",
+              "name": "Memory - Pressure (PSI)",
               "description": "Maximum Memory Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for memory to complete. Threshold: >10% moderate, >30% severe.\n\nAnswers: What is the maximum memory pressure across nodes?"
             },
             "links": [
@@ -139,8 +139,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Imbalance",
-              "description": "Coefficient of Variation for memory utilization across nodes. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is memory utilization across nodes?"
+              "name": "Memory - Imbalance",
+              "description": "Quantile ratio (p95/p50) for memory utilization across nodes. Shows how much more loaded the busiest nodes are vs median. Threshold: <1.5 green (balanced), 1.5-2.5 yellow (moderate imbalance), >2.5 red (high imbalance).\n\nAnswers: How balanced is memory utilization across nodes?"
             },
             "links": [
               {
@@ -168,12 +168,12 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "color": "#FFB249",
-                      "value": 0.3
+                      "value": 1.5,
+                      "color": "#FFB249"
                     },
                     {
-                      "color": "#EE6C6C",
-                      "value": 0.6
+                      "value": 2.5,
+                      "color": "#EE6C6C"
                     }
                   ]
                 }
@@ -186,8 +186,8 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:memory:imbalance:ratio",
-                      "seriesNameFormat": "Coefficient of Variation"
+                      "query": "openshift:cluster:memory:imbalance:ratio{scope=\"workloads\"}",
+                      "seriesNameFormat": "Imbalance ratio (p95/p50)"
                     }
                   }
                 }
@@ -199,7 +199,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Virtual Commitment",
+              "name": "Memory - Virtual Commitment",
               "description": "Total committed virtual memory as a percentage of allocatable physical memory. Threshold: <120% green (acceptable), 120-150% yellow (monitor VM usage), >150% red (high overcommitment risk).\n\nAnswers: Is the cluster overcommitting virtual memory?"
             },
             "links": [
@@ -219,7 +219,7 @@
                 },
                 "format": {
                   "decimalPlaces": 1,
-                  "unit": "percent"
+                  "unit": "percent-decimal"
                 },
                 "thresholds": {
                   "steps": [
@@ -246,7 +246,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "sum(openshift:vm:virtual:memory:bytes) / sum(kube_node_status_allocatable{resource=\"memory\"}) * 100",
+                      "query": "sum(openshift:vm:virtual:memory:bytes) / sum(kube_node_status_allocatable{resource=\"memory\"})",
                       "seriesNameFormat": "Virtual memory commitment"
                     }
                   }
@@ -259,10 +259,17 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Utilization",
+              "name": "CPU - Utilization",
               "description": "Percentage of cluster CPU capacity currently in use by workloads. Threshold: <70% green (healthy capacity), 70-85% yellow (monitor usage), >85% red (high utilization).\n\nAnswers: How much of the cluster's CPU is being used?"
             },
-            "links": [              {                "name": "View CPU Dashboard",                "tooltip": "Drill down to CPU dashboard",                "targetBlank": false,                "url": "/dashboards/openshift-cnv/cpu"              }            ],
+            "links": [
+              {
+                "name": "View CPU Dashboard",
+                "tooltip": "Drill down to CPU dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/openshift-cnv/cpu"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -312,10 +319,17 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Max Pressure (PSI)",
+              "name": "CPU - Pressure (PSI)",
               "description": "Maximum CPU Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for CPU. Threshold: <10% green (healthy), 10-30% yellow (moderate pressure), >30% red (high contention).\n\nAnswers: What is the worst-case CPU pressure in the cluster?"
             },
-            "links": [              {                "name": "View CPU Dashboard",                "tooltip": "Drill down to CPU dashboard",                "targetBlank": false,                "url": "/dashboards/openshift-cnv/cpu"              }            ],
+            "links": [
+              {
+                "name": "View CPU Dashboard",
+                "tooltip": "Drill down to CPU dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/openshift-cnv/cpu"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -365,10 +379,17 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Imbalance",
-              "description": "Coefficient of variation for CPU allocation across nodes. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is CPU allocation across nodes?"
+              "name": "CPU - Imbalance",
+              "description": "Quantile ratio (p95/p50) for CPU utilization across nodes. Shows how much more loaded the busiest nodes are vs median. Threshold: <1.5 green (balanced), 1.5-2.5 yellow (moderate imbalance), >2.5 red (high imbalance).\n\nAnswers: How balanced is CPU utilization across nodes?"
             },
-            "links": [              {                "name": "View CPU Dashboard",                "tooltip": "Drill down to CPU dashboard",                "targetBlank": false,                "url": "/dashboards/openshift-cnv/cpu"              }            ],
+            "links": [
+              {
+                "name": "View CPU Dashboard",
+                "tooltip": "Drill down to CPU dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/openshift-cnv/cpu"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -387,11 +408,11 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "value": 0.3,
+                      "value": 1.5,
                       "color": "#FFB249"
                     },
                     {
-                      "value": 0.6,
+                      "value": 2.5,
                       "color": "#EE6C6C"
                     }
                   ]
@@ -405,8 +426,8 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:cpu:imbalance:ratio",
-                      "seriesNameFormat": "Coefficient of Variation"
+                      "query": "openshift:cluster:cpu:imbalance:ratio{scope=\"workloads\"}",
+                      "seriesNameFormat": "Imbalance ratio (p95/p50)"
                     }
                   }
                 }
@@ -418,10 +439,17 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Virtual Commitment",
+              "name": "CPU - Virtual Commitment",
               "description": "Total virtual CPUs assigned to VMs as a percentage of physical CPU capacity. Threshold: <120% green (acceptable), 120-150% yellow (monitor VM usage), >150% red (high overcommit risk).\n\nAnswers: Is the cluster overcommitting virtual CPUs?"
             },
-            "links": [              {                "name": "View CPU Dashboard",                "tooltip": "Drill down to CPU dashboard",                "targetBlank": false,                "url": "/dashboards/openshift-cnv/cpu"              }            ],
+            "links": [
+              {
+                "name": "View CPU Dashboard",
+                "tooltip": "Drill down to CPU dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/openshift-cnv/cpu"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -430,7 +458,7 @@
                   "color": "blue-grey"
                 },
                 "format": {
-                  "unit": "percent",
+                  "unit": "percent-decimal",
                   "decimalPlaces": 1
                 },
                 "thresholds": {
@@ -458,7 +486,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:cpu:overcommit:ratio{scope=\"virtual\"} * 100",
+                      "query": "openshift:cluster:cpu:overcommit:ratio{scope=\"virtual\"}",
                       "seriesNameFormat": "vCPU overcommit"
                     }
                   }
@@ -471,10 +499,17 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Utilization",
+              "name": "I/O - Utilization",
               "description": "Cluster-wide storage device busy time as a percentage. Shows the fraction of wall-clock time when at least one I/O request was in flight. Threshold: <70% green (healthy capacity), 70-85% yellow (monitor usage), >85% red (high utilization).\n\nAnswers: How busy are the storage devices?"
             },
-            "links": [              {                "name": "View I/O Dashboard",                "tooltip": "Drill down to I/O dashboard",                "targetBlank": false,                "url": "/dashboards/openshift-cnv/io"              }            ],
+            "links": [
+              {
+                "name": "View I/O Dashboard",
+                "tooltip": "Drill down to I/O dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/openshift-cnv/io"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -524,10 +559,17 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Max Pressure (PSI)",
+              "name": "I/O - Pressure (PSI)",
               "description": "Maximum I/O Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for I/O to complete. Threshold: >10% moderate, >30% severe.\n\nAnswers: How much time are tasks waiting for I/O?"
             },
-            "links": [              {                "name": "View I/O Dashboard",                "tooltip": "Drill down to I/O dashboard",                "targetBlank": false,                "url": "/dashboards/openshift-cnv/io"              }            ],
+            "links": [
+              {
+                "name": "View I/O Dashboard",
+                "tooltip": "Drill down to I/O dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/openshift-cnv/io"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -536,7 +578,8 @@
                   "color": "blue-grey"
                 },
                 "format": {
-                  "unit": "percent-decimal"
+                  "unit": "percent-decimal",
+                  "decimalPlaces": 1
                 },
                 "thresholds": {
                   "steps": [
@@ -576,10 +619,17 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Imbalance",
-              "description": "Coefficient of Variation for storage latency (p95) across nodes. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is storage latency across nodes?"
+              "name": "I/O - Imbalance",
+              "description": "Quantile ratio (p95/p50) for I/O latency across nodes. Shows how much slower the slowest nodes are vs median. Threshold: <2.0 green (balanced), 2.0-4.0 yellow (moderate imbalance), >4.0 red (high imbalance).\n\nAnswers: How balanced is I/O latency across nodes?"
             },
-            "links": [              {                "name": "View I/O Dashboard",                "tooltip": "Drill down to I/O dashboard",                "targetBlank": false,                "url": "/dashboards/openshift-cnv/io"              }            ],
+            "links": [
+              {
+                "name": "View I/O Dashboard",
+                "tooltip": "Drill down to I/O dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/openshift-cnv/io"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -598,11 +648,11 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "value": 0.3,
+                      "value": 2.0,
                       "color": "#FFB249"
                     },
                     {
-                      "value": 0.6,
+                      "value": 4.0,
                       "color": "#EE6C6C"
                     }
                   ]
@@ -617,7 +667,7 @@
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
                       "query": "openshift:cluster:io:latency:imbalance:ratio",
-                      "seriesNameFormat": "Coefficient of Variation"
+                      "seriesNameFormat": "Imbalance ratio (p95/p50)"
                     }
                   }
                 }
@@ -629,10 +679,17 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Latency (p95)",
+              "name": "I/O - Latency (p95)",
               "description": "Storage I/O p95 latency percentile. 95% of operations complete within this time. Threshold: <30ms green, 30-60ms yellow, >60ms red.\n\nAnswers: What is the current storage p95 latency?"
             },
-            "links": [              {                "name": "View I/O Dashboard",                "tooltip": "Drill down to I/O dashboard",                "targetBlank": false,                "url": "/dashboards/openshift-cnv/io"              }            ],
+            "links": [
+              {
+                "name": "View I/O Dashboard",
+                "tooltip": "Drill down to I/O dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/openshift-cnv/io"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -641,7 +698,8 @@
                   "color": "blue-grey"
                 },
                 "format": {
-                  "unit": "milliseconds"
+                  "unit": "seconds",
+                  "decimalPlaces": 1
                 },
                 "thresholds": {
                   "steps": [
@@ -650,12 +708,12 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "color": "#FFB249",
-                      "value": 30
+                      "value": 0.03,
+                      "color": "#FFB249"
                     },
                     {
-                      "color": "#EE6C6C",
-                      "value": 60
+                      "value": 0.06,
+                      "color": "#EE6C6C"
                     }
                   ]
                 }
@@ -668,7 +726,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:p95 * 1000",
+                      "query": "openshift:cluster:io:latency:p95",
                       "seriesNameFormat": "p95 latency"
                     }
                   }

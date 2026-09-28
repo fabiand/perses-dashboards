@@ -507,7 +507,7 @@
               "calculation": "last-number",
               "format": {
                 "decimalPlaces": 1,
-                "unit": "percent"
+                "unit": "percent-decimal"
               },
               "thresholds": {
                 "steps": [
@@ -534,7 +534,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift:vm:virtual:memory:bytes) / sum(kube_node_status_allocatable{resource=\"memory\"}) * 100",
+                    "query": "sum(openshift:vm:virtual:memory:bytes) / sum(kube_node_status_allocatable{resource=\"memory\"})",
                     "seriesNameFormat": "Virtual Memory commitment"
                   }
                 }
@@ -650,7 +650,7 @@
         "spec": {
           "display": {
             "name": "Node Imbalance",
-            "description": "Coefficient of Variation for memory utilization across nodes. Measures how evenly memory is distributed across the cluster. Lower values indicate balanced distribution; higher values mean some nodes are heavily loaded while others are underutilized. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance). High imbalance reduces effective capacity.\n\nAnswers: How balanced is memory utilization across nodes?"
+            "description": "Quantile ratio (p95/p50) for memory utilization across nodes. Shows how much more loaded the busiest nodes are vs median. Threshold: <1.5 green (balanced), 1.5-2.5 yellow (moderate imbalance), >2.5 red (high imbalance).\n\nAnswers: How balanced is memory utilization across nodes?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -660,7 +660,7 @@
                 "decimalPlaces": 1,
                 "unit": "decimal"
               },
-              "max": 1,
+              "max": 5,
               "thresholds": {
                 "steps": [
                   {
@@ -668,12 +668,12 @@
                     "color": "#59CC8D"
                   },
                   {
-                    "color": "#FFB249",
-                    "value": 0.3
+                    "value": 1.5,
+                    "color": "#FFB249"
                   },
                   {
-                    "color": "#EE6C6C",
-                    "value": 0.6
+                    "value": 2.5,
+                    "color": "#EE6C6C"
                   }
                 ]
               }
@@ -686,8 +686,8 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "openshift:cluster:memory:imbalance:ratio",
-                    "seriesNameFormat": "Coefficient of Variation"
+                    "query": "openshift:cluster:memory:imbalance:ratio{scope=\"workloads\"}",
+                    "seriesNameFormat": "Imbalance ratio (p95/p50)"
                   }
                 }
               }
@@ -1085,7 +1085,8 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "unit": "percent-decimal"
+                "unit": "percent-decimal",
+                "decimalPlaces": 1
               },
               "thresholds": {
                 "steps": [
@@ -1131,7 +1132,8 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "unit": "percent-decimal"
+                "unit": "percent-decimal",
+                "decimalPlaces": 1
               },
               "thresholds": {
                 "steps": [

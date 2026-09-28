@@ -25,7 +25,8 @@
               "spec": {
                 "calculation": "last-number",
                 "format": {
-                  "unit": "decimal"
+                  "unit": "decimal",
+                  "decimalPlaces": 1
                 }
               }
             },
@@ -57,7 +58,8 @@
               "spec": {
                 "calculation": "last-number",
                 "format": {
-                  "unit": "decimal"
+                  "unit": "decimal",
+                  "decimalPlaces": 1
                 }
               }
             },
@@ -89,7 +91,8 @@
               "spec": {
                 "calculation": "last-number",
                 "format": {
-                  "unit": "percent-decimal"
+                  "unit": "percent-decimal",
+                  "decimalPlaces": 1
                 },
                 "thresholds": {
                   "steps": [
@@ -179,7 +182,7 @@
           "spec": {
             "display": {
               "name": "Node Imbalance",
-              "description": "Coefficient of variation for CPU allocation across nodes. Measures how evenly CPU load is distributed. Lower values indicate balanced distribution; higher values mean some nodes are heavily loaded while others are underutilized. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is CPU allocation across nodes?"
+              "description": "Quantile ratio (p95/p50) for CPU utilization across nodes. Shows how much more loaded the busiest nodes are vs median. Threshold: <1.5 green (balanced), 1.5-2.5 yellow (moderate imbalance), >2.5 red (high imbalance).\n\nAnswers: How balanced is CPU utilization across nodes?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -189,7 +192,7 @@
                   "unit": "decimal",
                   "decimalPlaces": 1
                 },
-                "max": 1,
+                "max": 5,
                 "thresholds": {
                   "steps": [
                     {
@@ -197,11 +200,11 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "value": 0.3,
+                      "value": 1.5,
                       "color": "#FFB249"
                     },
                     {
-                      "value": 0.6,
+                      "value": 2.5,
                       "color": "#EE6C6C"
                     }
                   ]
@@ -216,7 +219,7 @@
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
                       "query": "openshift:cluster:cpu:imbalance:ratio{scope=\"workloads\"}",
-                      "seriesNameFormat": "Coefficient of Variation"
+                      "seriesNameFormat": "Imbalance ratio (p95/p50)"
                     }
                   }
                 }
@@ -285,7 +288,7 @@
               "spec": {
                 "calculation": "last-number",
                 "format": {
-                  "unit": "percent",
+                  "unit": "percent-decimal",
                   "decimalPlaces": 1
                 },
                 "thresholds": {
@@ -313,7 +316,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:cpu:overcommit:ratio{scope=\"virtual\"} * 100",
+                      "query": "openshift:cluster:cpu:overcommit:ratio{scope=\"virtual\"}",
                       "seriesNameFormat": "vCPU overcommit"
                     }
                   }
