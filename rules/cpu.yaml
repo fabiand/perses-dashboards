@@ -185,8 +185,8 @@ spec:
             /
             sum(openshift:node:cpu:seconds{scope="workloads"})
 
-        # Cluster-wide CPU utilization imbalance
-        # p80 quantile of percentage point distance from mean
+        # Cluster-wide CPU pressure imbalance
+        # p80 quantile of percentage point distance from mean pressure
         # Shows the spread: 80% of nodes are within this many percentage points of the mean
         # Values: <0.10 (±10pp) = well balanced, 0.10-0.15 = moderate, 0.15-0.20 = significant, >0.20 = severe imbalance
         - record: openshift:cluster:cpu:imbalance:p80distance
@@ -196,9 +196,9 @@ spec:
           expr: |
             quantile(0.80,
               abs(
-                openshift:node:cpu:utilization:ratio{scope="workloads"}
+                openshift:node:cpu:pressure:ratio{severity="some"}
                 -
-                scalar(avg(openshift:node:cpu:utilization:ratio{scope="workloads"}))
+                scalar(avg(openshift:node:cpu:pressure:ratio{severity="some"}))
               )
             )
 

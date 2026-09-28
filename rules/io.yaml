@@ -146,11 +146,11 @@ spec:
               sum(rate(kme_system_block_io_latency_seconds_bucket[2m])) by (le, node)
             )
 
-        # Cluster-wide I/O latency imbalance
-        # p80 quantile of percentage distance from mean latency (normalized)
-        # Shows the spread: 80% of nodes are within this percentage of the mean
-        # Values: <0.10 (±10%) = well balanced, 0.10-0.15 = moderate, 0.15-0.20 = significant, >0.20 = severe imbalance
-        - record: openshift:cluster:io:latency:imbalance:p80distance
+        # Cluster-wide I/O pressure imbalance
+        # p80 quantile of percentage point distance from mean pressure
+        # Shows the spread: 80% of nodes are within this many percentage points of the mean
+        # Values: <0.10 (±10pp) = well balanced, 0.10-0.15 = moderate, 0.15-0.20 = significant, >0.20 = severe imbalance
+        - record: openshift:cluster:io:imbalance:p80distance
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -158,12 +158,10 @@ spec:
           expr: |
             quantile(0.80,
               abs(
-                openshift:node:io:latency:p95
+                openshift:node:io:pressure:ratio{severity="some"}
                 -
-                scalar(avg(openshift:node:io:latency:p95))
+                scalar(avg(openshift:node:io:pressure:ratio{severity="some"}))
               )
-              /
-              scalar(avg(openshift:node:io:latency:p95))
             )
 
         # Per-node I/O pressure (PSI)

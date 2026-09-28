@@ -17,8 +17,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Node Imbalance",
-              "description": "80th percentile of percentage distance from mean I/O latency. Shows the spread: 80% of nodes are within this percentage of the mean. For example, 0.15 means 80% of nodes are within ±15% of mean latency. Threshold: <0.10 (±10%) green (well balanced), 0.10-0.15 yellow (moderate), 0.15-0.20 orange (significant), >0.20 red (severe imbalance).\n\nAnswers: How balanced is I/O latency across nodes?"
+              "name": "Pressure Imbalance",
+              "description": "80th percentile of percentage point distance from mean I/O pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.15 means 80% of nodes are within ±15pp of mean pressure. Threshold: <0.10 (±10pp) green (well balanced), 0.10-0.15 yellow (moderate), 0.15-0.20 orange (significant), >0.20 red (severe imbalance).\n\nAnswers: How balanced is I/O pressure across nodes?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -58,7 +58,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:imbalance:p80distance",
+                      "query": "openshift:cluster:io:imbalance:p80distance",
                       "seriesNameFormat": "p80 distance from mean"
                     }
                   }

@@ -139,8 +139,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Memory - Imbalance",
-              "description": "80th percentile of percentage point distance from mean memory utilization. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <10% green (well balanced), 10-15% yellow (moderate), 15-20% orange (significant), >20% red (severe imbalance).\n\nAnswers: How balanced is memory utilization across nodes?"
+              "name": "Memory - Pressure Imbalance",
+              "description": "80th percentile of percentage point distance from mean memory pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <10% green (well balanced), 10-15% yellow (moderate), 15-20% orange (significant), >20% red (severe imbalance).\n\nAnswers: How balanced is memory pressure across nodes?"
             },
             "links": [
               {
@@ -383,8 +383,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "CPU - Imbalance",
-              "description": "80th percentile of percentage point distance from mean CPU utilization. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <10% green (well balanced), 10-15% yellow (moderate), 15-20% orange (significant), >20% red (severe imbalance).\n\nAnswers: How balanced is CPU utilization across nodes?"
+              "name": "CPU - Pressure Imbalance",
+              "description": "80th percentile of percentage point distance from mean CPU pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <10% green (well balanced), 10-15% yellow (moderate), 15-20% orange (significant), >20% red (severe imbalance).\n\nAnswers: How balanced is CPU pressure across nodes?"
             },
             "links": [
               {
@@ -627,8 +627,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "I/O - Imbalance",
-              "description": "80th percentile of percentage distance from mean I/O latency. Shows the spread: 80% of nodes are within this percentage of the mean. Threshold: <10% green (well balanced), 10-15% yellow (moderate), 15-20% orange (significant), >20% red (severe imbalance).\n\nAnswers: How balanced is I/O latency across nodes?"
+              "name": "I/O - Pressure Imbalance",
+              "description": "80th percentile of percentage point distance from mean I/O pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <10% green (well balanced), 10-15% yellow (moderate), 15-20% orange (significant), >20% red (severe imbalance).\n\nAnswers: How balanced is I/O pressure across nodes?"
             },
             "links": [
               {
@@ -678,7 +678,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:imbalance:p80distance",
+                      "query": "openshift:cluster:io:imbalance:p80distance",
                       "seriesNameFormat": "p80 distance from mean"
                     }
                   }

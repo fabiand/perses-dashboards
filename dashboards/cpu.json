@@ -181,8 +181,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Node Imbalance",
-              "description": "80th percentile of percentage point distance from mean CPU utilization. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.15 means 80% of nodes are within ±15pp of mean. Threshold: <0.10 (±10pp) green (well balanced), 0.10-0.15 yellow (moderate), 0.15-0.20 orange (significant), >0.20 red (severe imbalance).\n\nAnswers: How balanced is CPU utilization across nodes?"
+              "name": "Pressure Imbalance",
+              "description": "80th percentile of percentage point distance from mean CPU pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.15 means 80% of nodes are within ±15pp of mean pressure. Threshold: <0.10 (±10pp) green (well balanced), 0.10-0.15 yellow (moderate), 0.15-0.20 orange (significant), >0.20 red (severe imbalance).\n\nAnswers: How balanced is CPU pressure across nodes?"
             },
             "plugin": {
               "kind": "GaugeChart",
