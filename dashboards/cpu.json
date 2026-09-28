@@ -563,6 +563,94 @@
               }
             ]
           }
+        },
+        "issues": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Issues",
+              "description": "Count of active CPU-related issues: metric collection failures (scrape targets down, kubelet/cAdvisor down), or missing CPU metrics (node series). Any non-zero value indicates problems that may affect CPU monitoring accuracy.\n\nAnswers: Are there any CPU-related system issues or metric collection problems?"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "querySettings": [
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#FF6B35",
+                    "queryIndex": 0
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#C92A2A",
+                    "queryIndex": 1
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#FF4500",
+                    "queryIndex": 2
+                  }
+                ],
+                "visual": {
+                  "display": "line",
+                  "lineWidth": 1.25,
+                  "lineStyle": "solid",
+                  "areaOpacity": 0.3,
+                  "pointRadius": 2.75,
+                  "connectNulls": false,
+                  "stack": "all"
+                },
+                "legend": {
+                  "position": "bottom"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "count(ALERTS{alertname=\"TargetDown\", job=\"kube-state-metrics\"}) > 0",
+                      "seriesNameFormat": "Invalid metrics (scrape target down)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "count(up{job=\"kubelet\",metrics_path=\"/metrics/cadvisor\"} == 0) > 0",
+                      "seriesNameFormat": "Invalid metrics (kubelet cAdvisor down)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "(count(kube_node_status_allocatable{resource=\"cpu\"}) - count(openshift:node:cpu:count{scope=\"workloads\"})) > 0",
+                      "seriesNameFormat": "Missing node CPU series"
+                    }
+                  }
+                }
+              }
+            ],
+            "links": [
+              {
+                "name": "Runbook TargetDown",
+                "url": "https://github.com/openshift/runbooks/blob/master/alerts/cluster-monitoring-operator/TargetDown.md",
+                "tooltip": "Runbook"
+              }
+            ]
+          }
         }
       },
       "layouts": [
@@ -619,6 +707,15 @@
                 "height": 9,
                 "content": {
                   "$ref": "#/spec/panels/cluster_cpu_utilization_history"
+                }
+              },
+              {
+                "x": 0,
+                "y": 15,
+                "width": 24,
+                "height": 5,
+                "content": {
+                  "$ref": "#/spec/panels/issues"
                 }
               }
             ]
