@@ -643,7 +643,7 @@
           "kind": "Grid",
           "spec": {
             "display": {
-              "title": "At a Glance - Overview",
+              "title": "Memory",
               "collapse": {
                 "open": true
               }
@@ -684,10 +684,23 @@
                 "content": {
                   "$ref": "#/spec/panels/memory_virtual_commitment"
                 }
-              },
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "CPU",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
               {
                 "x": 0,
-                "y": 6,
+                "y": 0,
                 "width": 6,
                 "height": 6,
                 "content": {
@@ -696,7 +709,7 @@
               },
               {
                 "x": 6,
-                "y": 6,
+                "y": 0,
                 "width": 6,
                 "height": 6,
                 "content": {
@@ -705,7 +718,7 @@
               },
               {
                 "x": 12,
-                "y": 6,
+                "y": 0,
                 "width": 6,
                 "height": 6,
                 "content": {
@@ -714,47 +727,60 @@
               },
               {
                 "x": 18,
-                "y": 6,
+                "y": 0,
                 "width": 6,
                 "height": 6,
                 "content": {
                   "$ref": "#/spec/panels/cpu_virtual_commitment"
                 }
-              },
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "I/O",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
               {
                 "x": 0,
-                "y": 12,
+                "y": 0,
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/storage_utilization"
+                  "$ref": "#/spec/panels/io_utilization"
                 }
               },
               {
                 "x": 6,
-                "y": 12,
+                "y": 0,
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/storage_pressure"
+                  "$ref": "#/spec/panels/io_pressure"
                 }
               },
               {
                 "x": 12,
-                "y": 12,
+                "y": 0,
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/storage_imbalance"
+                  "$ref": "#/spec/panels/io_imbalance"
                 }
               },
               {
                 "x": 18,
-                "y": 12,
+                "y": 0,
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/storage_latency"
+                  "$ref": "#/spec/panels/io_latency"
                 }
               }
             ]
