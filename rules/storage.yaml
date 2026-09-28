@@ -17,7 +17,7 @@ spec:
             protocol: "block"
             unit: seconds
           expr: |
-            rate(kme_system_block_io_latency_seconds_bucket[1m])
+            rate(kme_system_block_io_latency_seconds_bucket[2m])
 
         # Cluster-wide latency distribution: 0-10ms
         - record: openshift:cluster:storage:latency_bucket:ratio
@@ -27,9 +27,9 @@ spec:
             le: "0.01"
             unit: ratio
           expr: |
-            sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.01"}[1m]))
+            sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.01"}[2m]))
             /
-            sum(rate(kme_system_block_io_latency_seconds_count[1m]))
+            sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide latency distribution: 10-100ms
         - record: openshift:cluster:storage:latency_bucket:ratio
@@ -41,11 +41,11 @@ spec:
             unit: ratio
           expr: |
             (
-              sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.1"}[1m]))
-              - sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.01"}[1m]))
+              sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.1"}[2m]))
+              - sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.01"}[2m]))
             )
             /
-            sum(rate(kme_system_block_io_latency_seconds_count[1m]))
+            sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide latency distribution: 100ms-1s
         - record: openshift:cluster:storage:latency_bucket:ratio
@@ -57,11 +57,11 @@ spec:
             unit: ratio
           expr: |
             (
-              sum(rate(kme_system_block_io_latency_seconds_bucket{le="1.0"}[1m]))
-              - sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.1"}[1m]))
+              sum(rate(kme_system_block_io_latency_seconds_bucket{le="1.0"}[2m]))
+              - sum(rate(kme_system_block_io_latency_seconds_bucket{le="0.1"}[2m]))
             )
             /
-            sum(rate(kme_system_block_io_latency_seconds_count[1m]))
+            sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide latency distribution: >1s
         - record: openshift:cluster:storage:latency_bucket:ratio
@@ -73,11 +73,11 @@ spec:
             unit: ratio
           expr: |
             (
-              sum(rate(kme_system_block_io_latency_seconds_bucket{le="+Inf"}[1m]))
-              - sum(rate(kme_system_block_io_latency_seconds_bucket{le="1.0"}[1m]))
+              sum(rate(kme_system_block_io_latency_seconds_bucket{le="+Inf"}[2m]))
+              - sum(rate(kme_system_block_io_latency_seconds_bucket{le="1.0"}[2m]))
             )
             /
-            sum(rate(kme_system_block_io_latency_seconds_count[1m]))
+            sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide p50 (median) latency
         - record: openshift:cluster:storage:latency:p50
@@ -87,7 +87,7 @@ spec:
             unit: seconds
           expr: |
             histogram_quantile(0.5,
-              sum(rate(kme_system_block_io_latency_seconds_bucket[1m])) by (le)
+              sum(rate(kme_system_block_io_latency_seconds_bucket[2m])) by (le)
             )
 
         # Cluster-wide p95 latency
@@ -98,7 +98,7 @@ spec:
             unit: seconds
           expr: |
             histogram_quantile(0.95,
-              sum(rate(kme_system_block_io_latency_seconds_bucket[1m])) by (le)
+              sum(rate(kme_system_block_io_latency_seconds_bucket[2m])) by (le)
             )
 
         # Cluster-wide p99 latency
@@ -109,5 +109,29 @@ spec:
             unit: seconds
           expr: |
             histogram_quantile(0.99,
-              sum(rate(kme_system_block_io_latency_seconds_bucket[1m])) by (le)
+              sum(rate(kme_system_block_io_latency_seconds_bucket[2m])) by (le)
             )
+
+        # Per-node p95 latency
+        - record: openshift:node:storage:latency:p95
+          labels:
+            layer: "host_to_device"
+            protocol: "block"
+            unit: seconds
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(kme_system_block_io_latency_seconds_bucket[2m])) by (le, node)
+            )
+
+        # Cluster-wide storage latency imbalance
+        # Coefficient of variation: measures spread of p95 latency across nodes
+        # Values: <0.3 = balanced, 0.3-0.6 = moderate imbalance, >0.6 = high imbalance
+        - record: openshift:cluster:storage:latency:imbalance:ratio
+          labels:
+            layer: "host_to_device"
+            protocol: "block"
+            unit: ratio
+          expr: |
+            stddev(openshift:node:storage:latency:p95)
+            /
+            avg(openshift:node:storage:latency:p95)
