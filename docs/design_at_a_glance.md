@@ -27,8 +27,8 @@ Provide instant cluster health assessment. Green = healthy, red = requires actio
 
 4. **Domain-specific time series**
    - Memory: cluster utilization history with tier breakdown
-   - Storage: latency quantiles (p50/p95/p99)
-   - CPU: overcommit ratio per node
+   - I/O: utilization history (max and average device busy time)
+   - CPU: system/workloads busy/idle breakdown
 
 ## Panel Group Schema
 
@@ -55,7 +55,7 @@ Row 2: Time Series (full width, 24 units)
 **Examples:**
 - Memory: "At a Glance - Memory", Row 2 shows cluster utilization with tier breakdown
 - CPU: "At a Glance - CPU", Row 2 shows system/workloads busy/idle
-- Storage: "At a Glance - Storage", Row 2 shows latency quantiles (p50/p95/p99)
+- I/O: "At a Glance - I/O", Row 2 shows utilization history (max/avg device busy time)
 
 ### Gauge Details
 
@@ -80,11 +80,11 @@ Row 2: Time Series (full width, 24 units)
   - Format: percent (150% means 1.5× overcommit)
   - Thresholds: <120% green, 120-150% yellow, >150% red
   - Action: Red = reduce overcommit or prepare for contention
-- **Storage:** Latency Quantiles
+- **I/O:** Latency Quantiles
   - Shows: p50/p95/p99 latency percentiles
   - Format: milliseconds
   - Thresholds: <30ms green, 30-60ms yellow, >60ms red
-  - Action: Red = investigate storage performance
+  - Action: Red = investigate I/O performance
 
 ### Time Series Examples
 
@@ -96,9 +96,9 @@ Row 2: Time Series (full width, 24 units)
 - Cluster CPU utilization over time
 - Stacked area chart: system (red), workloads busy (orange), workloads idle (green), committed (blue dashed)
 
-**Storage Dashboard** ("At a Glance - Storage")
-- Latency quantiles (p50, p95, p99)
-- Line chart showing latency trends
+**I/O Dashboard** ("At a Glance - I/O")
+- I/O utilization history (max and average device busy time)
+- Line chart showing max (orange) and avg (green) utilization trends
 
 ## Implementation Notes
 

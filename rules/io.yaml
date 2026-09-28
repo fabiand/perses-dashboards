@@ -2,17 +2,17 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: storage-latency-rules
+  name: io-rules
   labels:
     prometheus: k8s
     role: alert-rules
 spec:
   groups:
-    - name: storage_latency.rules
+    - name: io.rules
       rules:
-        # Per-device storage utilization (busy time)
+        # Per-device I/O utilization (busy time)
         # Fraction of time the device had at least one I/O request in flight
-        - record: openshift:node:storage:utilization:ratio
+        - record: openshift:node:io:utilization:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -23,18 +23,18 @@ spec:
               "node", "$1", "instance", "(.+)"
             )
 
-        # Cluster-wide storage utilization (max across all devices)
+        # Cluster-wide I/O utilization (max across all devices)
         # Shows worst-case device busy time
-        - record: openshift:cluster:storage:utilization:ratio
+        - record: openshift:cluster:io:utilization:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
             unit: ratio
           expr: |
-            max(openshift:node:storage:utilization:ratio)
+            max(openshift:node:io:utilization:ratio)
 
         # Per-node latency histogram rate
-        - record: openshift:node:storage:latency:rate
+        - record: openshift:node:io:latency:rate
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -43,7 +43,7 @@ spec:
             rate(kme_system_block_io_latency_seconds_bucket[2m])
 
         # Cluster-wide latency distribution: 0-10ms
-        - record: openshift:cluster:storage:latency_bucket:ratio
+        - record: openshift:cluster:io:latency_bucket:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -55,7 +55,7 @@ spec:
             sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide latency distribution: 10-100ms
-        - record: openshift:cluster:storage:latency_bucket:ratio
+        - record: openshift:cluster:io:latency_bucket:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -71,7 +71,7 @@ spec:
             sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide latency distribution: 100ms-1s
-        - record: openshift:cluster:storage:latency_bucket:ratio
+        - record: openshift:cluster:io:latency_bucket:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -87,7 +87,7 @@ spec:
             sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide latency distribution: >1s
-        - record: openshift:cluster:storage:latency_bucket:ratio
+        - record: openshift:cluster:io:latency_bucket:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -103,7 +103,7 @@ spec:
             sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide p50 (median) latency
-        - record: openshift:cluster:storage:latency:p50
+        - record: openshift:cluster:io:latency:p50
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -114,7 +114,7 @@ spec:
             )
 
         # Cluster-wide p95 latency
-        - record: openshift:cluster:storage:latency:p95
+        - record: openshift:cluster:io:latency:p95
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -125,7 +125,7 @@ spec:
             )
 
         # Cluster-wide p99 latency
-        - record: openshift:cluster:storage:latency:p99
+        - record: openshift:cluster:io:latency:p99
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -136,7 +136,7 @@ spec:
             )
 
         # Per-node p95 latency
-        - record: openshift:node:storage:latency:p95
+        - record: openshift:node:io:latency:p95
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -146,15 +146,15 @@ spec:
               sum(rate(kme_system_block_io_latency_seconds_bucket[2m])) by (le, node)
             )
 
-        # Cluster-wide storage latency imbalance
+        # Cluster-wide I/O latency imbalance
         # Coefficient of variation: measures spread of p95 latency across nodes
         # Values: <0.3 = balanced, 0.3-0.6 = moderate imbalance, >0.6 = high imbalance
-        - record: openshift:cluster:storage:latency:imbalance:ratio
+        - record: openshift:cluster:io:latency:imbalance:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
             unit: ratio
           expr: |
-            stddev(openshift:node:storage:latency:p95)
+            stddev(openshift:node:io:latency:p95)
             /
-            avg(openshift:node:storage:latency:p95)
+            avg(openshift:node:io:latency:p95)

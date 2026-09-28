@@ -2,7 +2,7 @@
   {
     "kind": "Dashboard",
     "metadata": {
-      "name": "storage_latency",
+      "name": "io",
       "createdAt": "2026-09-18T14:33:54.933644325Z",
       "updatedAt": "2026-09-18T15:00:27.127455287Z",
       "version": 1,
@@ -10,7 +10,7 @@
     },
     "spec": {
       "display": {
-        "name": "Storage"
+        "name": "I/O"
       },
       "panels": {
         "53d12c6d478148e7b910be6a52e0ef52": {
@@ -18,7 +18,7 @@
           "spec": {
             "display": {
               "name": "Node Imbalance",
-              "description": "Coefficient of Variation for storage latency (p95) across nodes. Measures how evenly I/O performance is distributed across the cluster. Lower values indicate balanced latency; higher values mean some nodes have significantly worse I/O performance than others. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is storage latency across nodes?"
+              "description": "Coefficient of Variation for I/O latency (p95) across nodes. Measures how evenly I/O performance is distributed across the cluster. Lower values indicate balanced latency; higher values mean some nodes have significantly worse I/O performance than others. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is I/O latency across nodes?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -54,7 +54,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency:imbalance:ratio",
+                      "query": "openshift:cluster:io:latency:imbalance:ratio",
                       "seriesNameFormat": "Coefficient of Variation"
                     }
                   }
@@ -116,7 +116,7 @@
           "spec": {
             "display": {
               "name": "Latency Quantiles",
-              "description": "Storage I/O latency percentiles: p50 shows typical latency (50% of operations complete within this time), p95 indicates SLA performance (95% complete within this time), p99 shows tail latency (worst-case for 99% of operations). Lower is better.\n\nAnswers: What are the current storage latency percentiles?"
+              "description": "I/O latency percentiles: p50 shows typical latency (50% of operations complete within this time), p95 indicates SLA performance (95% complete within this time), p99 shows tail latency (worst-case for 99% of operations). Lower is better.\n\nAnswers: What are the current I/O latency percentiles?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -151,7 +151,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency:p50 * 1000",
+                      "query": "openshift:cluster:io:latency:p50 * 1000",
                       "seriesNameFormat": "p50 (median)"
                     }
                   }
@@ -163,7 +163,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency:p95 * 1000",
+                      "query": "openshift:cluster:io:latency:p95 * 1000",
                       "seriesNameFormat": "p95"
                     }
                   }
@@ -175,7 +175,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency:p99 * 1000",
+                      "query": "openshift:cluster:io:latency:p99 * 1000",
                       "seriesNameFormat": "p99"
                     }
                   }
@@ -189,7 +189,7 @@
           "spec": {
             "display": {
               "name": "Utilization",
-              "description": "Cluster-wide storage device busy time as a percentage. Shows the fraction of wall-clock time when at least one I/O request was in flight on the busiest device. Threshold: <70% green (healthy capacity), 70-85% yellow (monitor usage), >85% red (high utilization).\n\nAnswers: How busy are the storage devices?"
+              "description": "Cluster-wide I/O device busy time as a percentage. Shows the fraction of wall-clock time when at least one I/O request was in flight on the busiest device. Threshold: <70% green (healthy capacity), 70-85% yellow (monitor usage), >85% red (high utilization).\n\nAnswers: How busy are the I/O devices?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -224,7 +224,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:utilization:ratio",
+                      "query": "openshift:cluster:io:utilization:ratio",
                       "seriesNameFormat": "Device busy time"
                     }
                   }
@@ -237,8 +237,8 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Storage Utilization History",
-              "description": "Historical trend of storage device utilization showing maximum and average busy time across all devices. Max (orange) shows worst-case device pressure, Avg (green) shows typical cluster-wide utilization. Rising trends indicate growing I/O demand.\n\nAnswers: How has storage device utilization changed over time?"
+              "name": "I/O Utilization History",
+              "description": "Historical trend of I/O device utilization showing maximum and average busy time across all devices. Max (orange) shows worst-case device pressure, Avg (green) shows typical cluster-wide utilization. Rising trends indicate growing I/O demand.\n\nAnswers: How has I/O device utilization changed over time?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -282,7 +282,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "max(openshift:node:storage:utilization:ratio)",
+                      "query": "max(openshift:node:io:utilization:ratio)",
                       "seriesNameFormat": "Max"
                     }
                   }
@@ -294,7 +294,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "avg(openshift:node:storage:utilization:ratio)",
+                      "query": "avg(openshift:node:io:utilization:ratio)",
                       "seriesNameFormat": "Avg"
                     }
                   }
@@ -308,7 +308,7 @@
           "spec": {
             "display": {
               "name": "Latency Distribution",
-              "description": "Percentage distribution of I/O operations by latency buckets (host-to-device). Stacked areas show what portion of operations complete in each time range. Ideal: most operations in 0-10ms (green), minimal in >100ms (red). Shift toward slower buckets indicates storage performance degradation.\n\nAnswers: How are I/O operations distributed across latency buckets?"
+              "description": "Percentage distribution of I/O operations by latency buckets (host-to-device). Stacked areas show what portion of operations complete in each time range. Ideal: most operations in 0-10ms (green), minimal in >100ms (red). Shift toward slower buckets indicates I/O performance degradation.\n\nAnswers: How are I/O operations distributed across latency buckets?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -365,7 +365,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"0.01\"}",
+                      "query": "openshift:cluster:io:latency_bucket:ratio{le=\"0.01\"}",
                       "seriesNameFormat": "0ms - 10ms"
                     }
                   }
@@ -377,7 +377,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"0.1\",g=\"0.01\"}",
+                      "query": "openshift:cluster:io:latency_bucket:ratio{le=\"0.1\",g=\"0.01\"}",
                       "seriesNameFormat": "10ms - 100ms"
                     }
                   }
@@ -389,7 +389,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"1.0\",g=\"0.1\"}",
+                      "query": "openshift:cluster:io:latency_bucket:ratio{le=\"1.0\",g=\"0.1\"}",
                       "seriesNameFormat": "100ms - 1s"
                     }
                   }
@@ -401,7 +401,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency_bucket:ratio{le=\"+Inf\",g=\"1.0\"}",
+                      "query": "openshift:cluster:io:latency_bucket:ratio{le=\"+Inf\",g=\"1.0\"}",
                       "seriesNameFormat": "> 1s"
                     }
                   }
@@ -415,7 +415,7 @@
           "spec": {
             "display": {
               "name": "Latency Quantiles History",
-              "description": "Historical trend of storage I/O latency percentiles over time. Shows how p50 (median), p95, and p99 latencies evolve, helping identify performance degradation patterns and track the impact of changes. Rising trends indicate worsening storage performance.\n\nAnswers: How have storage latency percentiles changed over time?"
+              "description": "Historical trend of storage I/O latency percentiles over time. Shows how p50 (median), p95, and p99 latencies evolve, helping identify performance degradation patterns and track the impact of changes. Rising trends indicate worsening I/O performance.\n\nAnswers: How have I/O latency percentiles changed over time?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -463,7 +463,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency:p50 * 1000",
+                      "query": "openshift:cluster:io:latency:p50 * 1000",
                       "seriesNameFormat": "p50 (median)"
                     }
                   }
@@ -475,7 +475,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency:p95 * 1000",
+                      "query": "openshift:cluster:io:latency:p95 * 1000",
                       "seriesNameFormat": "p95"
                     }
                   }
@@ -487,7 +487,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency:p99 * 1000",
+                      "query": "openshift:cluster:io:latency:p99 * 1000",
                       "seriesNameFormat": "p99"
                     }
                   }
@@ -501,7 +501,7 @@
           "spec": {
             "display": {
               "name": "Latency Alerts History",
-              "description": "Historical view of storage latency alerts per node. Shows when and which nodes experienced high latency. Stacked areas indicate multiple nodes firing simultaneously. Use to correlate latency issues with specific events or changes.\n\nAnswers: Which nodes have experienced latency alerts and when?"
+              "description": "Historical view of I/O latency alerts per node. Shows when and which nodes experienced high latency. Stacked areas indicate multiple nodes firing simultaneously. Use to correlate latency issues with specific events or changes.\n\nAnswers: Which nodes have experienced latency alerts and when?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
@@ -542,7 +542,7 @@
           "kind": "Grid",
           "spec": {
             "display": {
-              "title": "At a Glance - Storage",
+              "title": "At a Glance - I/O",
               "collapse": {
                 "open": true
               }

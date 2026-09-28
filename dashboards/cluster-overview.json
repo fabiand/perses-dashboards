@@ -2,7 +2,7 @@
   {
     "kind": "Dashboard",
     "metadata": {
-      "name": "cluster_overview",
+      "name": "overview",
       "createdAt": "2026-09-28T00:00:00.000000000Z",
       "updatedAt": "2026-09-28T00:00:00.000000000Z",
       "version": 1,
@@ -13,6 +13,7 @@
         "name": "Overview"
       },
       "duration": "15m",
+      "refreshInterval": "15s",
       "panels": {
         "memory_utilization": {
           "kind": "Panel",
@@ -430,11 +431,11 @@
             ]
           }
         },
-        "storage_utilization": {
+        "io_utilization": {
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Storage: Utilization",
+              "name": "I/O: Utilization",
               "description": "Cluster-wide storage device busy time as a percentage. Shows the fraction of wall-clock time when at least one I/O request was in flight. Threshold: <70% green (healthy capacity), 70-85% yellow (monitor usage), >85% red (high utilization).\n\nAnswers: How busy are the storage devices?"
             },
             "plugin": {
@@ -473,7 +474,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:utilization:ratio",
+                      "query": "openshift:cluster:io:utilization:ratio",
                       "seriesNameFormat": "Device busy time"
                     }
                   }
@@ -482,11 +483,11 @@
             ]
           }
         },
-        "storage_pressure": {
+        "io_pressure": {
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Storage: Pressure (PSI)",
+              "name": "I/O: Pressure (PSI)",
               "description": "Maximum I/O Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for I/O to complete. Threshold: >10% moderate, >30% severe.\n\nAnswers: How much time are tasks waiting for I/O?"
             },
             "plugin": {
@@ -533,11 +534,11 @@
             ]
           }
         },
-        "storage_imbalance": {
+        "io_imbalance": {
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Storage: Imbalance",
+              "name": "I/O: Imbalance",
               "description": "Coefficient of Variation for storage latency (p95) across nodes. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is storage latency across nodes?"
             },
             "plugin": {
@@ -576,7 +577,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency:imbalance:ratio",
+                      "query": "openshift:cluster:io:latency:imbalance:ratio",
                       "seriesNameFormat": "Coefficient of Variation"
                     }
                   }
@@ -585,11 +586,11 @@
             ]
           }
         },
-        "storage_latency": {
+        "io_latency": {
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Storage: Latency (p95)",
+              "name": "I/O: Latency (p95)",
               "description": "Storage I/O p95 latency percentile. 95% of operations complete within this time. Threshold: <30ms green, 30-60ms yellow, >60ms red.\n\nAnswers: What is the current storage p95 latency?"
             },
             "plugin": {
@@ -627,7 +628,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:storage:latency:p95 * 1000",
+                      "query": "openshift:cluster:io:latency:p95 * 1000",
                       "seriesNameFormat": "p95 latency"
                     }
                   }
