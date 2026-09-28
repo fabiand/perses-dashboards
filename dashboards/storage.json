@@ -270,6 +270,7 @@
                     "unit": "percent-decimal"
                   },
                   "label": "Device Busy Time",
+                  "max": 1.0,
                   "show": true
                 }
               }
