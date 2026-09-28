@@ -262,7 +262,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(openshift:node:memory:bytes{scope=\"system\"})",
-                    "seriesNameFormat": "Tier 0 - System"
+                    "seriesNameFormat": "System - Tier 0"
                   }
                 }
               }
