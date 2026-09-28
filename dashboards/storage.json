@@ -10,7 +10,7 @@
     },
     "spec": {
       "display": {
-        "name": "Storage Latency"
+        "name": "Storage"
       },
       "panels": {
         "53d12c6d478148e7b910be6a52e0ef52": {
@@ -226,6 +226,76 @@
                     "spec": {
                       "query": "openshift:cluster:storage:utilization:ratio",
                       "seriesNameFormat": "Device busy time"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "storage_utilization_history": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Storage Utilization History",
+              "description": "Historical trend of storage device utilization showing maximum and average busy time across all devices. Max (orange) shows worst-case device pressure, Avg (green) shows typical cluster-wide utilization. Rising trends indicate growing I/O demand.\n\nAnswers: How has storage device utilization changed over time?"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "bottom"
+                },
+                "querySettings": [
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#FF9F1C",
+                    "queryIndex": 0
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#59CC8D",
+                    "queryIndex": 1
+                  }
+                ],
+                "visual": {
+                  "areaOpacity": 0.2,
+                  "connectNulls": false,
+                  "display": "line",
+                  "lineWidth": 1.5,
+                  "pointRadius": 0,
+                  "stack": false
+                },
+                "yAxis": {
+                  "format": {
+                    "unit": "percent-decimal"
+                  },
+                  "label": "Device Busy Time",
+                  "show": true
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "max(openshift:node:storage:utilization:ratio)",
+                      "seriesNameFormat": "Max"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "avg(openshift:node:storage:utilization:ratio)",
+                      "seriesNameFormat": "Avg"
                     }
                   }
                 }
@@ -512,6 +582,15 @@
                 "height": 6,
                 "content": {
                   "$ref": "#/spec/panels/latency_quantiles_gauge"
+                }
+              },
+              {
+                "x": 0,
+                "y": 6,
+                "width": 24,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/storage_utilization_history"
                 }
               }
             ]

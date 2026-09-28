@@ -24,12 +24,11 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "last-number",
+                "calculation": "last-number",\n                "sparkline": {\n                  "color": "blue-grey"\n                },
                 "format": {
                   "decimalPlaces": 1,
                   "unit": "percent-decimal"
                 },
-                "max": 1,
                 "thresholds": {
                   "steps": [
                     {
@@ -79,7 +78,6 @@
                   "decimalPlaces": 1,
                   "unit": "percent-decimal"
                 },
-                "max": 1,
                 "thresholds": {
                   "steps": [
                     {
@@ -129,7 +127,6 @@
                   "decimalPlaces": 1,
                   "unit": "decimal"
                 },
-                "max": 1,
                 "thresholds": {
                   "steps": [
                     {
@@ -326,7 +323,6 @@
                   "unit": "decimal",
                   "decimalPlaces": 1
                 },
-                "max": 1,
                 "thresholds": {
                   "steps": [
                     {
@@ -522,7 +518,6 @@
                   "unit": "decimal",
                   "decimalPlaces": 1
                 },
-                "max": 1,
                 "thresholds": {
                   "steps": [
                     {
@@ -571,7 +566,6 @@
                 "format": {
                   "unit": "milliseconds"
                 },
-                "max": 100,
                 "thresholds": {
                   "steps": [
                     {
