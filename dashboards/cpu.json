@@ -182,7 +182,7 @@
           "spec": {
             "display": {
               "name": "Pressure Imbalance",
-              "description": "80th percentile of percentage point distance from mean CPU pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.22 means 80% of nodes are within ±22pp of mean pressure. Threshold: <0.11 (±11pp) green (healthy balanced), 0.11-0.22 yellow (unhealthy balance), 0.22-0.33 orange (severely unbalanced), >0.33 red (critically unbalanced).\n\nAnswers: How balanced is CPU pressure across nodes?"
+              "description": "80th percentile of percentage point distance from mean CPU pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.22 means 80% of nodes are within ±22pp of mean pressure. Threshold: <0.11 (±11pp) green (healthy balanced), 0.11-0.22 yellow (unhealthy balance), 0.22-0.33 orange (severely unbalanced), >0.33 red (critically unbalanced).\n\nAnswers: Within what percentage point band are 80% of nodes?"
             },
             "plugin": {
               "kind": "GaugeChart",

@@ -140,7 +140,7 @@
           "spec": {
             "display": {
               "name": "Memory - Pressure Imbalance",
-              "description": "80th percentile of percentage point distance from mean memory pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <11% green (healthy balanced), 11-22% yellow (unhealthy balance), 22-33% orange (severely unbalanced), >33% red (critically unbalanced).\n\nAnswers: How balanced is memory pressure across nodes?"
+              "description": "80th percentile of percentage point distance from mean memory pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <11% green (healthy balanced), 11-22% yellow (unhealthy balance), 22-33% orange (severely unbalanced), >33% red (critically unbalanced).\n\nAnswers: Within what percentage point band are 80% of nodes?"
             },
             "links": [
               {
@@ -384,7 +384,7 @@
           "spec": {
             "display": {
               "name": "CPU - Pressure Imbalance",
-              "description": "80th percentile of percentage point distance from mean CPU pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <11% green (healthy balanced), 11-22% yellow (unhealthy balance), 22-33% orange (severely unbalanced), >33% red (critically unbalanced).\n\nAnswers: How balanced is CPU pressure across nodes?"
+              "description": "80th percentile of percentage point distance from mean CPU pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <11% green (healthy balanced), 11-22% yellow (unhealthy balance), 22-33% orange (severely unbalanced), >33% red (critically unbalanced).\n\nAnswers: Within what percentage point band are 80% of nodes?"
             },
             "links": [
               {
@@ -628,7 +628,7 @@
           "spec": {
             "display": {
               "name": "I/O - Pressure Imbalance",
-              "description": "80th percentile of percentage point distance from mean I/O pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <11% green (healthy balanced), 11-22% yellow (unhealthy balance), 22-33% orange (severely unbalanced), >33% red (critically unbalanced).\n\nAnswers: How balanced is I/O pressure across nodes?"
+              "description": "80th percentile of percentage point distance from mean I/O pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <11% green (healthy balanced), 11-22% yellow (unhealthy balance), 22-33% orange (severely unbalanced), >33% red (critically unbalanced).\n\nAnswers: Within what percentage point band are 80% of nodes?"
             },
             "links": [
               {
