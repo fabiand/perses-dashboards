@@ -65,24 +65,26 @@ openshift:cluster:io:latency:p99
 
 ### Imbalance
 
-I/O imbalance measures how evenly latency is distributed across nodes using the p80 quantile of percentage distance from mean latency.
+I/O imbalance measures how evenly pressure is distributed across nodes using the p80 quantile of percentage point distance from mean pressure.
 
 | Imbalance Range | Interpretation |
 |----------------|----------------|
-| < 0.10 (±10%) | Well balanced |
+| < 0.10 (±10pp) | Well balanced |
 | 0.10 - 0.15 | Moderate imbalance |
 | 0.15 - 0.20 | Significant imbalance |
 | > 0.20 | Severe imbalance - investigate node differences |
 
-Shows the spread: 80% of nodes are within this percentage of the mean latency.
+Shows the spread: 80% of nodes are within this many percentage points of the mean pressure.
 
-**Design rationale**: This metric uses simple, direct language that anyone can understand without a statistics background. Previously we used Coefficient of Variation (stddev/mean), which is mathematically sound but difficult to interpret for most users - what does a CV of 0.45 actually mean in practice? The p80 distance metric gives you an immediately actionable number: 0.15 means "80% of your nodes are within ±15% of the mean latency." No mental math, no statistical knowledge required - you can instantly visualize whether your cluster is balanced or not.
+**Why pressure instead of latency**: Pressure imbalance is more actionable than latency imbalance. Different disk speeds may cause latency variance that's not a problem, but pressure always indicates contention. Measuring pressure imbalance shows where I/O bottlenecks are unevenly distributed.
+
+**Design rationale**: This metric uses simple, direct language that anyone can understand without a statistics background. Previously we used Coefficient of Variation (stddev/mean), which is mathematically sound but difficult to interpret for most users - what does a CV of 0.45 actually mean in practice? The p80 distance metric gives you an immediately actionable number: 0.15 means "80% of your nodes are within ±15 percentage points of the mean." No mental math, no statistical knowledge required - you can instantly visualize whether your cluster is balanced or not.
 
 #### Example
 
 ```promql
-# Cluster I/O latency imbalance
-openshift:cluster:io:latency:imbalance:p80distance
+# Cluster I/O pressure imbalance
+openshift:cluster:io:imbalance:p80distance
 ```
 
 ## Recording Rule Structure
@@ -96,7 +98,7 @@ openshift:node:io:latency:p95{node}
 openshift:cluster:io:latency:p50
 openshift:cluster:io:latency:p95
 openshift:cluster:io:latency:p99
-openshift:cluster:io:latency:imbalance:p80distance
+openshift:cluster:io:imbalance:p80distance
 openshift:cluster:io:latency_bucket:ratio{le, g}
 ```
 
@@ -124,7 +126,7 @@ openshift:cluster:io:latency_bucket:ratio{le, g}
 | `openshift:cluster:io:latency:p50` | Cluster-wide median latency |
 | `openshift:cluster:io:latency:p95` | Cluster-wide 95th percentile latency |
 | `openshift:cluster:io:latency:p99` | Cluster-wide 99th percentile latency |
-| `openshift:cluster:io:latency:imbalance:p80distance` | p80 quantile of percentage distance from mean p95 latency across nodes |
+| `openshift:cluster:io:imbalance:p80distance` | p80 quantile of percentage point distance from mean pressure across nodes |
 | `openshift:cluster:io:latency_bucket:ratio{le,g}` | Latency distribution by bucket |
 
 ## Latency Buckets
@@ -178,8 +180,8 @@ openshift:cluster:io:latency:p99
 ### Imbalance Detection
 
 ```promql
-# Detect unbalanced I/O performance (>20% spread)
-openshift:cluster:io:latency:imbalance:p80distance > 0.20
+# Detect unbalanced I/O pressure (>20pp spread)
+openshift:cluster:io:imbalance:p80distance > 0.20
 ```
 
 ### Distribution Analysis

@@ -150,7 +150,7 @@ openshift:node:memory:bytes{temperature="warm", scope="workloads", tier="2"}
 | `utilization` | Fraction of workloads memory currently used | Capacity planning and threshold alerts. Values approaching 1.0 signal the cluster needs more memory or workload reduction | 0.7 - 0.8 |
 | `pressure` | Fraction of time spent waiting for memory to become available | Detect memory contention before OOM. Workloads competing for cache/buffers even if utilization looks acceptable | < 0.1 |
 | `overcommit` | Virtual memory assigned to VMs vs physical memory allocated | Track VM memory safety margin. Values >1 are normal, but high values increase OOM risk if VMs consume full allocation | < 1.5 |
-| `imbalance` | p80 quantile of percentage point distance from mean utilization | Detect uneven workload distribution. Shows the spread: 80% of nodes are within this many percentage points of the mean | < 0.10 (well balanced), 0.10-0.15 (moderate), 0.15-0.20 (significant), >0.20 (severe imbalance) |
+| `imbalance` | p80 quantile of percentage point distance from mean pressure | Detect uneven pressure distribution. Shows the spread: 80% of nodes are within this many percentage points of the mean pressure | < 0.10 (well balanced), 0.10-0.15 (moderate), 0.15-0.20 (significant), >0.20 (severe imbalance) |
 
 #### Example
 
@@ -282,14 +282,14 @@ openshift:cluster:memory:overcommit:ratio
 
 **Why**: Track virtual memory assignment vs physical allocation. Values >1 indicate overcommit.
 
-**Use-case**: Memory utilization imbalance detection.
+**Use-case**: Memory pressure imbalance detection.
 
 ```promql
-# Cluster-wide memory imbalance (p80 distance from mean)
+# Cluster-wide memory pressure imbalance (p80 distance from mean)
 openshift:cluster:memory:imbalance:p80distance
 ```
 
-**Why**: Detect uneven workload distribution across nodes. Computed as p80 quantile of `abs(node_utilization - mean) / mean`. Shows the spread: 80% of nodes are within this percentage of the mean. Values <0.10 (±10%) indicate balanced distribution, 0.10-0.15 moderate imbalance, 0.15-0.20 significant imbalance, >0.20 severe imbalance requiring workload rebalancing.
+**Why**: Detect uneven pressure distribution across nodes. Computed as p80 quantile of `abs(node_pressure - mean_pressure)`. Shows the spread: 80% of nodes are within this many percentage points of the mean pressure. Values <0.10 (±10pp) indicate balanced distribution, 0.10-0.15 moderate imbalance, 0.15-0.20 significant imbalance, >0.20 severe imbalance requiring investigation. Pressure imbalance is more actionable than utilization imbalance - high utilization without pressure is healthy, but pressure always indicates contention.
 
 **Design rationale**: This metric uses simple, direct language that anyone can understand without a statistics background. Previously we used Coefficient of Variation (stddev/mean), which is mathematically sound but difficult to interpret for most users - what does a CV of 0.45 actually mean in practice? The p80 distance metric gives you an immediately actionable number: 0.15 means "80% of your nodes are within ±15 percentage points of the mean." No mental math, no statistical knowledge required - you can instantly visualize whether your cluster is balanced or not.
 
