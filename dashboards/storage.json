@@ -17,7 +17,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Nodes with Latency Alerts",
+              "name": "Node Imbalance",
               "description": "Percentage of nodes currently firing storage latency alerts. Shows cluster-wide health: 0% is healthy (no nodes with high latency), higher percentages indicate widespread I/O performance issues.\n\nAnswers: What percentage of nodes are experiencing high storage latency?"
             },
             "plugin": {
@@ -65,7 +65,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "IO Pressure (PSI)",
+              "name": "Pressure (PSI)",
               "description": "Maximum I/O Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for I/O to complete. Higher values indicate I/O contention and performance degradation. Threshold: >10% moderate, >30% severe.\n\nAnswers: How much time are tasks waiting for I/O?"
             },
             "plugin": {
@@ -421,7 +421,7 @@
           "kind": "Grid",
           "spec": {
             "display": {
-              "title": "At a Glance",
+              "title": "At a Glance - Storage",
               "collapse": {
                 "open": true
               }
@@ -430,28 +430,28 @@
               {
                 "x": 0,
                 "y": 0,
-                "width": 8,
+                "width": 12,
                 "height": 6,
                 "content": {
                   "$ref": "#/spec/panels/latency_quantiles_gauge"
                 }
               },
               {
-                "x": 8,
+                "x": 12,
                 "y": 0,
-                "width": 8,
-                "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/53d12c6d478148e7b910be6a52e0ef52"
-                }
-              },
-              {
-                "x": 16,
-                "y": 0,
-                "width": 8,
+                "width": 6,
                 "height": 6,
                 "content": {
                   "$ref": "#/spec/panels/a7c3d8e1f2b4456789abcdef01234567"
+                }
+              },
+              {
+                "x": 18,
+                "y": 0,
+                "width": 6,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/53d12c6d478148e7b910be6a52e0ef52"
                 }
               }
             ]
