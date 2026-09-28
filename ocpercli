@@ -1,0 +1,237 @@
+#!/bin/bash
+set -euo pipefail
+
+VERSION="0.1.0"
+SCRIPT_NAME="ocpercli"
+
+# Color output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+usage() {
+    cat <<EOF
+$SCRIPT_NAME - Perses Dashboard CLI for OpenShift
+
+Usage: $SCRIPT_NAME [OPTIONS] <dashboard-file>
+
+Apply Perses dashboard files to an OpenShift cluster in the current namespace.
+
+Arguments:
+  <dashboard-file>    Path to Perses dashboard JSON file
+
+Options:
+  -n, --namespace <ns>  Target namespace (default: current namespace)
+  -p, --project <name>  Override project name in dashboard metadata
+  -d, --dry-run        Show what would be applied without applying
+  -h, --help           Show this help message
+  -v, --version        Show version
+
+Examples:
+  $SCRIPT_NAME dashboards/overview.json
+  $SCRIPT_NAME -n monitoring dashboards/memory.json
+  $SCRIPT_NAME --dry-run dashboards/cpu.json
+  $SCRIPT_NAME --project my-project dashboards/io.json
+
+Requirements:
+  - oc (OpenShift CLI) must be installed and configured
+  - kubectl can be used as fallback
+  - Perses CRDs must be installed in the cluster
+
+EOF
+    exit 0
+}
+
+version() {
+    echo "$SCRIPT_NAME version $VERSION"
+    exit 0
+}
+
+error() {
+    echo -e "${RED}Error: $1${NC}" >&2
+    exit 1
+}
+
+info() {
+    echo -e "${GREEN}✓ $1${NC}"
+}
+
+warn() {
+    echo -e "${YELLOW}⚠ $1${NC}"
+}
+
+# Check if oc or kubectl is available
+check_cli() {
+    if command -v oc &> /dev/null; then
+        echo "oc"
+    elif command -v kubectl &> /dev/null; then
+        echo "kubectl"
+    else
+        error "Neither 'oc' nor 'kubectl' found. Please install OpenShift CLI (oc) or kubectl."
+    fi
+}
+
+# Get current namespace
+get_namespace() {
+    local cli=$1
+    local ns=""
+
+    if [[ "$cli" == "oc" ]]; then
+        ns=$(oc project -q 2>/dev/null || echo "")
+    else
+        ns=$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null || echo "")
+    fi
+
+    if [[ -z "$ns" ]]; then
+        ns="default"
+    fi
+
+    echo "$ns"
+}
+
+# Validate Perses dashboard JSON
+validate_dashboard() {
+    local file=$1
+
+    if [[ ! -f "$file" ]]; then
+        error "File not found: $file"
+    fi
+
+    if ! jq empty "$file" 2>/dev/null; then
+        error "Invalid JSON in file: $file"
+    fi
+
+    local kind=$(jq -r '.kind // empty' "$file")
+    if [[ "$kind" != "Dashboard" ]]; then
+        error "File does not contain a Perses Dashboard (kind: $kind)"
+    fi
+
+    local name=$(jq -r '.metadata.name // empty' "$file")
+    if [[ -z "$name" ]]; then
+        error "Dashboard metadata.name is missing"
+    fi
+}
+
+# Wrap Perses dashboard in Kubernetes Custom Resource
+wrap_dashboard() {
+    local file=$1
+    local namespace=$2
+    local project_override=$3
+
+    local dashboard=$(cat "$file")
+    local name=$(echo "$dashboard" | jq -r '.metadata.name')
+    local project=$(echo "$dashboard" | jq -r '.metadata.project // "default"')
+
+    # Override project if specified
+    if [[ -n "$project_override" ]]; then
+        project="$project_override"
+        dashboard=$(echo "$dashboard" | jq --arg proj "$project" '.metadata.project = $proj')
+    fi
+
+    # Create PersesDashboard CRD wrapper
+    cat <<EOF
+apiVersion: perses.dev/v1alpha1
+kind: PersesDashboard
+metadata:
+  name: $name
+  namespace: $namespace
+spec:
+  dashboard: $(echo "$dashboard" | jq -c .)
+EOF
+}
+
+# Main function
+main() {
+    local file=""
+    local namespace=""
+    local project=""
+    local dry_run=false
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                usage
+                ;;
+            -v|--version)
+                version
+                ;;
+            -n|--namespace)
+                namespace="$2"
+                shift 2
+                ;;
+            -p|--project)
+                project="$2"
+                shift 2
+                ;;
+            -d|--dry-run)
+                dry_run=true
+                shift
+                ;;
+            -*)
+                error "Unknown option: $1"
+                ;;
+            *)
+                if [[ -z "$file" ]]; then
+                    file="$1"
+                else
+                    error "Multiple files not supported. Got: '$file' and '$1'"
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    # Validate arguments
+    if [[ -z "$file" ]]; then
+        error "No dashboard file specified. Use -h for help."
+    fi
+
+    # Check prerequisites
+    local cli=$(check_cli)
+    info "Using CLI: $cli"
+
+    # Validate dashboard file
+    validate_dashboard "$file"
+    local dashboard_name=$(jq -r '.metadata.name' "$file")
+    info "Dashboard: $dashboard_name"
+
+    # Get or set namespace
+    if [[ -z "$namespace" ]]; then
+        namespace=$(get_namespace "$cli")
+    fi
+    info "Namespace: $namespace"
+
+    # Show project override if set
+    if [[ -n "$project" ]]; then
+        info "Project override: $project"
+    fi
+
+    # Generate Kubernetes resource
+    local k8s_resource=$(wrap_dashboard "$file" "$namespace" "$project")
+
+    if [[ "$dry_run" == true ]]; then
+        warn "Dry-run mode - showing resource that would be applied:"
+        echo "---"
+        echo "$k8s_resource"
+        echo "---"
+        exit 0
+    fi
+
+    # Apply to cluster
+    echo "$k8s_resource" | $cli apply -f - -n "$namespace"
+
+    if [[ $? -eq 0 ]]; then
+        info "Dashboard '$dashboard_name' applied successfully to namespace '$namespace'"
+    else
+        error "Failed to apply dashboard"
+    fi
+}
+
+# Check for jq
+if ! command -v jq &> /dev/null; then
+    error "jq is required but not installed. Please install jq."
+fi
+
+main "$@"
