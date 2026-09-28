@@ -18,17 +18,17 @@
           "spec": {
             "display": {
               "name": "Node Imbalance",
-              "description": "Quantile ratio (p95/p50) for I/O latency across nodes. Shows how much slower the slowest nodes are vs median. Threshold: <2.0 green (balanced), 2.0-4.0 yellow (moderate imbalance), >4.0 red (high imbalance).\n\nAnswers: How balanced is I/O latency across nodes?"
+              "description": "80th percentile of percentage distance from mean I/O latency. Shows the spread: 80% of nodes are within this percentage of the mean. For example, 0.15 means 80% of nodes are within ±15% of mean latency. Threshold: <0.10 (±10%) green (well balanced), 0.10-0.15 yellow (moderate), 0.15-0.20 orange (significant), >0.20 red (severe imbalance).\n\nAnswers: How balanced is I/O latency across nodes?"
             },
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
                 "format": {
-                  "unit": "decimal",
-                  "decimalPlaces": 1
+                  "unit": "percent-decimal",
+                  "decimalPlaces": 2
                 },
-                "max": 10,
+                "max": 0.5,
                 "thresholds": {
                   "steps": [
                     {
@@ -36,11 +36,15 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "value": 2.0,
+                      "value": 0.10,
                       "color": "#FFB249"
                     },
                     {
-                      "value": 4.0,
+                      "value": 0.15,
+                      "color": "#FF9F1C"
+                    },
+                    {
+                      "value": 0.20,
                       "color": "#EE6C6C"
                     }
                   ]
@@ -54,8 +58,8 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:imbalance:ratio",
-                      "seriesNameFormat": "Imbalance ratio (p95/p50)"
+                      "query": "openshift:cluster:io:latency:imbalance:p80distance",
+                      "seriesNameFormat": "p80 distance from mean"
                     }
                   }
                 }

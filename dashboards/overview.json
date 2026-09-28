@@ -140,7 +140,7 @@
           "spec": {
             "display": {
               "name": "Memory - Imbalance",
-              "description": "Quantile ratio (p95/p50) for memory utilization across nodes. Shows how much more loaded the busiest nodes are vs median. Threshold: <1.5 green (balanced), 1.5-2.5 yellow (moderate imbalance), >2.5 red (high imbalance).\n\nAnswers: How balanced is memory utilization across nodes?"
+              "description": "80th percentile of percentage point distance from mean memory utilization. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <10% green (well balanced), 10-15% yellow (moderate), 15-20% orange (significant), >20% red (severe imbalance).\n\nAnswers: How balanced is memory utilization across nodes?"
             },
             "links": [
               {
@@ -159,7 +159,7 @@
                 },
                 "format": {
                   "decimalPlaces": 1,
-                  "unit": "decimal"
+                  "unit": "percent-decimal"
                 },
                 "thresholds": {
                   "steps": [
@@ -168,11 +168,15 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "value": 1.5,
+                      "value": 0.10,
                       "color": "#FFB249"
                     },
                     {
-                      "value": 2.5,
+                      "value": 0.15,
+                      "color": "#FF9F1C"
+                    },
+                    {
+                      "value": 0.20,
                       "color": "#EE6C6C"
                     }
                   ]
@@ -186,8 +190,8 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:memory:imbalance:ratio{scope=\"workloads\"}",
-                      "seriesNameFormat": "Imbalance ratio (p95/p50)"
+                      "query": "openshift:cluster:memory:imbalance:p80distance{scope=\"workloads\"}",
+                      "seriesNameFormat": "p80 distance from mean"
                     }
                   }
                 }
@@ -380,7 +384,7 @@
           "spec": {
             "display": {
               "name": "CPU - Imbalance",
-              "description": "Quantile ratio (p95/p50) for CPU utilization across nodes. Shows how much more loaded the busiest nodes are vs median. Threshold: <1.5 green (balanced), 1.5-2.5 yellow (moderate imbalance), >2.5 red (high imbalance).\n\nAnswers: How balanced is CPU utilization across nodes?"
+              "description": "80th percentile of percentage point distance from mean CPU utilization. Shows the spread: 80% of nodes are within this many percentage points of the mean. Threshold: <10% green (well balanced), 10-15% yellow (moderate), 15-20% orange (significant), >20% red (severe imbalance).\n\nAnswers: How balanced is CPU utilization across nodes?"
             },
             "links": [
               {
@@ -398,7 +402,7 @@
                   "color": "blue-grey"
                 },
                 "format": {
-                  "unit": "decimal",
+                  "unit": "percent-decimal",
                   "decimalPlaces": 1
                 },
                 "thresholds": {
@@ -408,11 +412,15 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "value": 1.5,
+                      "value": 0.10,
                       "color": "#FFB249"
                     },
                     {
-                      "value": 2.5,
+                      "value": 0.15,
+                      "color": "#FF9F1C"
+                    },
+                    {
+                      "value": 0.20,
                       "color": "#EE6C6C"
                     }
                   ]
@@ -426,8 +434,8 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:cpu:imbalance:ratio{scope=\"workloads\"}",
-                      "seriesNameFormat": "Imbalance ratio (p95/p50)"
+                      "query": "openshift:cluster:cpu:imbalance:p80distance{scope=\"workloads\"}",
+                      "seriesNameFormat": "p80 distance from mean"
                     }
                   }
                 }
@@ -620,7 +628,7 @@
           "spec": {
             "display": {
               "name": "I/O - Imbalance",
-              "description": "Quantile ratio (p95/p50) for I/O latency across nodes. Shows how much slower the slowest nodes are vs median. Threshold: <2.0 green (balanced), 2.0-4.0 yellow (moderate imbalance), >4.0 red (high imbalance).\n\nAnswers: How balanced is I/O latency across nodes?"
+              "description": "80th percentile of percentage distance from mean I/O latency. Shows the spread: 80% of nodes are within this percentage of the mean. Threshold: <10% green (well balanced), 10-15% yellow (moderate), 15-20% orange (significant), >20% red (severe imbalance).\n\nAnswers: How balanced is I/O latency across nodes?"
             },
             "links": [
               {
@@ -638,7 +646,7 @@
                   "color": "blue-grey"
                 },
                 "format": {
-                  "unit": "decimal",
+                  "unit": "percent-decimal",
                   "decimalPlaces": 1
                 },
                 "thresholds": {
@@ -648,11 +656,15 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "value": 2.0,
+                      "value": 0.10,
                       "color": "#FFB249"
                     },
                     {
-                      "value": 4.0,
+                      "value": 0.15,
+                      "color": "#FF9F1C"
+                    },
+                    {
+                      "value": 0.20,
                       "color": "#EE6C6C"
                     }
                   ]
@@ -666,8 +678,8 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:imbalance:ratio",
-                      "seriesNameFormat": "Imbalance ratio (p95/p50)"
+                      "query": "openshift:cluster:io:latency:imbalance:p80distance",
+                      "seriesNameFormat": "p80 distance from mean"
                     }
                   }
                 }
