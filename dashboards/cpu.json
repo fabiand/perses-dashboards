@@ -264,7 +264,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "topk(1, openshift:node:cpu:pressure:ratio{severity=\"some\"})",
+                      "query": "topk(1, openshift:node:cpu:pressure:ratio{severity=\"some\"} @ end())",
                       "seriesNameFormat": "{{node}}"
                     }
                   }
