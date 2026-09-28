@@ -421,7 +421,7 @@
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
                       "query": "sum(openshift:cluster:virtual:cpu:seconds)",
-                      "seriesNameFormat": "Committed"
+                      "seriesNameFormat": "Virtual Committed"
                     }
                   }
                 }

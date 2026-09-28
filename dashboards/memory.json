@@ -346,7 +346,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(openshift:vm:virtual:memory:bytes)",
-                    "seriesNameFormat": "Committed"
+                    "seriesNameFormat": "Virtual Committed"
                   }
                 }
               }
