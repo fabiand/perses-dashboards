@@ -71,7 +71,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Max Pressure (PSI)",
+              "name": "Pressure (PSI) - max",
               "description": "Maximum I/O Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for I/O to complete. Higher values indicate I/O contention and performance degradation. Threshold: >10% moderate, >30% severe.\n\nAnswers: How much time are tasks waiting for I/O?"
             },
             "plugin": {

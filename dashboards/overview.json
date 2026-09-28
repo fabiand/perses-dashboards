@@ -79,7 +79,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Memory - Pressure (PSI)",
+              "name": "Memory - Pressure (PSI) - max",
               "description": "Maximum Memory Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for memory to complete. Threshold: >10% moderate, >30% severe.\n\nAnswers: What is the maximum memory pressure across nodes?"
             },
             "links": [
@@ -323,7 +323,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "CPU - Pressure (PSI)",
+              "name": "CPU - Pressure (PSI) - max",
               "description": "Maximum CPU Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for CPU. Threshold: <10% green (healthy), 10-30% yellow (moderate pressure), >30% red (high contention).\n\nAnswers: What is the worst-case CPU pressure in the cluster?"
             },
             "links": [
@@ -567,7 +567,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "I/O - Pressure (PSI)",
+              "name": "I/O - Pressure (PSI) - max",
               "description": "Maximum I/O Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for I/O to complete. Threshold: >10% moderate, >30% severe.\n\nAnswers: How much time are tasks waiting for I/O?"
             },
             "links": [
