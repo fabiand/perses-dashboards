@@ -657,7 +657,7 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "decimalPlaces": 2,
+                "decimalPlaces": 0,
                 "unit": "percent-decimal"
               },
               "max": 1.0,

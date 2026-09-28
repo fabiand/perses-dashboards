@@ -190,7 +190,7 @@
                 "calculation": "last-number",
                 "format": {
                   "unit": "percent-decimal",
-                  "decimalPlaces": 2
+                  "decimalPlaces": 0
                 },
                 "max": 1.0,
                 "thresholds": {
