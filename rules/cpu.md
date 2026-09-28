@@ -2,215 +2,240 @@
 
 ## Objective
 
-CPU is a compressible resource - when exhausted, workloads are throttled rather than terminated. Monitoring CPU allocation and utilization is critical for:
+CPU is a compressible resource - when exhausted, workloads are throttled rather than terminated. These recording rules measure CPU allocation and utilization to enable:
 
 - **Capacity planning** - Understand allocation vs physical capacity
-- **Performance optimization** - Detect CPU contention and throttling
+- **Performance optimization** - Detect CPU contention and throttling  
 - **Overcommit management** - Track virtual CPU allocation in virtualized environments
 
 ## Concept
 
-Recording rules pre-calculate CPU metrics to simplify dashboard queries and provide consistent accounting. The core principle: **track both physical and virtual CPU dimensions separately**.
-
-Multiple dimensions slice CPU resources to address different operational needs:
-- **Scope** - allocation boundary (physical, system, workloads, virtual)
-- **Level** - aggregation (node, cluster, VM)
-- **Metric type** - capacity, allocation, utilization, overcommit
+Recording rules pre-calculate CPU metrics using a consistent dimensional model. The core principle: **track both scope (system vs workloads) and utilization state (used vs free)**.
 
 ### Scopes
 
-CPU resources are divided into multiple scopes:
+CPU resources are divided into two scopes:
 
-| Scope | Description | Metrics |
-|-------|-------------|---------|
-| `physical` | Physical CPU cores on the node | Capacity count |
-| `system` | CPU reserved for OS/hypervisor | Reserved count |
-| `workloads` | CPU available for pods/VMs | Allocatable, utilization |
-| `virtual` | Virtual CPUs (vCPUs) from VMs | vCPU count, overcommit ratio |
+| Scope | Purpose | Metrics |
+|-------|---------|---------|
+| `system` | Reserved for OS/hypervisor | count, seconds (utilized true/false) |
+| `workloads` | Available for pods/VMs | count, seconds (utilized true/false), ratios |
 
-#### Example
+### Utilization States
 
-```promql
-# Physical CPU capacity per node
-openshift:node:cpu:capacity:count{scope="physical"}
+| State | Description |
+|-------|-------------|
+| `utilized="true"` | CPU seconds actively used |
+| `utilized="false"` | CPU seconds available (free) |
 
-# CPU available for workloads
-openshift:node:cpu:allocatable:count{scope="workloads"}
+## Recording Rule Structure
 
-# Virtual CPU count (VMs)
-openshift:node:cpu:vcpu:count{scope="virtual"}
+All rules use **colon hierarchy** (Prometheus convention):
+
+```
+openshift:node:cpu:count{scope, unit}
+openshift:node:cpu:seconds{scope, utilized, unit}
+openshift:node:cpu:utilization:ratio{scope, unit}
+openshift:node:cpu:overcommit:ratio{scope, unit}
+openshift:node:cpu:pressure:ratio{severity, unit}
+openshift:cluster:cpu:count{scope, unit}
+openshift:cluster:cpu:seconds{scope, utilized, unit}
+openshift:cluster:cpu:utilization:ratio{scope, unit}
+openshift:cluster:cpu:overcommit:ratio{scope, unit}
+openshift:cluster:cpu:imbalance:ratio{scope, unit}
+openshift:cluster:cpu:pressure:ratio{severity, unit}
+openshift:vm:virtual:cpu:seconds{scope, unit}
+openshift:vm:cpu:requested:count{unit}
+openshift:vm:cpu:overcommit:ratio{unit}
 ```
 
-### Node-level Metrics
+### Label Dimensions
 
-Node-level metrics provide per-node CPU visibility:
+- **scope**: `system`, `workloads`, `virtual`
+- **utilized**: `true` (used), `false` (free)
+- **severity**: `some` (PSI severity level)
+- **unit**: `count`, `seconds`, `ratio`
+
+## Node-level Metrics
 
 | Metric | Labels | Description |
 |--------|--------|-------------|
-| `openshift:node:cpu:capacity:count` | scope="physical" | Total physical CPU cores |
-| `openshift:node:cpu:allocatable:count` | scope="workloads" | CPU available for workloads |
-| `openshift:node:cpu:reserved:count` | scope="system" | CPU reserved for system |
-| `openshift:node:cpu:vcpu:count` | scope="virtual" | Total vCPUs from VMs |
-| `openshift:node:cpu:overcommit:ratio` | scope="virtual" | vCPU/pCPU ratio |
-| `openshift:node:cpu:utilization:ratio` | scope="workloads" | Requested/Allocatable |
-| `openshift:node:cpu:allocation:ratio` | scope="workloads" | Allocated/Allocatable |
+| `openshift:node:cpu:count` | scope="system" | CPU cores reserved for system |
+| `openshift:node:cpu:count` | scope="workloads" | CPU cores allocatable to workloads |
+| `openshift:node:cpu:seconds` | scope="system", utilized="true" | System CPU usage (rate) |
+| `openshift:node:cpu:seconds` | scope="system", utilized="false" | System CPU free |
+| `openshift:node:cpu:seconds` | scope="workloads", utilized="true" | Workload CPU usage (rate) |
+| `openshift:node:cpu:seconds` | scope="workloads", utilized="false" | Workload CPU free |
+| `openshift:node:cpu:utilization:ratio` | scope="workloads" | Workload utilization (used/total) |
+| `openshift:node:cpu:overcommit:ratio` | scope="workloads" | vCPU/pCPU ratio per node |
+| `openshift:node:cpu:pressure:ratio` | severity="some" | CPU pressure (PSI) |
+| `openshift:node:virtual:cpu:seconds` | scope="workloads" | Total vCPU seconds per node |
 
-#### Example
+### Example
 
 ```promql
-# CPU capacity on a specific node
-openshift:node:cpu:capacity:count{scope="physical", node="worker-1"}
+# System CPU cores reserved per node
+openshift:node:cpu:count{scope="system"}
 
-# vCPU overcommit ratio (>1.0 means overcommitted)
-openshift:node:cpu:overcommit:ratio{scope="virtual", node="worker-1"}
+# Workload CPU usage per node
+openshift:node:cpu:seconds{scope="workloads", utilized="true"}
+
+# CPU pressure per node
+openshift:node:cpu:pressure:ratio{severity="some"}
 ```
 
-### Cluster-level Metrics
-
-Cluster-level metrics aggregate across all nodes:
+## Cluster-level Metrics
 
 | Metric | Labels | Description |
 |--------|--------|-------------|
-| `openshift:cluster:cpu:capacity:count` | scope="physical" | Total cluster pCPUs |
-| `openshift:cluster:cpu:allocatable:count` | scope="workloads" | Total allocatable CPUs |
-| `openshift:cluster:cpu:reserved:count` | scope="system" | Total reserved CPUs |
-| `openshift:cluster:cpu:vcpu:count` | scope="virtual" | Total cluster vCPUs |
+| `openshift:cluster:cpu:count` | scope="system" | Total system CPU cores |
+| `openshift:cluster:cpu:count` | scope="workloads" | Total workload CPU cores |
+| `openshift:cluster:cpu:seconds` | scope="system", utilized="true" | Cluster system CPU usage |
+| `openshift:cluster:cpu:seconds` | scope="system", utilized="false" | Cluster system CPU free |
+| `openshift:cluster:cpu:seconds` | scope="workloads", utilized="true" | Cluster workload CPU usage |
+| `openshift:cluster:cpu:seconds` | scope="workloads", utilized="false" | Cluster workload CPU free |
+| `openshift:cluster:virtual:cpu:seconds` | scope="workloads" | Total cluster vCPU seconds |
+| `openshift:cluster:cpu:utilization:ratio` | scope="workloads" | Cluster utilization (used/total) |
 | `openshift:cluster:cpu:overcommit:ratio` | scope="virtual" | Cluster vCPU/pCPU ratio |
-| `openshift:cluster:cpu:utilization:ratio` | scope="workloads" | Cluster CPU utilization |
-| `openshift:cluster:cpu:imbalance:ratio` | scope="workloads" | Allocation imbalance metric |
+| `openshift:cluster:cpu:imbalance:ratio` | scope="workloads" | Coefficient of variation across nodes |
+| `openshift:cluster:cpu:pressure:ratio` | severity="some" | Max CPU pressure across cluster |
 
-#### Example
+### Example
 
 ```promql
-# Total cluster CPU capacity
-openshift:cluster:cpu:capacity:count{scope="physical"}
+# Total cluster workload CPU
+openshift:cluster:cpu:count{scope="workloads"}
 
-# Cluster-wide overcommit ratio
+# Cluster CPU utilization
+openshift:cluster:cpu:utilization:ratio{scope="workloads"}
+
+# Cluster overcommit ratio
 openshift:cluster:cpu:overcommit:ratio{scope="virtual"}
 ```
 
-### VM-level Metrics
-
-VM-level metrics track individual VM CPU allocation:
+## VM-level Metrics
 
 | Metric | Labels | Description |
 |--------|--------|-------------|
-| `openshift:vm:cpu:vcpu:count` | - | vCPUs allocated to VM |
+| `openshift:vm:virtual:cpu:seconds` | scope="workloads" | vCPU count per VM |
 | `openshift:vm:cpu:requested:count` | - | CPU cores requested by virt-launcher |
-| `openshift:vm:cpu:allocation:ratio` | - | VM CPU allocation ratio |
+| `openshift:vm:cpu:overcommit:ratio` | - | VM vCPU/requested ratio |
 
-#### Example
+### Example
 
 ```promql
 # vCPUs for a specific VM
-openshift:vm:cpu:vcpu:count{name="my-vm", namespace="default"}
+openshift:vm:virtual:cpu:seconds{name="my-vm", namespace="default"}
 
 # CPU request for VM
 openshift:vm:cpu:requested:count{name="my-vm", namespace="default"}
 ```
 
-### NUMA Topology Metrics
-
-NUMA topology metrics provide CPU distribution across NUMA nodes (when available):
-
-| Metric | Labels | Description |
-|--------|--------|-------------|
-| `openshift:node:cpu:numa:count` | scope="physical", numa_node | CPUs per NUMA node |
-| `openshift:node:numa:node_count:count` | - | Total NUMA nodes per node |
-
-**Note:** NUMA metrics require `node_cpu_info` or similar metrics with NUMA topology labels. Availability depends on node exporters.
-
-#### Example
-
-```promql
-# CPUs in NUMA node 0
-openshift:node:cpu:numa:count{scope="physical", node="worker-1", numa_node="0"}
-
-# Count of NUMA nodes
-openshift:node:numa:node_count:count{node="worker-1"}
-```
-
 ## Source Metrics
-
-The recording rules are built from these base metrics:
 
 | Source Metric | Description |
 |--------------|-------------|
 | `kube_node_status_capacity{resource="cpu"}` | Physical CPU capacity per node |
 | `kube_node_status_allocatable{resource="cpu"}` | CPU allocatable to workloads |
-| `kube_pod_container_resource_requests{resource="cpu"}` | CPU requests per container |
-| `kube_pod_info` | Pod to node mapping |
-| `kubevirt_vmi_info` | VM instance information |
-| `kubevirt_vmi_vcpu_seconds` | VM vCPU usage (used for counting vCPUs) |
-| `node_cpu_info{numa_node!=""}` | NUMA topology information (optional) |
+| `container_cpu_usage_seconds_total{id="/system.slice"}` | System CPU usage |
+| `container_cpu_usage_seconds_total{id="/kubepods.slice"}` | Workload CPU usage |
+| `node_pressure_cpu_waiting_seconds_total` | CPU pressure (PSI) |
+| `kubevirt_vmi_vcpu_seconds_total` | VM vCPU count |
+| `kube_pod_container_resource_requests{resource="cpu"}` | Container CPU requests |
 
-## Overcommit Ratio Interpretation
+## Ratio Interpretations
 
-The vCPU overcommit ratio indicates how many virtual CPUs are allocated relative to physical CPUs:
+### Utilization Ratio
+
+Fraction of CPU currently in use:
 
 | Ratio Range | Interpretation |
 |-------------|----------------|
-| 0.0 - 1.0 | No overcommit (safe) |
-| 1.0 - 2.0 | Moderate overcommit (typical for VMs) |
-| 2.0 - 4.0 | High overcommit (may cause contention) |
-| > 4.0 | Very high overcommit (performance risk) |
+| 0.0 - 0.7 | Healthy capacity |
+| 0.7 - 0.85 | Monitor usage |
+| > 0.85 | High utilization |
 
-### Example
+```promql
+# Nodes with high utilization (>85%)
+openshift:node:cpu:utilization:ratio{scope="workloads"} > 0.85
+```
+
+### Overcommit Ratio
+
+vCPU allocation vs physical capacity:
+
+| Ratio Range | Interpretation |
+|-------------|----------------|
+| 0.0 - 1.0 | No overcommit |
+| 1.0 - 2.0 | Moderate overcommit (typical) |
+| 2.0 - 4.0 | High overcommit |
+| > 4.0 | Very high overcommit (performance risk) |
 
 ```promql
 # Nodes with high overcommit (>2.0)
-openshift:node:cpu:overcommit:ratio{scope="virtual"} > 2.0
+openshift:node:cpu:overcommit:ratio{scope="workloads"} > 2.0
 ```
 
-## Imbalance Coefficient
+### Imbalance Ratio
 
-The cluster CPU imbalance ratio uses the coefficient of variation to measure how evenly CPU is distributed:
+Coefficient of variation measuring workload distribution:
 
-| Coefficient Range | Interpretation |
-|------------------|----------------|
+| Ratio Range | Interpretation |
+|-------------|----------------|
 | < 0.3 | Balanced distribution |
 | 0.3 - 0.6 | Moderate imbalance |
 | > 0.6 | High imbalance - rebalancing recommended |
-
-### Example
 
 ```promql
 # Check cluster CPU imbalance
 openshift:cluster:cpu:imbalance:ratio{scope="workloads"}
 ```
 
-## Accounting Principles
+### Pressure Ratio (PSI)
 
-1. **Physical Capacity** = System Reserved + Workload Allocatable
-2. **Virtual Overcommit** = Total vCPUs / Physical Capacity
-3. **Utilization** = Allocated CPU / Allocatable CPU
-4. **Imbalance** = stddev(allocation) / avg(allocation)
+Fraction of time tasks are waiting for CPU:
+
+| Ratio Range | Interpretation |
+|-------------|----------------|
+| < 0.1 | Low pressure |
+| 0.1 - 0.3 | Moderate pressure |
+| > 0.3 | High pressure (contention) |
+
+```promql
+# Nodes with high CPU pressure
+openshift:node:cpu:pressure:ratio{severity="some"} > 0.3
+```
 
 ## Common Queries
 
 ### Capacity Planning
 
 ```promql
-# Cluster CPU capacity vs utilization
-sum(openshift:cluster:cpu:allocatable:count{scope="workloads"})
--
-sum(kube_pod_container_resource_requests{resource="cpu"})
+# Total cluster CPU capacity
+openshift:cluster:cpu:count{scope="workloads"}
+
+# Used vs free
+openshift:cluster:cpu:seconds{scope="workloads", utilized="true"}
+openshift:cluster:cpu:seconds{scope="workloads", utilized="false"}
 ```
 
 ### Performance Analysis
 
 ```promql
-# Nodes with high CPU allocation (>80%)
-openshift:node:cpu:allocation:ratio{scope="workloads"} > 0.8
+# Per-node CPU utilization
+openshift:node:cpu:utilization:ratio{scope="workloads"}
+
+# Cluster-wide utilization
+openshift:cluster:cpu:utilization:ratio{scope="workloads"}
 ```
 
-### VM Overcommit Monitoring
+### Overcommit Monitoring
 
 ```promql
 # Total vCPUs vs physical CPUs
-openshift:cluster:cpu:vcpu:count{scope="virtual"}
+openshift:cluster:virtual:cpu:seconds{scope="workloads"}
 /
-openshift:cluster:cpu:capacity:count{scope="physical"}
+openshift:cluster:cpu:count{scope="workloads"}
 ```
 
 ### Imbalance Detection
@@ -219,3 +244,11 @@ openshift:cluster:cpu:capacity:count{scope="physical"}
 # Detect unbalanced CPU allocation
 openshift:cluster:cpu:imbalance:ratio{scope="workloads"} > 0.6
 ```
+
+## Important Notes
+
+- **Rate windows**: All rate calculations use 2-minute windows `[2m]` for stability
+- **Scope dimensions**: System and workloads are mutually exclusive; sum equals total capacity
+- **Utilization state**: used + free = total for each scope
+- **Virtual CPU tracking**: Counts vCPUs from kubevirt_vmi_vcpu_seconds_total
+- **Cluster ratios**: Computed as `sum(numerator) / sum(denominator)` for capacity-weighted averages
