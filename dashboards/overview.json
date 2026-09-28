@@ -38,7 +38,7 @@
                   "color": "blue-grey"
                 },
                 "format": {
-                  "decimalPlaces": 1,
+                  "decimalPlaces": 0,
                   "unit": "percent-decimal"
                 },
                 "thresholds": {
@@ -98,7 +98,7 @@
                   "color": "blue-grey"
                 },
                 "format": {
-                  "decimalPlaces": 1,
+                  "decimalPlaces": 0,
                   "unit": "percent-decimal"
                 },
                 "thresholds": {
@@ -222,7 +222,7 @@
                   "color": "blue-grey"
                 },
                 "format": {
-                  "decimalPlaces": 1,
+                  "decimalPlaces": 0,
                   "unit": "percent-decimal"
                 },
                 "thresholds": {
@@ -283,7 +283,7 @@
                 },
                 "format": {
                   "unit": "percent-decimal",
-                  "decimalPlaces": 1
+                  "decimalPlaces": 0
                 },
                 "thresholds": {
                   "steps": [
@@ -343,7 +343,7 @@
                 },
                 "format": {
                   "unit": "percent-decimal",
-                  "decimalPlaces": 1
+                  "decimalPlaces": 0
                 },
                 "thresholds": {
                   "steps": [
@@ -467,7 +467,7 @@
                 },
                 "format": {
                   "unit": "percent-decimal",
-                  "decimalPlaces": 1
+                  "decimalPlaces": 0
                 },
                 "thresholds": {
                   "steps": [
@@ -527,7 +527,7 @@
                 },
                 "format": {
                   "unit": "percent-decimal",
-                  "decimalPlaces": 1
+                  "decimalPlaces": 0
                 },
                 "thresholds": {
                   "steps": [
@@ -587,7 +587,7 @@
                 },
                 "format": {
                   "unit": "percent-decimal",
-                  "decimalPlaces": 1
+                  "decimalPlaces": 0
                 },
                 "thresholds": {
                   "steps": [
@@ -711,7 +711,7 @@
                 },
                 "format": {
                   "unit": "seconds",
-                  "decimalPlaces": 1
+                  "decimalPlaces": 0
                 },
                 "thresholds": {
                   "steps": [
