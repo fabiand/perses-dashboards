@@ -16,7 +16,7 @@ Provide instant cluster health assessment. Green = healthy, red = requires actio
 2. **Consistent layout across dashboards to know what you see without contextual awareness**
    - Same structure every time → gauges always in same positions
    - Same gauge titles across dashboards → resource context from panel group title
-   - Row 1: Four gauges (utilization, virtual commitment, pressure, node imbalance)
+   - Row 1: Four gauges (utilization, pressure, node imbalance, resource-specific)
    - Row 2: Domain-specific time series
    - Switch dashboards, instantly oriented
 
@@ -40,8 +40,8 @@ At a Glance - <Resource>
 
 Row 1: Gauges (equal width, 6 units each)
 ┌──────────────┬──────────────┬──────────────┬──────────────┐
-│ Utilization  │   Virtual    │  Pressure    │     Node     │
-│              │ Commitment   │    (PSI)     │  Imbalance   │
+│ Utilization  │  Pressure    │     Node     │  Resource-   │
+│              │    (PSI)     │  Imbalance   │   Specific   │
 └──────────────┴──────────────┴──────────────┴──────────────┘
 
 Row 2: Time Series (full width, 24 units)
@@ -64,21 +64,27 @@ Row 2: Time Series (full width, 24 units)
 - Thresholds: <70% green, 70-85% yellow, >85% red
 - Action: Red = cluster needs scaling or workload reduction
 
-**Gauge 2: Virtual Commitment**
-- Shows: overcommit ratio as percentage (virtual/physical × 100)
-- Format: percent (150% means 1.5× overcommit)
-- Thresholds: <120% green, 120-150% yellow, >150% red
-- Action: Red = reduce overcommit or prepare for contention
-
-**Gauge 3: Pressure (PSI)**
+**Gauge 2: Pressure (PSI)**
 - Shows: worst-case contention across nodes (max node)
 - Thresholds: <10% green, 10-30% yellow, >30% red
 - Action: Red = investigate node under pressure
 
-**Gauge 4: Node Imbalance**
+**Gauge 3: Node Imbalance**
 - Shows: coefficient of variation across nodes
 - Thresholds: <0.3 green, 0.3-0.6 yellow, >0.6 red
 - Action: Red = rebalance workloads across nodes
+
+**Gauge 4: Resource-Specific**
+- **CPU/Memory:** Virtual Commitment
+  - Shows: overcommit ratio as percentage (virtual/physical × 100)
+  - Format: percent (150% means 1.5× overcommit)
+  - Thresholds: <120% green, 120-150% yellow, >150% red
+  - Action: Red = reduce overcommit or prepare for contention
+- **Storage:** Latency Quantiles
+  - Shows: p50/p95/p99 latency percentiles
+  - Format: milliseconds
+  - Thresholds: <30ms green, 30-60ms yellow, >60ms red
+  - Action: Red = investigate storage performance
 
 ### Time Series Examples
 
