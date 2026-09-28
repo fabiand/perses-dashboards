@@ -263,8 +263,7 @@
                   "connectNulls": false,
                   "display": "line",
                   "lineWidth": 1.5,
-                  "pointRadius": 0,
-                  "stack": false
+                  "pointRadius": 0
                 },
                 "yAxis": {
                   "format": {
