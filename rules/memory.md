@@ -291,6 +291,8 @@ openshift:cluster:memory:imbalance:p80distance
 
 **Why**: Detect uneven workload distribution across nodes. Computed as p80 quantile of `abs(node_utilization - mean) / mean`. Shows the spread: 80% of nodes are within this percentage of the mean. Values <0.10 (±10%) indicate balanced distribution, 0.10-0.15 moderate imbalance, 0.15-0.20 significant imbalance, >0.20 severe imbalance requiring workload rebalancing.
 
+**Design rationale**: This metric uses simple, direct language that anyone can understand without a statistics background. Previously we used Coefficient of Variation (stddev/mean), which is mathematically sound but difficult to interpret for most users - what does a CV of 0.45 actually mean in practice? The p80 distance metric gives you an immediately actionable number: 0.15 means "80% of your nodes are within ±15 percentage points of the mean." No mental math, no statistical knowledge required - you can instantly visualize whether your cluster is balanced or not.
+
 ## Important Notes
 
 - **Recording rules and data lag**: Recording rules can reference other recording rules, but this creates time lag between when base metrics update and when dependent rules evaluate. To avoid inconsistencies, complex rules expand other recording rules inline (using base metrics directly). Comments mark these expansions with "same as openshift:..." to document which recording rule is being inlined.

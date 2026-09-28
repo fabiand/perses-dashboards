@@ -246,6 +246,8 @@ Shows the spread: 80% of nodes are within this many percentage points of the mea
 - 0.15 - 0.20: Significant imbalance
 - > 0.20: Severe imbalance - rebalancing recommended
 
+**Design rationale**: This metric uses simple, direct language that anyone can understand without a statistics background. Previously we used Coefficient of Variation (stddev/mean), which is mathematically sound but difficult to interpret for most users - what does a CV of 0.45 actually mean in practice? The p80 distance metric gives you an immediately actionable number: 0.15 means "80% of your nodes are within ±15 percentage points of the mean." No mental math, no statistical knowledge required - you can instantly visualize whether your cluster is balanced or not.
+
 #### Pressure Ratio
 
 Shows worst-case CPU contention across the cluster:

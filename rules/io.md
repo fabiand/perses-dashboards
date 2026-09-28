@@ -76,6 +76,8 @@ I/O imbalance measures how evenly latency is distributed across nodes using the 
 
 Shows the spread: 80% of nodes are within this percentage of the mean latency.
 
+**Design rationale**: This metric uses simple, direct language that anyone can understand without a statistics background. Previously we used Coefficient of Variation (stddev/mean), which is mathematically sound but difficult to interpret for most users - what does a CV of 0.45 actually mean in practice? The p80 distance metric gives you an immediately actionable number: 0.15 means "80% of your nodes are within ±15% of the mean latency." No mental math, no statistical knowledge required - you can instantly visualize whether your cluster is balanced or not.
+
 #### Example
 
 ```promql
