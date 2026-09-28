@@ -679,7 +679,7 @@
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/vcpu_overcommit"
+                  "$ref": "#/spec/panels/cpu_pressure"
                 }
               },
               {
@@ -688,7 +688,7 @@
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/cpu_pressure"
+                  "$ref": "#/spec/panels/node_cpu_imbalance"
                 }
               },
               {
@@ -697,7 +697,7 @@
                 "width": 6,
                 "height": 6,
                 "content": {
-                  "$ref": "#/spec/panels/node_cpu_imbalance"
+                  "$ref": "#/spec/panels/vcpu_overcommit"
                 }
               },
               {

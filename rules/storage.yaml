@@ -10,6 +10,29 @@ spec:
   groups:
     - name: storage_latency.rules
       rules:
+        # Per-device storage utilization (busy time)
+        # Fraction of time the device had at least one I/O request in flight
+        - record: openshift:node:storage:utilization:ratio
+          labels:
+            segment: "host_to_device"
+            protocol: "block"
+            unit: ratio
+          expr: |
+            label_replace(
+              rate(node_disk_io_time_seconds_total{device=~"nvme.*|sd.*"}[2m]),
+              "node", "$1", "instance", "(.+)"
+            )
+
+        # Cluster-wide storage utilization (max across all devices)
+        # Shows worst-case device busy time
+        - record: openshift:cluster:storage:utilization:ratio
+          labels:
+            segment: "host_to_device"
+            protocol: "block"
+            unit: ratio
+          expr: |
+            max(openshift:node:storage:utilization:ratio)
+
         # Per-node latency histogram rate
         - record: openshift:node:storage:latency:rate
           labels:
