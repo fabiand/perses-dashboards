@@ -384,7 +384,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:cpu:seconds{scope=\"system\"}",
+                      "query": "sum(openshift:cluster:cpu:seconds{scope=\"system\"})",
                       "seriesNameFormat": "System"
                     }
                   }
