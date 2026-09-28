@@ -246,13 +246,13 @@ spec:
             scope: "workloads"
             unit: ratio
           expr: |
-            # Coefficient of Variation: measures relative spread of memory utilization across nodes
-            # Values: <0.3 = balanced, 0.3-0.6 = moderate imbalance, >0.6 = high imbalance
-            stddev(openshift:node:memory:utilization:ratio{scope="workloads"})
+            # Quantile ratio: p95/p50 shows how much more loaded the busiest nodes are vs median
+            # Values: <1.5 = balanced, 1.5-2.5 = moderate imbalance, >2.5 = high imbalance
+            quantile(0.95, openshift:node:memory:utilization:ratio{scope="workloads"})
 
             /
 
-            avg(openshift:node:memory:utilization:ratio{scope="workloads"})
+            quantile(0.5, openshift:node:memory:utilization:ratio{scope="workloads"})
 
         - record: openshift:cluster:memory:overcommit:ratio
           labels:

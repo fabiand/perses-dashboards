@@ -86,7 +86,7 @@ spec:
 
             / on (node)
 
-            openshift:node:cpu:seconds{scope="workloads"}
+            sum by (node) (openshift:node:cpu:seconds{scope="workloads"})
 
         # CPU Pressure Stall Information (PSI) per node
         # Shows fraction of time tasks are waiting for CPU (some pressure)
@@ -185,17 +185,17 @@ spec:
             /
             sum(openshift:node:cpu:seconds{scope="workloads"})
 
-        # Cluster-wide CPU allocation imbalance
-        # Coefficient of variation: measures spread of CPU allocation across nodes
-        # Values: <0.3 = balanced, 0.3-0.6 = moderate imbalance, >0.6 = high imbalance
+        # Cluster-wide CPU utilization imbalance
+        # Quantile ratio: p95/p50 shows how much more loaded the busiest nodes are vs median
+        # Values: <1.5 = balanced, 1.5-2.5 = moderate imbalance, >2.5 = high imbalance
         - record: openshift:cluster:cpu:imbalance:ratio
           labels:
             scope: "workloads"
             unit: ratio
           expr: |
-            stddev(openshift:node:cpu:overcommit:ratio{scope="workloads"})
+            quantile(0.95, openshift:node:cpu:utilization:ratio{scope="workloads"})
             /
-            avg(openshift:node:cpu:overcommit:ratio{scope="workloads"})
+            quantile(0.5, openshift:node:cpu:utilization:ratio{scope="workloads"})
 
     #
     # VM-level CPU Rules
