@@ -4,9 +4,16 @@ jsons := $(wildcard */*.json)
 
 #URL=https://prometheus-k8s-openshift-monitoring.apps.cnv2.engineering.redhat.com
 PROJECT := openshift-cnv
-PROM_URL ?= https://$(shell oc get route -n openshift-monitoring prometheus-k8s -o jsonpath='{.status.ingress[0].host}')
-TOKEN ?= $(shell oc whoami -t)
+PROM_URL ?= https://$(shell $(OC) get route -n openshift-monitoring prometheus-k8s -o jsonpath='{.status.ingress[0].host}')
 
+ifdef TOKEN
+	OC = oc --server "$(URL)" --token "$(TOKEN)" --insecure-skip-tls-verify
+else
+	TOKEN ?= $(shell oc whoami -t)
+	OC=oc
+endif	
+
+URL=https://api.cnv2.engineering.redhat.com:6443
 
 run-dashboard:
 	podman -r run --name perses --rm --net=host persesdev/perses:latest
@@ -18,15 +25,15 @@ dashboard-url:
 apply: apply-prom apply-perses
 apply-prom:
 	# Create a Role with PrometheusRule permissions in current namespace
-	oc get role prometheus-rule-creator || oc create role prometheus-rule-creator \
+	$(OC) get role prometheus-rule-creator || $(OC) create role prometheus-rule-creator \
 	  --verb=create,get,list,watch,update,patch,delete \
 	  --resource=prometheusrules.monitoring.coreos.com
 	# Bind the role to your user in current namespace
-	oc get rolebinding prometheus-rule-creator || oc create rolebinding prometheus-rule-creator \
+	$(OC) get rolebinding prometheus-rule-creator || $(OC) create rolebinding prometheus-rule-creator \
 	  --role=prometheus-rule-creator \
-	  --user=$$(oc whoami)
+	  --user=$$($(OC) whoami)
 	
-	for R in rules/*.yaml ; do oc apply -f $$R ; done
+	for R in rules/*.yaml ; do $(OC) apply -f $$R ; done
 
 apply-perses: FORCE $(jsons)
 	percli apply -f 01-project.json
