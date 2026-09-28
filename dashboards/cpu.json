@@ -228,7 +228,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Pressure (PSI)",
+              "name": "Max Pressure (PSI)",
               "description": "Maximum CPU Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for CPU on the most pressured node. Higher values indicate CPU contention and performance degradation. Threshold: <10% green (healthy), 10-30% yellow (moderate pressure), >30% red (high contention).\n\nAnswers: What is the worst-case CPU pressure in the cluster?"
             },
             "plugin": {
@@ -264,7 +264,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "topk(1, openshift:node:cpu:pressure:ratio{severity=\"some\"} @ end())",
+                      "query": "max(openshift:node:cpu:pressure:ratio{severity=\\"some\\"} @ end())",
                       "seriesNameFormat": "{{node}}"
                     }
                   }
