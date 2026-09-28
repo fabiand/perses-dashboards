@@ -182,7 +182,7 @@ Cluster-level ratios provide cluster-wide health metrics:
 |-------|---------|---------|
 | `utilization` | sum(node utilized) / sum(node total) | Cluster-wide utilization |
 | `overcommit` | sum(virtual) / sum(workloads) | Cluster vCPU/pCPU ratio |
-| `imbalance` | stddev(node overcommit) / avg(node overcommit) | Allocation balance across nodes |
+| `imbalance` | p80 quantile of percentage distance from mean | Allocation balance across nodes - 80% of nodes within this % of mean |
 | `pressure` | max(node pressure) | Worst-case node contention |
 
 #### Utilization Ratio
@@ -221,23 +221,30 @@ Values > 1.0 indicate overcommit. Values > 2.0 may cause contention under load.
 
 #### Imbalance Ratio
 
-Measures how evenly CPU is allocated across nodes using coefficient of variation:
+Measures how evenly CPU is allocated across nodes using p80 quantile of percentage point distance from mean:
 
 ```promql
-openshift:cluster:cpu:imbalance:ratio{scope="workloads"}
+openshift:cluster:cpu:imbalance:p80distance{scope="workloads"}
 ```
 
 Calculated as:
 ```
-stddev(openshift:node:cpu:overcommit:ratio{scope="workloads"})
-/
-avg(openshift:node:cpu:overcommit:ratio{scope="workloads"})
+quantile(0.80,
+  abs(
+    openshift:node:cpu:utilization:ratio{scope="workloads"}
+    -
+    scalar(avg(openshift:node:cpu:utilization:ratio{scope="workloads"}))
+  )
+)
 ```
 
+Shows the spread: 80% of nodes are within this many percentage points of the mean utilization.
+
 **Interpretation**:
-- < 0.3: Balanced distribution
-- 0.3 - 0.6: Moderate imbalance
-- > 0.6: High imbalance - rebalancing recommended
+- < 0.10 (±10pp): Well balanced distribution
+- 0.10 - 0.15: Moderate imbalance
+- 0.15 - 0.20: Significant imbalance
+- > 0.20: Severe imbalance - rebalancing recommended
 
 #### Pressure Ratio
 
@@ -264,7 +271,7 @@ openshift:cluster:cpu:seconds{scope="system|workloads", utilized="true|false", u
 openshift:cluster:virtual:cpu:seconds{scope="workloads", unit="seconds"}
 openshift:cluster:cpu:utilization:ratio{scope="workloads", unit="ratio"}
 openshift:cluster:cpu:overcommit:ratio{scope="virtual", unit="ratio"}
-openshift:cluster:cpu:imbalance:ratio{scope="workloads", unit="ratio"}
+openshift:cluster:cpu:imbalance:p80distance{scope="workloads", unit="ratio"}
 openshift:cluster:cpu:pressure:ratio{severity="some", unit="ratio"}
 ```
 

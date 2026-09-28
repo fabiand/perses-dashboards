@@ -65,19 +65,22 @@ openshift:cluster:io:latency:p99
 
 ### Imbalance
 
-I/O imbalance measures how evenly latency is distributed across nodes using the coefficient of variation on p95 latency.
+I/O imbalance measures how evenly latency is distributed across nodes using the p80 quantile of percentage distance from mean latency.
 
 | Imbalance Range | Interpretation |
 |----------------|----------------|
-| < 0.3 | Balanced |
-| 0.3 - 0.6 | Moderate imbalance |
-| > 0.6 | High imbalance - investigate node differences |
+| < 0.10 (±10%) | Well balanced |
+| 0.10 - 0.15 | Moderate imbalance |
+| 0.15 - 0.20 | Significant imbalance |
+| > 0.20 | Severe imbalance - investigate node differences |
+
+Shows the spread: 80% of nodes are within this percentage of the mean latency.
 
 #### Example
 
 ```promql
 # Cluster I/O latency imbalance
-openshift:cluster:io:latency:imbalance:ratio
+openshift:cluster:io:latency:imbalance:p80distance
 ```
 
 ## Recording Rule Structure
@@ -91,7 +94,7 @@ openshift:node:io:latency:p95{node}
 openshift:cluster:io:latency:p50
 openshift:cluster:io:latency:p95
 openshift:cluster:io:latency:p99
-openshift:cluster:io:latency:imbalance:ratio
+openshift:cluster:io:latency:imbalance:p80distance
 openshift:cluster:io:latency_bucket:ratio{le, g}
 ```
 
@@ -119,7 +122,7 @@ openshift:cluster:io:latency_bucket:ratio{le, g}
 | `openshift:cluster:io:latency:p50` | Cluster-wide median latency |
 | `openshift:cluster:io:latency:p95` | Cluster-wide 95th percentile latency |
 | `openshift:cluster:io:latency:p99` | Cluster-wide 99th percentile latency |
-| `openshift:cluster:io:latency:imbalance:ratio` | Coefficient of variation of p95 latency across nodes |
+| `openshift:cluster:io:latency:imbalance:p80distance` | p80 quantile of percentage distance from mean p95 latency across nodes |
 | `openshift:cluster:io:latency_bucket:ratio{le,g}` | Latency distribution by bucket |
 
 ## Latency Buckets
@@ -173,8 +176,8 @@ openshift:cluster:io:latency:p99
 ### Imbalance Detection
 
 ```promql
-# Detect unbalanced I/O performance
-openshift:cluster:io:latency:imbalance:ratio > 0.6
+# Detect unbalanced I/O performance (>20% spread)
+openshift:cluster:io:latency:imbalance:p80distance > 0.20
 ```
 
 ### Distribution Analysis
