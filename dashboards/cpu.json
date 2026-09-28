@@ -129,7 +129,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Cluster CPU Utilization",
+              "name": "Utilization",
               "description": "Percentage of cluster CPU capacity currently in use by workloads. Shows aggregate utilization across all nodes. Threshold: <70% green (healthy capacity), 70-85% yellow (monitor usage), >85% red (high utilization).\n\nAnswers: How much of the cluster's CPU is being used?"
             },
             "plugin": {
@@ -178,7 +178,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Node CPU Imbalance",
+              "name": "Node Imbalance",
               "description": "Coefficient of variation for CPU allocation across nodes. Measures how evenly CPU load is distributed. Lower values indicate balanced distribution; higher values mean some nodes are heavily loaded while others are underutilized. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is CPU allocation across nodes?"
             },
             "plugin": {
@@ -228,7 +228,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "CPU Pressure (PSI)",
+              "name": "Pressure (PSI)",
               "description": "Maximum CPU Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for CPU on the most pressured node. Higher values indicate CPU contention and performance degradation. Threshold: <10% green (healthy), 10-30% yellow (moderate pressure), >30% red (high contention).\n\nAnswers: What is the worst-case CPU pressure in the cluster?"
             },
             "plugin": {
@@ -277,7 +277,7 @@
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "vCPU Overcommit",
+              "name": "Virtual Commitment",
               "description": "Total virtual CPUs assigned to VMs as a percentage of physical CPU capacity. Values >100% indicate CPU overcommitment. Threshold: <120% green (acceptable), 120-150% yellow (monitor VM usage), >150% red (high overcommit risk). Overcommitment is safe when VMs don't simultaneously reach peak CPU usage.\n\nAnswers: Is the cluster overcommitting virtual CPUs?"
             },
             "plugin": {
@@ -658,7 +658,7 @@
           "kind": "Grid",
           "spec": {
             "display": {
-              "title": "At a Glance",
+              "title": "At a Glance - CPU",
               "collapse": {
                 "open": true
               }
