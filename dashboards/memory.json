@@ -652,8 +652,8 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "topk(1, (sum by (instance) (rate(node_pressure_memory_waiting_seconds_total{instance=~\"$node\"}[1m]@end()))))",
-                    "seriesNameFormat": "{{instance}}"
+                    "query": "openshift:cluster:memory:pressure:ratio{severity=\"some\"}",
+                    "seriesNameFormat": "Max memory pressure"
                   }
                 }
               }

@@ -225,9 +225,9 @@ spec:
             unit: ratio
           expr: |
             label_replace(
-              rate(node_pressure_memory_waiting_seconds_total[1m]),
+              rate(node_pressure_memory_waiting_seconds_total[2m]),
               "node", "$1", "instance", "(.+)"
-            ) > 0.1
+            )
 
         - record: openshift:cluster:memory:utilization:ratio
           labels:
@@ -275,6 +275,13 @@ spec:
             / on (node)
 
             kube_node_status_allocatable{resource="memory"}
+
+        - record: openshift:cluster:memory:pressure:ratio
+          labels:
+            severity: "some"
+            unit: ratio
+          expr: |
+            max(openshift:node:memory:pressure:ratio{severity="some"})
 
 
     #
