@@ -69,16 +69,16 @@ I/O imbalance measures how evenly pressure is distributed across nodes using the
 
 | Imbalance Range | Interpretation |
 |----------------|----------------|
-| < 0.10 (±10pp) | Well balanced |
-| 0.10 - 0.15 | Moderate imbalance |
-| 0.15 - 0.20 | Significant imbalance |
-| > 0.20 | Severe imbalance - investigate node differences |
+| < 0.11 (±11pp) | Healthy balanced |
+| 0.11 - 0.22 | Unhealthy balance |
+| 0.22 - 0.33 | Severely unbalanced |
+| > 0.33 | Critically unbalanced - investigate node differences |
 
 Shows the spread: 80% of nodes are within this many percentage points of the mean pressure.
 
 **Why pressure instead of latency**: Pressure imbalance is more actionable than latency imbalance. Different disk speeds may cause latency variance that's not a problem, but pressure always indicates contention. Measuring pressure imbalance shows where I/O bottlenecks are unevenly distributed.
 
-**Design rationale**: This metric uses simple, direct language that anyone can understand without a statistics background. Previously we used Coefficient of Variation (stddev/mean), which is mathematically sound but difficult to interpret for most users - what does a CV of 0.45 actually mean in practice? The p80 distance metric gives you an immediately actionable number: 0.15 means "80% of your nodes are within ±15 percentage points of the mean." No mental math, no statistical knowledge required - you can instantly visualize whether your cluster is balanced or not.
+**Design rationale**: This metric uses simple, direct language that anyone can understand without a statistics background. Previously we used Coefficient of Variation (stddev/mean), which is mathematically sound but difficult to interpret for most users - what does a CV of 0.45 actually mean in practice? The p80 distance metric gives you an immediately actionable number: 0.22 means "80% of your nodes are within ±22 percentage points of the mean." No mental math, no statistical knowledge required - you can instantly visualize whether your cluster is balanced or not.
 
 #### Example
 
@@ -180,8 +180,8 @@ openshift:cluster:io:latency:p99
 ### Imbalance Detection
 
 ```promql
-# Detect unbalanced I/O pressure (>20pp spread)
-openshift:cluster:io:imbalance:p80distance > 0.20
+# Detect unbalanced I/O pressure (>33pp spread indicates critical imbalance)
+openshift:cluster:io:imbalance:p80distance > 0.33
 ```
 
 ### Distribution Analysis

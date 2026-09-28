@@ -650,7 +650,7 @@
         "spec": {
           "display": {
             "name": "Pressure Imbalance",
-            "description": "80th percentile of percentage point distance from mean memory pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.15 means 80% of nodes are within ±15pp of mean pressure. Threshold: <0.10 (±10pp) green (well balanced), 0.10-0.15 yellow (moderate), 0.15-0.20 orange (significant), >0.20 red (severe imbalance).\n\nAnswers: How balanced is memory pressure across nodes?"
+            "description": "80th percentile of percentage point distance from mean memory pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.22 means 80% of nodes are within ±22pp of mean pressure. Threshold: <0.11 (±11pp) green (healthy balanced), 0.11-0.22 yellow (unhealthy balance), 0.22-0.33 orange (severely unbalanced), >0.33 red (critically unbalanced).\n\nAnswers: How balanced is memory pressure across nodes?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -668,15 +668,15 @@
                     "color": "#59CC8D"
                   },
                   {
-                    "value": 0.10,
+                    "value": 0.11,
                     "color": "#FFB249"
                   },
                   {
-                    "value": 0.15,
+                    "value": 0.22,
                     "color": "#FF9F1C"
                   },
                   {
-                    "value": 0.20,
+                    "value": 0.33,
                     "color": "#EE6C6C"
                   }
                 ]

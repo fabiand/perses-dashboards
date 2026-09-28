@@ -241,14 +241,14 @@ quantile(0.80,
 Shows the spread: 80% of nodes are within this many percentage points of the mean pressure.
 
 **Interpretation**:
-- < 0.10 (±10pp): Well balanced distribution
-- 0.10 - 0.15: Moderate imbalance
-- 0.15 - 0.20: Significant imbalance
-- > 0.20: Severe imbalance - rebalancing recommended
+- < 0.11 (±11pp): Healthy balanced distribution
+- 0.11 - 0.22: Unhealthy balance
+- 0.22 - 0.33: Severely unbalanced
+- > 0.33: Critically unbalanced - rebalancing recommended
 
 **Why pressure instead of utilization**: Pressure imbalance is more actionable than utilization imbalance. High utilization without pressure is healthy (CPUs are being used efficiently), but pressure always indicates contention. Measuring pressure imbalance shows where the actual bottlenecks are.
 
-**Design rationale**: This metric uses simple, direct language that anyone can understand without a statistics background. Previously we used Coefficient of Variation (stddev/mean), which is mathematically sound but difficult to interpret for most users - what does a CV of 0.45 actually mean in practice? The p80 distance metric gives you an immediately actionable number: 0.15 means "80% of your nodes are within ±15 percentage points of the mean." No mental math, no statistical knowledge required - you can instantly visualize whether your cluster is balanced or not.
+**Design rationale**: This metric uses simple, direct language that anyone can understand without a statistics background. Previously we used Coefficient of Variation (stddev/mean), which is mathematically sound but difficult to interpret for most users - what does a CV of 0.45 actually mean in practice? The p80 distance metric gives you an immediately actionable number: 0.22 means "80% of your nodes are within ±22 percentage points of the mean." No mental math, no statistical knowledge required - you can instantly visualize whether your cluster is balanced or not.
 
 #### Pressure Ratio
 
