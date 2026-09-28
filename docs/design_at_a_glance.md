@@ -15,7 +15,8 @@ Provide instant cluster health assessment. Green = healthy, red = requires actio
 
 2. **Consistent layout across dashboards to know what you see without contextual awareness**
    - Same structure every time → gauges always in same positions
-   - Row 1: Four gauges (cluster util, node imbalance, top-1 pressure, virtual commitment)
+   - Same gauge titles across dashboards → resource context from panel group title
+   - Row 1: Four gauges (utilization, virtual commitment, pressure, node imbalance)
    - Row 2: Domain-specific time series
    - Switch dashboards, instantly oriented
 
@@ -31,14 +32,16 @@ Provide instant cluster health assessment. Green = healthy, red = requires actio
 
 ## Panel Group Schema
 
+**Panel Group Title:** `At a Glance - <Resource>` (e.g., "At a Glance - Memory", "At a Glance - CPU")
+
 ```
-At a Glance
+At a Glance - <Resource>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Row 1: Gauges (equal width, 6 units each)
 ┌──────────────┬──────────────┬──────────────┬──────────────┐
-│   Cluster    │     Node     │    Top-1     │   Virtual    │
-│ Utilization  │  Imbalance   │   Pressure   │ Commitment   │
+│ Utilization  │   Virtual    │  Pressure    │     Node     │
+│              │ Commitment   │    (PSI)     │  Imbalance   │
 └──────────────┴──────────────┴──────────────┴──────────────┘
 
 Row 2: Time Series (full width, 24 units)
@@ -47,51 +50,56 @@ Row 2: Time Series (full width, 24 units)
 └───────────────────────────────────────────────────────────┘
 ```
 
+**Design Principle:** Gauge titles are resource-agnostic. The panel group title provides resource context.
+
 **Examples:**
-- Memory: Row 2 shows cluster utilization with tier breakdown
-- Storage: Row 2 shows latency quantiles (p50/p95/p99)
-- CPU: Row 2 shows per-node overcommit ratios
+- Memory: "At a Glance - Memory", Row 2 shows cluster utilization with tier breakdown
+- CPU: "At a Glance - CPU", Row 2 shows system/workloads busy/idle
+- Storage: "At a Glance - Storage", Row 2 shows latency quantiles (p50/p95/p99)
 
 ### Gauge Details
 
-**Cluster Utilization**
+**Gauge 1: Utilization**
 - Shows: percentage of cluster resource in use
 - Thresholds: <70% green, 70-85% yellow, >85% red
 - Action: Red = cluster needs scaling or workload reduction
 
-**Node Imbalance**
-- Shows: coefficient of variation across nodes
-- Thresholds: <0.3 green, 0.3-0.6 yellow, >0.6 red
-- Action: Red = rebalance workloads across nodes
-
-**Top-1 Pressure** (max node)
-- Shows: worst-case contention (PSI)
-- Thresholds: <10% green, 10-30% yellow, >30% red
-- Action: Red = investigate node under pressure
-
-**Virtual Commitment** (memory/CPU)
+**Gauge 2: Virtual Commitment**
 - Shows: overcommit ratio as percentage (virtual/physical × 100)
 - Format: percent (150% means 1.5× overcommit)
 - Thresholds: <120% green, 120-150% yellow, >150% red
 - Action: Red = reduce overcommit or prepare for contention
 
+**Gauge 3: Pressure (PSI)**
+- Shows: worst-case contention across nodes (max node)
+- Thresholds: <10% green, 10-30% yellow, >30% red
+- Action: Red = investigate node under pressure
+
+**Gauge 4: Node Imbalance**
+- Shows: coefficient of variation across nodes
+- Thresholds: <0.3 green, 0.3-0.6 yellow, >0.6 red
+- Action: Red = rebalance workloads across nodes
+
 ### Time Series Examples
 
-**Memory Dashboard**
-- Cluster utilization history with tier breakdown (DRAM, swap, overflow)
-- Stacked area chart showing capacity consumption over time
+**Memory Dashboard** ("At a Glance - Memory")
+- Cluster utilization history with tier breakdown
+- Stacked area chart: system (red), workloads (orange), committed (blue dashed)
 
-**Storage Dashboard**
+**CPU Dashboard** ("At a Glance - CPU")
+- Cluster CPU utilization over time
+- Stacked area chart: system (red), workloads busy (orange), workloads idle (green), committed (blue dashed)
+
+**Storage Dashboard** ("At a Glance - Storage")
 - Latency quantiles (p50, p95, p99)
 - Line chart showing latency trends
 
-**CPU Dashboard**
-- vCPU overcommit ratio per node
-- Multi-line chart identifying overcommitted nodes
-
 ## Implementation Notes
 
-- Gauge width: 6 units each (24-unit grid → 4 gauges)
-- Time series height: 9-13 units depending on content density
-- All gauges use 1 decimal place precision
-- Color palette: green (#59CC8D), yellow (#FFB249), red (#EE6C6C)
+- **Panel group title:** Include resource name (e.g., "At a Glance - Memory")
+- **Gauge titles:** Resource-agnostic across all dashboards (same titles, different data)
+- **Gauge width:** 6 units each (24-unit grid → 4 gauges)
+- **Time series height:** 9-13 units depending on content density
+- **Gauge precision:** All gauges use 1 decimal place
+- **Color palette:** green (#59CC8D), yellow (#FFB249), red (#EE6C6C)
+- **Gauge order:** Must remain consistent across all resource dashboards
