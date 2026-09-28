@@ -274,7 +274,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"0\", utilized=\"true\", usage=\"overflow\"}) > 0",
-                    "seriesNameFormat": "Tier 0 - System Overflow"
+                    "seriesNameFormat": "Workloads - Tier 0 - System Overflow"
                   }
                 }
               }
@@ -286,7 +286,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"0\", temperature=\"hot\", utilized=\"true\"})",
-                    "seriesNameFormat": "Tier 0 - Hot"
+                    "seriesNameFormat": "Workloads - Tier 0 - Hot"
                   }
                 }
               }
@@ -298,7 +298,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"0\", temperature=\"warm\", utilized=\"true\"})",
-                    "seriesNameFormat": "Tier 0 - Warm"
+                    "seriesNameFormat": "Workloads - Tier 0 - Warm"
                   }
                 }
               }
@@ -310,7 +310,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"0\", utilized=\"false\"})",
-                    "seriesNameFormat": "Tier 0 - Free"
+                    "seriesNameFormat": "Workloads - Tier 0 - Free"
                   }
                 }
               }
@@ -322,7 +322,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"2\", temperature=\"warm\", utilized=\"true\"}) > 0",
-                    "seriesNameFormat": "Tier 2 - Warm (Swap used)"
+                    "seriesNameFormat": "Workloads - Tier 2 - Warm (Swap used)"
                   }
                 }
               }
@@ -334,7 +334,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(openshift:node:memory:bytes{scope=\"workloads\", tier=\"2\", utilized=\"false\"}) > 0",
-                    "seriesNameFormat": "Tier 2 - Free (Swap free)"
+                    "seriesNameFormat": "Workloads - Tier 2 - Free (Swap free)"
                   }
                 }
               }
@@ -394,7 +394,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "sum(openshift:node:memory:bytes{utilized=\"true\", scope=\"workloads\"}) / sum(kube_node_status_allocatable{resource=\"memory\"})",
-                    "seriesNameFormat": "Physical Memory utilization"
+                    "seriesNameFormat": "Workloads - Physical Memory utilization"
                   }
                 }
               }
@@ -1111,7 +1111,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "max(sum by (node) (openshift:node:memory:bytes{scope=\"workloads\", temperature=\"hot\", node=~\"$node\"}) / on (node) kube_node_status_allocatable{resource=\"memory\"})",
-                    "seriesNameFormat": "Max"
+                    "seriesNameFormat": "Workloads - Max"
                   }
                 }
               }
@@ -1157,7 +1157,7 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "min(sum by (node) (openshift:node:memory:bytes{scope=\"workloads\", temperature=\"hot\", node=~\"$node\"}) / on (node) kube_node_status_allocatable{resource=\"memory\"})",
-                    "seriesNameFormat": "Min"
+                    "seriesNameFormat": "Workloads - Min"
                   }
                 }
               }
