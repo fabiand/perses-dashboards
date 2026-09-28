@@ -107,8 +107,8 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "max(rate(node_pressure_io_waiting_seconds_total[1m]))",
-                      "seriesNameFormat": "Max IO pressure (tasks waiting)"
+                      "query": "max(openshift:node:io:pressure:ratio{severity=\"some\"} @ end())",
+                      "seriesNameFormat": "Max IO pressure"
                     }
                   }
                 }
