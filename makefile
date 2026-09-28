@@ -41,7 +41,7 @@ apply-perses: FORCE $(jsons)
 	jq --arg token "$(TOKEN)" '.[0].spec.authorization.credentials = $$token' 02-secret.json.in | percli apply -f -
 	jq --arg url "$(PROM_URL)" '.[0].spec.plugin.spec.proxy.spec.url = $$url' 03-dts.json.in | percli apply -f -
 	
-	for D in dashboards/*.json ; do percli apply -f $$D ; done
+	for D in dashboards/*.json ; do (set -ex ; percli apply -f $$D || exit 1 ) ; done
 
 docs: 04-dash-memory-summary.json.in 04-dash-memory-details.json.in
 	cp documentation.md.in documentation.md
