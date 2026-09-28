@@ -8,33 +8,6 @@
     "display": {
       "name": "Memory"
     },
-    "variables": [
-      {
-        "kind": "ListVariable",
-        "spec": {
-          "display": {
-            "name": "Node",
-            "hidden": false
-          },
-          "defaultValue": "$__all",
-          "allowAllValue": true,
-          "allowMultiple": false,
-          "customAllValue": ".*",
-          "sort": "alphabetical-ci-asc",
-          "plugin": {
-            "kind": "PrometheusLabelValuesVariable",
-            "spec": {
-              "datasource": {
-                "kind": "PrometheusDatasource",
-                "name": "default"
-              },
-              "labelName": "node"
-            }
-          },
-          "name": "node"
-        }
-      }
-    ],
     "panels": {
       "ClusterPressure": {
         "kind": "Panel",
