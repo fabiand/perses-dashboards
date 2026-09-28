@@ -12,7 +12,7 @@
       "display": {
         "name": "Overview"
       },
-      "duration": "15m",
+      "duration": "1h",
       "refreshInterval": "15s",
       "panels": {
         "memory_utilization": {

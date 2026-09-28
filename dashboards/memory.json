@@ -1823,6 +1823,7 @@
         }
       }
     ],
-    "duration": "1h"
+    "duration": "1h",
+    "refreshInterval": "15s"
   }
 }
