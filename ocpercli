@@ -14,25 +14,33 @@ usage() {
     cat <<EOF
 $SCRIPT_NAME - Perses Dashboard CLI for OpenShift
 
-Usage: $SCRIPT_NAME [OPTIONS] <dashboard-file>
+Usage: $SCRIPT_NAME <command> [OPTIONS] <dashboard-file>
 
-Apply Perses dashboard files to an OpenShift cluster in the current namespace.
+Commands:
+  apply       Create or update Perses dashboards in the cluster
+  delete      Delete Perses dashboards from the cluster
 
-Arguments:
-  <dashboard-file>    Path to Perses dashboard JSON file
-
-Options:
+Apply Options:
   -n, --namespace <ns>  Target namespace (default: current namespace)
   -p, --project <name>  Override project name in dashboard metadata
   -d, --dry-run        Show what would be applied without applying
   -h, --help           Show this help message
   -v, --version        Show version
 
+Delete Options:
+  -n, --namespace <ns>  Target namespace (default: current namespace)
+  -d, --dry-run        Show what would be deleted without deleting
+  -h, --help           Show this help message
+
+Arguments:
+  <dashboard-file>    Path to Perses dashboard JSON file
+
 Examples:
-  $SCRIPT_NAME dashboards/overview.json
-  $SCRIPT_NAME -n monitoring dashboards/memory.json
-  $SCRIPT_NAME --dry-run dashboards/cpu.json
-  $SCRIPT_NAME --project my-project dashboards/io.json
+  $SCRIPT_NAME apply dashboards/overview.json
+  $SCRIPT_NAME apply -n monitoring dashboards/memory.json
+  $SCRIPT_NAME apply --dry-run dashboards/cpu.json
+  $SCRIPT_NAME delete dashboards/overview.json
+  $SCRIPT_NAME delete -n monitoring dashboards/memory.json
 
 Requirements:
   - oc (OpenShift CLI) must be installed and configured
@@ -102,61 +110,68 @@ validate_dashboard() {
         error "Invalid JSON in file: $file"
     fi
 
-    local kind=$(jq -r '.kind // empty' "$file")
-    if [[ "$kind" != "Dashboard" ]]; then
-        error "File does not contain a Perses Dashboard (kind: $kind)"
+    local file_type=$(jq -r 'type' "$file")
+    if [[ "$file_type" != "array" ]]; then
+        error "File must contain an array of dashboards, got: $file_type"
     fi
 
-    local name=$(jq -r '.metadata.name // empty' "$file")
-    if [[ -z "$name" ]]; then
-        error "Dashboard metadata.name is missing"
+    local count=$(jq 'length' "$file")
+    if [[ "$count" -eq 0 ]]; then
+        error "File contains an empty array"
     fi
+
+    # Validate first element is a dashboard
+    local kind=$(jq -r '.[0].kind // empty' "$file")
+    if [[ "$kind" != "Dashboard" ]]; then
+        error "Array elements are not Perses Dashboards (kind: $kind)"
+    fi
+}
+
+# Get dashboard count
+get_dashboard_count() {
+    local file=$1
+    jq 'length' "$file"
 }
 
 # Wrap Perses dashboard in Kubernetes Custom Resource
 wrap_dashboard() {
     local file=$1
-    local namespace=$2
-    local project_override=$3
+    local index=$2
+    local namespace=$3
+    local project_override=$4
 
-    local dashboard=$(cat "$file")
-    local name=$(echo "$dashboard" | jq -r '.metadata.name')
-    local project=$(echo "$dashboard" | jq -r '.metadata.project // "default"')
-
-    # Override project if specified
-    if [[ -n "$project_override" ]]; then
-        project="$project_override"
-        dashboard=$(echo "$dashboard" | jq --arg proj "$project" '.metadata.project = $proj')
-    fi
-
-    # Create PersesDashboard CRD wrapper
-    cat <<EOF
-apiVersion: perses.dev/v1alpha1
-kind: PersesDashboard
-metadata:
-  name: $name
-  namespace: $namespace
-spec:
-  dashboard: $(echo "$dashboard" | jq -c .)
-EOF
+    # Build the PersesDashboard CRD using jq
+    jq -n \
+        --arg ns "$namespace" \
+        --arg proj_override "$project_override" \
+        --argjson dashboard "$(jq ".[$index]" "$file")" \
+        '{
+            apiVersion: "perses.dev/v1alpha2",
+            kind: "PersesDashboard",
+            metadata: {
+                name: $dashboard.metadata.name,
+                namespace: $ns,
+                labels: {
+                    "perses.dev/project": (if $proj_override != "" then $proj_override else ($dashboard.metadata.project // "default") end)
+                }
+            },
+            spec: ($dashboard.spec + {
+                project: (if $proj_override != "" then $proj_override else ($dashboard.metadata.project // "default") end)
+            })
+        }'
 }
 
-# Main function
-main() {
+# Apply dashboards
+cmd_apply() {
     local file=""
     local namespace=""
     local project=""
     local dry_run=false
+    local cli=$(check_cli)
 
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
-            -h|--help)
-                usage
-                ;;
-            -v|--version)
-                version
-                ;;
             -n|--namespace)
                 namespace="$2"
                 shift 2
@@ -188,14 +203,12 @@ main() {
         error "No dashboard file specified. Use -h for help."
     fi
 
-    # Check prerequisites
-    local cli=$(check_cli)
     info "Using CLI: $cli"
 
     # Validate dashboard file
     validate_dashboard "$file"
-    local dashboard_name=$(jq -r '.metadata.name' "$file")
-    info "Dashboard: $dashboard_name"
+    local count=$(get_dashboard_count "$file")
+    info "Found $count dashboard(s) in file"
 
     # Get or set namespace
     if [[ -z "$namespace" ]]; then
@@ -208,25 +221,140 @@ main() {
         info "Project override: $project"
     fi
 
-    # Generate Kubernetes resource
-    local k8s_resource=$(wrap_dashboard "$file" "$namespace" "$project")
+    # Process each dashboard
+    for ((i=0; i<count; i++)); do
+        local dashboard_name=$(jq -r ".[$i].metadata.name" "$file")
 
-    if [[ "$dry_run" == true ]]; then
-        warn "Dry-run mode - showing resource that would be applied:"
-        echo "---"
-        echo "$k8s_resource"
-        echo "---"
-        exit 0
+        if [[ "$count" -gt 1 ]]; then
+            echo ""
+            info "Processing dashboard $((i+1))/$count: $dashboard_name"
+        else
+            info "Dashboard: $dashboard_name"
+        fi
+
+        # Generate Kubernetes resource
+        local k8s_resource=$(wrap_dashboard "$file" "$i" "$namespace" "$project")
+
+        if [[ "$dry_run" == true ]]; then
+            warn "Dry-run mode - showing resource that would be applied:"
+            echo "---"
+            echo "$k8s_resource"
+            echo "---"
+        else
+            # Apply to cluster
+            echo "$k8s_resource" | $cli apply -f - -n "$namespace"
+
+            if [[ $? -eq 0 ]]; then
+                info "Dashboard '$dashboard_name' applied successfully"
+            else
+                error "Failed to apply dashboard '$dashboard_name'"
+            fi
+        fi
+    done
+}
+
+# Delete dashboards
+cmd_delete() {
+    local file=""
+    local namespace=""
+    local dry_run=false
+    local cli=$(check_cli)
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -n|--namespace)
+                namespace="$2"
+                shift 2
+                ;;
+            -d|--dry-run)
+                dry_run=true
+                shift
+                ;;
+            -*)
+                error "Unknown option: $1"
+                ;;
+            *)
+                if [[ -z "$file" ]]; then
+                    file="$1"
+                else
+                    error "Multiple files not supported. Got: '$file' and '$1'"
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    # Validate arguments
+    if [[ -z "$file" ]]; then
+        error "No dashboard file specified. Use -h for help."
     fi
 
-    # Apply to cluster
-    echo "$k8s_resource" | $cli apply -f - -n "$namespace"
+    info "Using CLI: $cli"
 
-    if [[ $? -eq 0 ]]; then
-        info "Dashboard '$dashboard_name' applied successfully to namespace '$namespace'"
-    else
-        error "Failed to apply dashboard"
+    # Validate dashboard file
+    validate_dashboard "$file"
+    local count=$(get_dashboard_count "$file")
+    info "Found $count dashboard(s) in file"
+
+    # Get or set namespace
+    if [[ -z "$namespace" ]]; then
+        namespace=$(get_namespace "$cli")
     fi
+    info "Namespace: $namespace"
+
+    # Process each dashboard
+    for ((i=0; i<count; i++)); do
+        local dashboard_name=$(jq -r ".[$i].metadata.name" "$file")
+
+        if [[ "$count" -gt 1 ]]; then
+            echo ""
+            info "Processing dashboard $((i+1))/$count: $dashboard_name"
+        else
+            info "Dashboard: $dashboard_name"
+        fi
+
+        if [[ "$dry_run" == true ]]; then
+            warn "Dry-run mode - would delete: PersesDashboard/$dashboard_name in namespace $namespace"
+        else
+            # Delete from cluster
+            $cli delete persesdashboard "$dashboard_name" -n "$namespace"
+
+            if [[ $? -eq 0 ]]; then
+                info "Dashboard '$dashboard_name' deleted successfully"
+            else
+                error "Failed to delete dashboard '$dashboard_name'"
+            fi
+        fi
+    done
+}
+
+# Main function
+main() {
+    # Handle global flags before command
+    if [[ $# -eq 0 ]]; then
+        usage
+    fi
+
+    case $1 in
+        -h|--help)
+            usage
+            ;;
+        -v|--version)
+            version
+            ;;
+        apply)
+            shift
+            cmd_apply "$@"
+            ;;
+        delete)
+            shift
+            cmd_delete "$@"
+            ;;
+        *)
+            error "Unknown command: $1. Use 'apply' or 'delete'. See -h for help."
+            ;;
+    esac
 }
 
 # Check for jq
