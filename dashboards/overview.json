@@ -22,6 +22,14 @@
               "name": "Memory: Utilization",
               "description": "Aggregated physical memory utilization across all cluster nodes as a percentage of allocatable memory. Threshold: <70% green (healthy), 80-90% yellow (monitor), >90% red (critical).\n\nAnswers: What is the overall cluster memory utilization?"
             },
+            "links": [
+              {
+                "name": "View Memory Dashboard",
+                "tooltip": "Drill down to Memory dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/memory"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -74,6 +82,14 @@
               "name": "Memory: Pressure (PSI)",
               "description": "Maximum Memory Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for memory to complete. Threshold: >10% moderate, >30% severe.\n\nAnswers: What is the maximum memory pressure across nodes?"
             },
+            "links": [
+              {
+                "name": "View Memory Dashboard",
+                "tooltip": "Drill down to Memory dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/memory"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -126,6 +142,14 @@
               "name": "Memory: Imbalance",
               "description": "Coefficient of Variation for memory utilization across nodes. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is memory utilization across nodes?"
             },
+            "links": [
+              {
+                "name": "View Memory Dashboard",
+                "tooltip": "Drill down to Memory dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/memory"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -178,6 +202,14 @@
               "name": "Memory: Virtual Commitment",
               "description": "Total committed virtual memory as a percentage of allocatable physical memory. Threshold: <120% green (acceptable), 120-150% yellow (monitor VM usage), >150% red (high overcommitment risk).\n\nAnswers: Is the cluster overcommitting virtual memory?"
             },
+            "links": [
+              {
+                "name": "View Memory Dashboard",
+                "tooltip": "Drill down to Memory dashboard",
+                "targetBlank": false,
+                "url": "/dashboards/memory"
+              }
+            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -230,6 +262,7 @@
               "name": "CPU: Utilization",
               "description": "Percentage of cluster CPU capacity currently in use by workloads. Threshold: <70% green (healthy capacity), 70-85% yellow (monitor usage), >85% red (high utilization).\n\nAnswers: How much of the cluster's CPU is being used?"
             },
+            "links": [              {                "name": "View CPU Dashboard",                "tooltip": "Drill down to CPU dashboard",                "targetBlank": false,                "url": "/dashboards/cpu"              }            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -282,6 +315,7 @@
               "name": "CPU: Pressure (PSI)",
               "description": "Maximum CPU Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for CPU. Threshold: <10% green (healthy), 10-30% yellow (moderate pressure), >30% red (high contention).\n\nAnswers: What is the worst-case CPU pressure in the cluster?"
             },
+            "links": [              {                "name": "View CPU Dashboard",                "tooltip": "Drill down to CPU dashboard",                "targetBlank": false,                "url": "/dashboards/cpu"              }            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -334,6 +368,7 @@
               "name": "CPU: Imbalance",
               "description": "Coefficient of variation for CPU allocation across nodes. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is CPU allocation across nodes?"
             },
+            "links": [              {                "name": "View CPU Dashboard",                "tooltip": "Drill down to CPU dashboard",                "targetBlank": false,                "url": "/dashboards/cpu"              }            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -386,6 +421,7 @@
               "name": "CPU: Virtual Commitment",
               "description": "Total virtual CPUs assigned to VMs as a percentage of physical CPU capacity. Threshold: <120% green (acceptable), 120-150% yellow (monitor VM usage), >150% red (high overcommit risk).\n\nAnswers: Is the cluster overcommitting virtual CPUs?"
             },
+            "links": [              {                "name": "View CPU Dashboard",                "tooltip": "Drill down to CPU dashboard",                "targetBlank": false,                "url": "/dashboards/cpu"              }            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -438,6 +474,7 @@
               "name": "I/O: Utilization",
               "description": "Cluster-wide storage device busy time as a percentage. Shows the fraction of wall-clock time when at least one I/O request was in flight. Threshold: <70% green (healthy capacity), 70-85% yellow (monitor usage), >85% red (high utilization).\n\nAnswers: How busy are the storage devices?"
             },
+            "links": [              {                "name": "View I/O Dashboard",                "tooltip": "Drill down to I/O dashboard",                "targetBlank": false,                "url": "/dashboards/io"              }            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -490,6 +527,7 @@
               "name": "I/O: Pressure (PSI)",
               "description": "Maximum I/O Pressure Stall Information (PSI) across all nodes. Shows the fraction of time tasks are waiting for I/O to complete. Threshold: >10% moderate, >30% severe.\n\nAnswers: How much time are tasks waiting for I/O?"
             },
+            "links": [              {                "name": "View I/O Dashboard",                "tooltip": "Drill down to I/O dashboard",                "targetBlank": false,                "url": "/dashboards/io"              }            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -541,6 +579,7 @@
               "name": "I/O: Imbalance",
               "description": "Coefficient of Variation for storage latency (p95) across nodes. Threshold: <0.3 green (balanced), 0.3-0.6 yellow (moderate imbalance), >0.6 red (high imbalance).\n\nAnswers: How balanced is storage latency across nodes?"
             },
+            "links": [              {                "name": "View I/O Dashboard",                "tooltip": "Drill down to I/O dashboard",                "targetBlank": false,                "url": "/dashboards/io"              }            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -593,6 +632,7 @@
               "name": "I/O: Latency (p95)",
               "description": "Storage I/O p95 latency percentile. 95% of operations complete within this time. Threshold: <30ms green, 30-60ms yellow, >60ms red.\n\nAnswers: What is the current storage p95 latency?"
             },
+            "links": [              {                "name": "View I/O Dashboard",                "tooltip": "Drill down to I/O dashboard",                "targetBlank": false,                "url": "/dashboards/io"              }            ],
             "plugin": {
               "kind": "StatChart",
               "spec": {
