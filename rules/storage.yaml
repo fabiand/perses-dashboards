@@ -13,7 +13,7 @@ spec:
         # Per-node latency histogram rate
         - record: openshift:node:storage:latency:rate
           labels:
-            layer: "host_to_device"
+            segment: "host_to_device"
             protocol: "block"
             unit: seconds
           expr: |
@@ -22,7 +22,7 @@ spec:
         # Cluster-wide latency distribution: 0-10ms
         - record: openshift:cluster:storage:latency_bucket:ratio
           labels:
-            layer: "host_to_device"
+            segment: "host_to_device"
             protocol: "block"
             le: "0.01"
             unit: ratio
@@ -34,7 +34,7 @@ spec:
         # Cluster-wide latency distribution: 10-100ms
         - record: openshift:cluster:storage:latency_bucket:ratio
           labels:
-            layer: "host_to_device"
+            segment: "host_to_device"
             protocol: "block"
             le: "0.1"
             g: "0.01"
@@ -50,7 +50,7 @@ spec:
         # Cluster-wide latency distribution: 100ms-1s
         - record: openshift:cluster:storage:latency_bucket:ratio
           labels:
-            layer: "host_to_device"
+            segment: "host_to_device"
             protocol: "block"
             le: "1.0"
             g: "0.1"
@@ -66,7 +66,7 @@ spec:
         # Cluster-wide latency distribution: >1s
         - record: openshift:cluster:storage:latency_bucket:ratio
           labels:
-            layer: "host_to_device"
+            segment: "host_to_device"
             protocol: "block"
             le: "+Inf"
             g: "1.0"
@@ -82,7 +82,7 @@ spec:
         # Cluster-wide p50 (median) latency
         - record: openshift:cluster:storage:latency:p50
           labels:
-            layer: "host_to_device"
+            segment: "host_to_device"
             protocol: "block"
             unit: seconds
           expr: |
@@ -93,7 +93,7 @@ spec:
         # Cluster-wide p95 latency
         - record: openshift:cluster:storage:latency:p95
           labels:
-            layer: "host_to_device"
+            segment: "host_to_device"
             protocol: "block"
             unit: seconds
           expr: |
@@ -104,7 +104,7 @@ spec:
         # Cluster-wide p99 latency
         - record: openshift:cluster:storage:latency:p99
           labels:
-            layer: "host_to_device"
+            segment: "host_to_device"
             protocol: "block"
             unit: seconds
           expr: |
@@ -115,7 +115,7 @@ spec:
         # Per-node p95 latency
         - record: openshift:node:storage:latency:p95
           labels:
-            layer: "host_to_device"
+            segment: "host_to_device"
             protocol: "block"
             unit: seconds
           expr: |
@@ -128,7 +128,7 @@ spec:
         # Values: <0.3 = balanced, 0.3-0.6 = moderate imbalance, >0.6 = high imbalance
         - record: openshift:cluster:storage:latency:imbalance:ratio
           labels:
-            layer: "host_to_device"
+            segment: "host_to_device"
             protocol: "block"
             unit: ratio
           expr: |
