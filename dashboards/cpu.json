@@ -285,7 +285,7 @@
           "spec": {
             "display": {
               "name": "Virtual Commitment",
-              "description": "Total virtual CPUs assigned to VMs as a percentage of physical CPU capacity. Values >100% indicate CPU overcommitment. Threshold: <120% green (acceptable), 120-150% yellow (monitor VM usage), >150% red (high overcommit risk). Overcommitment is safe when VMs don't simultaneously reach peak CPU usage.\n\nAnswers: Is the cluster overcommitting virtual CPUs?"
+              "description": "Total virtual CPUs assigned to VMs as a percentage of physical CPU capacity. Values >100% indicate CPU overcommitment. Threshold: <150% green (acceptable), 150-175% yellow (monitor VM usage), >175% red (high overcommit risk). Overcommitment is safe when VMs don't simultaneously reach peak CPU usage.\n\nAnswers: Is the cluster overcommitting virtual CPUs?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -303,11 +303,11 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "value": 120,
+                      "value": 150,
                       "color": "#FFB249"
                     },
                     {
-                      "value": 150,
+                      "value": 175,
                       "color": "#EE6C6C"
                     }
                   ]

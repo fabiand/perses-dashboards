@@ -519,7 +519,7 @@
         "spec": {
           "display": {
             "name": "Virtual Commitment",
-            "description": "Total committed virtual memory as a percentage of allocatable physical memory. Values >100% indicate memory overcommitment. Threshold: <120% acceptable (VMs rarely use full allocation), 120-150% yellow (monitor VM usage), >150% red (high overcommitment risk). Overcommitment is safe only if VMs don't simultaneously reach peak usage.\n\nAnswers: Is the cluster overcommitting virtual memory?"
+            "description": "Total committed virtual memory as a percentage of allocatable physical memory. Values >100% indicate memory overcommitment. Threshold: <150% green (VMs rarely use full allocation), 150-175% yellow (monitor VM usage), >175% red (high overcommitment risk). Overcommitment is safe only if VMs don't simultaneously reach peak usage.\n\nAnswers: Is the cluster overcommitting virtual memory?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -537,11 +537,11 @@
                     "color": "#59CC8D"
                   },
                   {
-                    "value": 120,
+                    "value": 150,
                     "color": "#FFB249"
                   },
                   {
-                    "value": 150,
+                    "value": 175,
                     "color": "#EE6C6C"
                   }
                 ]
