@@ -109,12 +109,6 @@
                   "colorMode": "fixed",
                   "colorValue": "#FFCC00",
                   "queryIndex": 3
-                },
-                {
-                  "colorMode": "fixed",
-                  "colorValue": "#6BB6FF",
-                  "queryIndex": 4,
-                  "lineStyle": "dotted"
                 }
               ],
               "yAxis": {
@@ -172,18 +166,6 @@
                   "spec": {
                     "query": "(kube_node_status_capacity{resource=\"memory\"} - kube_node_status_allocatable{resource=\"memory\"})\n+\nsum(kube_pod_resource_request{resource=\"memory\", node=~\"$node\"})",
                     "seriesNameFormat": "Plan - Memory requests"
-                  }
-                }
-              }
-            },
-            {
-              "kind": "TimeSeriesQuery",
-              "spec": {
-                "plugin": {
-                  "kind": "PrometheusTimeSeriesQuery",
-                  "spec": {
-                    "query": "sum(openshift:node:memory:bytes{scope=\"system\"}) + openshift:cluster:memory:requests:bytes",
-                    "seriesNameFormat": "Requests"
                   }
                 }
               }
@@ -247,6 +229,14 @@
                   "colorValue": "#6BB6FF",
                   "queryIndex": 7,
                   "lineStyle": "dashed",
+                  "stack": false,
+                  "areaOpacity": 0
+                },
+                {
+                  "colorMode": "fixed",
+                  "colorValue": "#6BB6FF",
+                  "queryIndex": 8,
+                  "lineStyle": "dotted",
                   "stack": false,
                   "areaOpacity": 0
                 }
@@ -365,6 +355,18 @@
                   "spec": {
                     "query": "sum(openshift:vm:virtual:memory:bytes)",
                     "seriesNameFormat": "Virtual Committed"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(openshift:node:memory:bytes{scope=\"system\"}) + openshift:cluster:memory:requests:bytes",
+                    "seriesNameFormat": "Requests"
                   }
                 }
               }
