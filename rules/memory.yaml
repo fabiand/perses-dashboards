@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: memory-dashboard-rules
+  name: memory-rules
   #namespace: openshift-monitoring # You may adjust this namespace as needed
   labels:
     prometheus: k8s
