@@ -346,12 +346,13 @@
                 "querySettings": [
                   {
                     "colorMode": "fixed",
-                    "colorValue": "#EE6C6C",
-                    "queryIndex": 0
+                    "colorValue": "#B83232",
+                    "queryIndex": 0,
+                    "lineStyle": "dotted"
                   },
                   {
                     "colorMode": "fixed",
-                    "colorValue": "#643535",
+                    "colorValue": "#B83232",
                     "queryIndex": 1,
                     "lineStyle": "dotted"
                   },
