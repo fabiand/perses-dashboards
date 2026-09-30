@@ -85,10 +85,10 @@ spec:
             (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
 
             - on (node)
-            openshift:node:memory:bytes{scope="system", tier="0", temperature="hot", utilized="true"}
+            openshift:node:memory:bytes{tier="0", scope="system", utilized="true", temperature="hot"}
 
             - on (node)
-            openshift:node:memory:bytes{scope="system", tier="0", temperature="warm", utilized="true"}
+            openshift:node:memory:bytes{tier="0", scope="system", utilized="true", temperature="warm"}
 
         - record: openshift:node:memory:bytes
           labels:
@@ -99,10 +99,10 @@ spec:
             unit: bytes
           expr: |
             clamp_min(
-              openshift:node:memory:bytes{scope="system", tier="0", temperature="hot", utilized="true"}
+              openshift:node:memory:bytes{tier="0", scope="system", utilized="true", temperature="hot"}
 
               + on (node)
-              openshift:node:memory:bytes{scope="system", tier="0", temperature="warm", utilized="true"}
+              openshift:node:memory:bytes{tier="0", scope="system", utilized="true", temperature="warm"}
 
               - on (node) group_left()
               (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}),
@@ -145,13 +145,13 @@ spec:
             kube_node_status_allocatable{resource="memory"}
 
             - on (node)
-            openshift:node:memory:bytes{scope="workloads", tier="0", temperature="hot", utilized="true"}
+            openshift:node:memory:bytes{tier="0", scope="workloads", utilized="true", temperature="hot"}
 
             - on (node)
-            openshift:node:memory:bytes{scope="workloads", tier="0", temperature="warm", utilized="true"}
+            openshift:node:memory:bytes{tier="0", scope="workloads", utilized="true", temperature="warm"}
 
             - on (node)
-            openshift:node:memory:bytes{scope="workloads", tier="0", utilized="true", usage="system-overflow"}
+            openshift:node:memory:bytes{tier="0", scope="workloads", utilized="true", usage="system-overflow"}
 
         - record: openshift:node:memory:utilization:ratio
           labels:
@@ -159,7 +159,7 @@ spec:
             scope: "workloads"
             unit: ratio
           expr: |
-            sum by (node) (openshift:node:memory:bytes{utilized="true", scope="workloads"})
+            sum by (node) (openshift:node:memory:bytes{scope="workloads", utilized="true"})
 
             / on (node)
 
@@ -219,7 +219,7 @@ spec:
             scope: "workloads"
             unit: ratio
           expr: |
-            sum(openshift:node:memory:bytes{utilized="true", scope="workloads"})
+            sum(openshift:node:memory:bytes{scope="workloads", utilized="true"})
 
             /
 
