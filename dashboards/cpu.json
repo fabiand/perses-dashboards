@@ -351,18 +351,24 @@
                   },
                   {
                     "colorMode": "fixed",
-                    "colorValue": "#FF9F1C",
-                    "queryIndex": 1
+                    "colorValue": "#643535",
+                    "queryIndex": 1,
+                    "lineStyle": "dotted"
                   },
                   {
                     "colorMode": "fixed",
-                    "colorValue": "#59CC8D",
+                    "colorValue": "#FF9F1C",
                     "queryIndex": 2
                   },
                   {
                     "colorMode": "fixed",
+                    "colorValue": "#59CC8D",
+                    "queryIndex": 3
+                  },
+                  {
+                    "colorMode": "fixed",
                     "colorValue": "#6BB6FF",
-                    "queryIndex": 3,
+                    "queryIndex": 4,
                     "lineStyle": "dashed",
                     "stack": false,
                     "areaOpacity": 0
@@ -370,7 +376,7 @@
                   {
                     "colorMode": "fixed",
                     "colorValue": "#6BB6FF",
-                    "queryIndex": 4,
+                    "queryIndex": 5,
                     "lineStyle": "dotted",
                     "stack": false,
                     "areaOpacity": 0
@@ -402,6 +408,18 @@
                     "spec": {
                       "query": "sum(openshift:cluster:cpu:seconds{scope=\"system\"})",
                       "seriesNameFormat": "System"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "sum(openshift:cluster:cpu:seconds{scope=\"workloads\", utilized=\"true\", usage=\"system-overflow\"}) > 0",
+                      "seriesNameFormat": "Workloads - System Overflow"
                     }
                   }
                 }
