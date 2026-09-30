@@ -85,7 +85,7 @@ spec:
             (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"})
 
             - on (node)
-            sum(openshift:node:memory:bytes{tier="0", scope="system", utilized="true"})
+            sum by (node) (openshift:node:memory:bytes{tier="0", scope="system", utilized="true"})
 
         - record: openshift:node:memory:bytes
           labels:
@@ -96,7 +96,7 @@ spec:
             unit: bytes
           expr: |
             clamp_min(
-              sum(openshift:node:memory:bytes{tier="0", scope="system", utilized="true"})
+              sum by (node) (openshift:node:memory:bytes{tier="0", scope="system", utilized="true"})
 
               - on (node) group_left()
               (kube_node_status_capacity{resource="memory"} - kube_node_status_allocatable{resource="memory"}),
@@ -139,13 +139,8 @@ spec:
             kube_node_status_allocatable{resource="memory"}
 
             - on (node)
-            openshift:node:memory:bytes{tier="0", scope="workloads", utilized="true", temperature="hot"}
 
-            - on (node)
-            openshift:node:memory:bytes{tier="0", scope="workloads", utilized="true", temperature="warm"}
-
-            - on (node)
-            openshift:node:memory:bytes{tier="0", scope="workloads", utilized="true", usage="system-overflow"}
+            sum by (node) (openshift:node:memory:bytes{tier="0", scope="workloads", utilized="true"})
 
         - record: openshift:node:memory:utilization:ratio
           labels:
