@@ -1668,6 +1668,15 @@
               "content": {
                 "$ref": "#/spec/panels/Swap"
               }
+            },
+            {
+              "x": 0,
+              "y": 25,
+              "width": 24,
+              "height": 5,
+              "content": {
+                "$ref": "#/spec/panels/IssueAlertHistory"
+              }
             }
           ]
         }
@@ -1774,15 +1783,6 @@
               "height": 8,
               "content": {
                 "$ref": "#/spec/panels/NodeSystemReservedUtilizationHistory"
-              }
-            },
-            {
-              "x": 21,
-              "y": 0,
-              "width": 2,
-              "height": 8,
-              "content": {
-                "$ref": "#/spec/panels/IssueAlertHistory"
               }
             },
             {
