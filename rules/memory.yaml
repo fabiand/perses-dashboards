@@ -284,11 +284,10 @@ spec:
           labels:
             unit: bytes
           expr: |
-            sum by (node) (
-              sum by (node) (
-                kube_pod_container_resource_requests{resource="memory"}
-              )
-            )
+              sum by (node) (kube_pod_resource_request{resource="memory"})
+              * on(node) group_left(role)
+              max by (node) (kube_node_role{role=~".+"})
+
 
         - record: openshift:cluster:memory:requests:bytes
           labels:
