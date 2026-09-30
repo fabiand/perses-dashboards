@@ -529,6 +529,7 @@
                 "decimalPlaces": 0,
                 "unit": "percent-decimal"
               },
+              "max": 2,
               "thresholds": {
                 "steps": [
                   {
