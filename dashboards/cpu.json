@@ -431,7 +431,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:cpu:seconds{scope=\"workloads\", utilized=\"true\"}",
+                      "query": "sum(openshift:cluster:cpu:seconds{scope=\"workloads\", utilized=\"true\"})",
                       "seriesNameFormat": "Workloads - Busy"
                     }
                   }
