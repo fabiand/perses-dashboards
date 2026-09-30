@@ -281,7 +281,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift:node:memory:bytes{tier=\"0\", scope=\"workloads\", utilized=\"true\", usage=\"overflow\"}) > 0",
+                    "query": "sum(openshift:node:memory:bytes{tier=\"0\", scope=\"workloads\", utilized=\"true\", usage=\"system-overflow\"}) > 0",
                     "seriesNameFormat": "Workloads - Tier 0 - System Overflow"
                   }
                 }
