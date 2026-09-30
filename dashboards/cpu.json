@@ -447,7 +447,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "sum(openshift:node:cpu:count{scope=\"system\"}) + openshift:cluster:cpu:requests:count",
+                      "query": "sum(openshift:node:cpu:count{scope=\"system\"}) + sum(openshift:cluster:cpu:requests:count)",
                       "seriesNameFormat": "Requests"
                     }
                   }
