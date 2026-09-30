@@ -7,6 +7,11 @@ metadata:
   labels:
     prometheus: k8s
     role: alert-rules
+#
+# Label Ordering Convention:
+# When defining recording rule labels, use this order: tier, scope, utilized, temperature
+# Example: {tier: "0", scope: "workloads", utilized: "true", temperature: "hot"}
+#
 spec:
   groups:
     #
