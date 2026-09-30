@@ -365,6 +365,14 @@
                     "lineStyle": "dashed",
                     "stack": false,
                     "areaOpacity": 0
+                  },
+                  {
+                    "colorMode": "fixed",
+                    "colorValue": "#6BB6FF",
+                    "queryIndex": 4,
+                    "lineStyle": "dotted",
+                    "stack": false,
+                    "areaOpacity": 0
                   }
                 ],
                 "visual": {
@@ -429,6 +437,18 @@
                     "spec": {
                       "query": "sum(openshift:cluster:virtual:cpu:seconds)",
                       "seriesNameFormat": "Virtual Committed"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "sum(openshift:node:cpu:count{scope=\"system\"}) + openshift:cluster:cpu:requests:count",
+                      "seriesNameFormat": "Requests"
                     }
                   }
                 }

@@ -202,6 +202,20 @@ spec:
               )
             )
 
+        - record: openshift:node:cpu:requests:count
+          labels:
+            unit: count
+          expr: |
+              sum by (node) (kube_pod_resource_request{resource="cpu"})
+              * on(node) group_left(role)
+              max by (node) (kube_node_role{role=~".+"})
+
+        - record: openshift:cluster:cpu:requests:count
+          labels:
+            unit: count
+          expr: |
+            sum(openshift:node:cpu:requests:count)
+
     #
     # VM-level CPU Rules
     #
