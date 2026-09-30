@@ -280,6 +280,22 @@ spec:
             kube_node_status_allocatable{resource="memory"}
 
 
+        - record: openshift:node:memory:requests:bytes
+          labels:
+            unit: bytes
+          expr: |
+            sum by (node) (
+              sum by (node) (
+                kube_pod_container_resource_requests{resource="memory"}
+              )
+            )
+
+        - record: openshift:cluster:memory:requests:bytes
+          labels:
+            unit: bytes
+          expr: |
+            sum(openshift:node:memory:requests:bytes)
+
     #
     # Virtual Memory Rules
     #
@@ -291,6 +307,8 @@ spec:
             unit: ratio
           expr: |
             sum(openshift:vm:virtual:memory:bytes)
+
+        
 
 
     #
