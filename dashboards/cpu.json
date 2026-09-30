@@ -84,7 +84,7 @@
           "spec": {
             "display": {
               "name": "Cluster CPU Overcommit",
-              "description": "Ratio of total virtual CPUs to physical CPU cores across the cluster. Values below 1.5 indicate conservative allocation (green), 1.5-2.0 shows moderate overcommit (yellow), and above 2.0 indicates aggressive overcommit that may impact performance (red).\n\nAnswers: What is the cluster-wide CPU overcommit ratio?"
+              "description": "Ratio of total virtual CPUs to physical CPU cores across the cluster. Values below 120% indicate conservative allocation (green), 120-150% shows moderate overcommit (yellow), and above 150% indicates aggressive overcommit that may impact performance (red).\n\nAnswers: What is the cluster-wide CPU overcommit ratio?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -101,11 +101,11 @@
                       "color": "#59CC8D"
                     },
                     {
-                      "value": 1.5,
+                      "value": 1.2,
                       "color": "#FFB249"
                     },
                     {
-                      "value": 2.0,
+                      "value": 1.5,
                       "color": "#EE6C6C"
                     }
                   ]
@@ -507,13 +507,24 @@
           "spec": {
             "display": {
               "name": "Node vCPU Overcommit",
-              "description": "Virtual CPU overcommit ratio per node over time. Shows the ratio of VM vCPUs to physical cores on each node. Values above 1.0 indicate overcommitment. Use this to identify hotspots where VMs may compete for CPU resources and to balance VM placement across nodes.\n\nAnswers: What is the vCPU overcommit ratio on each node?"
+              "description": "Virtual CPU overcommit ratio per node over time. Shows the ratio of VM vCPUs to physical cores on each node. Values above 1.0 indicate overcommitment. Threshold: <120% green, 120-150% yellow, >150% red. Use this to identify hotspots where VMs may compete for CPU resources and to balance VM placement across nodes.\n\nAnswers: What is the vCPU overcommit ratio on each node?"
             },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
                   "position": "bottom"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 1.2
+                    },
+                    {
+                      "value": 1.5,
+                      "color": "#EA4747"
+                    }
+                  ]
                 },
                 "visual": {
                   "connectNulls": false,

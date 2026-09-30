@@ -1497,7 +1497,7 @@
         "spec": {
           "display": {
             "name": "VM Virtual commited",
-            "description": "Average VM memory overcommit ratio across nodes. Shows the typical level of VM virtual memory assignment relative to actual VM memory usage. Threshold: <150% healthy, 150-175% yellow (moderate overcommit), >175% red (aggressive overcommit). Higher values indicate VMs are assigned significantly more memory than they're using.\n\nAnswers: What is the average VM overcommit level?"
+            "description": "Average VM memory overcommit ratio across nodes. Shows the typical level of VM virtual memory assignment relative to actual VM memory usage. Threshold: <120% green (healthy), 120-150% yellow (moderate overcommit), >150% red (aggressive overcommit). Higher values indicate VMs are assigned significantly more memory than they're using.\n\nAnswers: What is the average VM overcommit level?"
           },
           "plugin": {
             "kind": "GaugeChart",
@@ -1511,11 +1511,16 @@
               "thresholds": {
                 "steps": [
                   {
-                    "value": 1.5
+                    "value": 0,
+                    "color": "#59CC8D"
+                  },
+                  {
+                    "value": 1.2,
+                    "color": "#FFB249"
                   },
                   {
                     "color": "#EE6C6C",
-                    "value": 1.75
+                    "value": 1.5
                   }
                 ]
               }
