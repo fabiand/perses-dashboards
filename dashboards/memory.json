@@ -365,7 +365,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "sum(openshift:node:memory:bytes{scope=\"system\"}) + openshift:cluster:memory:requests:bytes",
+                    "query": "sum(openshift:node:memory:bytes{scope=\"system\"}) + sum(openshift:cluster:memory:requests:bytes)",
                     "seriesNameFormat": "Requests"
                   }
                 }
