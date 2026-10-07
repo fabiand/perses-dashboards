@@ -2,7 +2,7 @@
   {
     "kind": "Dashboard",
     "metadata": {
-      "name": "io",
+      "name": "io-glance",
       "createdAt": "2026-09-18T14:33:54.933644325Z",
       "updatedAt": "2026-09-18T15:00:27.127455287Z",
       "version": 1,
@@ -10,7 +10,7 @@
     },
     "spec": {
       "display": {
-        "name": "OpenShift Virtualization / Infrastructure View / I/O (DevPrev)"
+        "name": "OpenShift Virtualization / Infrastructure View / I/O at a glance (DevPrev)"
       },
       "panels": {
         "53d12c6d478148e7b910be6a52e0ef52": {
@@ -18,7 +18,7 @@
           "spec": {
             "display": {
               "name": "Pressure Imbalance",
-              "description": "80th percentile of percentage point distance from mean I/O pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.22 means 80% of nodes are within ±22pp of mean pressure. Threshold: <0.11 (±11pp) green (healthy balanced), 0.11-0.22 yellow (unhealthy balance), 0.22-0.33 orange (severely unbalanced), >0.33 red (critically unbalanced).\n\nAnswers: Within what percentage point band are 80% of nodes?"
+              "description": "80th percentile of percentage point distance from mean I/O pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.22 means 80% of nodes are within \u00b122pp of mean pressure. Threshold: <0.11 (\u00b111pp) green (healthy balanced), 0.11-0.22 yellow (unhealthy balance), 0.22-0.33 orange (severely unbalanced), >0.33 red (critically unbalanced).\n\nAnswers: Within what percentage point band are 80% of nodes?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -620,59 +620,6 @@
                 "height": 9,
                 "content": {
                   "$ref": "#/spec/panels/storage_utilization_history"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "kind": "Grid",
-          "spec": {
-            "display": {
-              "title": "Latency Distribution",
-              "collapse": {
-                "open": true
-              }
-            },
-            "items": [
-              {
-                "x": 0,
-                "y": 0,
-                "width": 24,
-                "height": 13,
-                "content": {
-                  "$ref": "#/spec/panels/859fb288b6a546a0bea31d734264727c"
-                }
-              },
-              {
-                "x": 0,
-                "y": 13,
-                "width": 24,
-                "height": 9,
-                "content": {
-                  "$ref": "#/spec/panels/latency_quantiles_history"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "kind": "Grid",
-          "spec": {
-            "display": {
-              "title": "Nodes",
-              "collapse": {
-                "open": true
-              }
-            },
-            "items": [
-              {
-                "x": 0,
-                "y": 0,
-                "width": 24,
-                "height": 6,
-                "content": {
-                  "$ref": "#/spec/panels/bb254c2f0b9c4fd5bc45f03e39813b16"
                 }
               }
             ]

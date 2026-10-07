@@ -2,7 +2,7 @@
   {
     "kind": "Dashboard",
     "metadata": {
-      "name": "cpu",
+      "name": "cpu-glance",
       "createdAt": "2026-09-25T00:00:00.000000000Z",
       "updatedAt": "2026-09-25T00:00:00.000000000Z",
       "version": 1,
@@ -10,7 +10,7 @@
     },
     "spec": {
       "display": {
-        "name": "OpenShift Virtualization / Infrastructure View / CPU (DevPrev)"
+        "name": "OpenShift Virtualization / Infrastructure View / CPU at a glance (DevPrev)"
       },
       "panels": {
         "cluster_cpu_capacity": {
@@ -182,7 +182,7 @@
           "spec": {
             "display": {
               "name": "Pressure Imbalance",
-              "description": "80th percentile of percentage point distance from mean CPU pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.22 means 80% of nodes are within ±22pp of mean pressure. Threshold: <0.11 (±11pp) green (healthy balanced), 0.11-0.22 yellow (unhealthy balance), 0.22-0.33 orange (severely unbalanced), >0.33 red (critically unbalanced).\n\nAnswers: Within what percentage point band are 80% of nodes?"
+              "description": "80th percentile of percentage point distance from mean CPU pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.22 means 80% of nodes are within \u00b122pp of mean pressure. Threshold: <0.11 (\u00b111pp) green (healthy balanced), 0.11-0.22 yellow (unhealthy balance), 0.22-0.33 orange (severely unbalanced), >0.33 red (critically unbalanced).\n\nAnswers: Within what percentage point band are 80% of nodes?"
             },
             "plugin": {
               "kind": "GaugeChart",
@@ -765,68 +765,6 @@
                 "height": 9,
                 "content": {
                   "$ref": "#/spec/panels/cluster_cpu_utilization_history"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "kind": "Grid",
-          "spec": {
-            "display": {
-              "title": "Per Node",
-              "collapse": {
-                "open": false
-              }
-            },
-            "items": [
-              {
-                "x": 0,
-                "y": 0,
-                "width": 12,
-                "height": 9,
-                "content": {
-                  "$ref": "#/spec/panels/node_cpu_capacity"
-                }
-              },
-              {
-                "x": 12,
-                "y": 0,
-                "width": 12,
-                "height": 9,
-                "content": {
-                  "$ref": "#/spec/panels/node_vcpu_overcommit"
-                }
-              },
-              {
-                "x": 0,
-                "y": 9,
-                "width": 24,
-                "height": 5,
-                "content": {
-                  "$ref": "#/spec/panels/issues"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "kind": "Grid",
-          "spec": {
-            "display": {
-              "title": "VMs",
-              "collapse": {
-                "open": false
-              }
-            },
-            "items": [
-              {
-                "x": 0,
-                "y": 0,
-                "width": 24,
-                "height": 9,
-                "content": {
-                  "$ref": "#/spec/panels/vm_vcpu_count"
                 }
               }
             ]
