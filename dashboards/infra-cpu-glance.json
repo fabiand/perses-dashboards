@@ -2,7 +2,7 @@
   {
     "kind": "Dashboard",
     "metadata": {
-      "name": "cpu-glance",
+      "name": "infra-cpu-glance",
       "createdAt": "2026-09-25T00:00:00.000000000Z",
       "updatedAt": "2026-09-25T00:00:00.000000000Z",
       "version": 1,
@@ -10,7 +10,7 @@
     },
     "spec": {
       "display": {
-        "name": "OpenShift Virtualization / Infrastructure View / CPU at a glance (DevPrev)"
+        "name": "OpenShift Virtualization / Infrastructure View / CPU (DevPrev)"
       },
       "panels": {
         "cluster_cpu_capacity": {
@@ -182,7 +182,7 @@
           "spec": {
             "display": {
               "name": "Pressure Imbalance",
-              "description": "80th percentile of percentage point distance from mean CPU pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.22 means 80% of nodes are within \u00b122pp of mean pressure. Threshold: <0.11 (\u00b111pp) green (healthy balanced), 0.11-0.22 yellow (unhealthy balance), 0.22-0.33 orange (severely unbalanced), >0.33 red (critically unbalanced).\n\nAnswers: Within what percentage point band are 80% of nodes?"
+              "description": "80th percentile of percentage point distance from mean CPU pressure. Shows the spread: 80% of nodes are within this many percentage points of the mean. For example, 0.22 means 80% of nodes are within ±22pp of mean pressure. Threshold: <0.11 (±11pp) green (healthy balanced), 0.11-0.22 yellow (unhealthy balance), 0.22-0.33 orange (severely unbalanced), >0.33 red (critically unbalanced).\n\nAnswers: Within what percentage point band are 80% of nodes?"
             },
             "plugin": {
               "kind": "GaugeChart",
