@@ -89,14 +89,14 @@ All metrics come from pre-calculated recording rules (fast queries):
 
 - `openshift:cluster:memory:utilization:ratio`
 - `max(openshift:node:memory:pressure:ratio{severity="some"} @ end())`
-- `openshift:cluster:memory:imbalance:p80distance`
+- `openshift:cluster:memory:imbalance:distance{quantile="0.80"}`
 - `openshift:cluster:cpu:utilization:ratio`
 - `max(openshift:node:cpu:pressure:ratio{severity="some"} @ end())`
-- `openshift:cluster:cpu:imbalance:p80distance`
+- `openshift:cluster:cpu:imbalance:distance{quantile="0.80"}`
 - `openshift:cluster:io:utilization:ratio`
 - `max(openshift:node:io:pressure:ratio{severity="some"} @ end())`
-- `openshift:cluster:io:imbalance:p80distance`
-- `openshift:cluster:io:latency:p95`
+- `openshift:cluster:io:imbalance:distance{quantile="0.80"}`
+- `openshift:cluster:io:latency{quantile="0.95"}`
 
 Note: Pressure metrics aggregate at query time (max across nodes) rather than using cluster-level recording rules.
 
