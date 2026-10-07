@@ -10,7 +10,7 @@
     },
     "spec": {
       "display": {
-        "name": "Overview"
+        "name": "OpenShift Virtualization / Infrastructure View / Overview (DevPrev)"
       },
       "duration": "1h",
       "refreshInterval": "15s",

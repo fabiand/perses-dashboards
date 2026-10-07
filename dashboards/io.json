@@ -10,7 +10,7 @@
     },
     "spec": {
       "display": {
-        "name": "I/O"
+        "name": "OpenShift Virtualization / Infrastructure View / I/O (DevPrev)"
       },
       "panels": {
         "53d12c6d478148e7b910be6a52e0ef52": {

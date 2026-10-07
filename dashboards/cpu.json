@@ -10,7 +10,7 @@
     },
     "spec": {
       "display": {
-        "name": "CPU"
+        "name": "OpenShift Virtualization / Infrastructure View / CPU (DevPrev)"
       },
       "panels": {
         "cluster_cpu_capacity": {

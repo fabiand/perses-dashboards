@@ -6,7 +6,7 @@
   },
   "spec": {
     "display": {
-      "name": "Memory"
+      "name": "OpenShift Virtualization / Infrastructure View / Memory (DevPrev)"
     },
     "panels": {
       "ClusterPressure": {
