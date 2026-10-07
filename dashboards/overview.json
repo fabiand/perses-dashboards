@@ -27,7 +27,7 @@
                 "name": "View Memory Dashboard",
                 "tooltip": "Drill down to Memory dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/memory"
+                "url": "/projects/openshift-cnv/dashboards/infra-memory-glance"
               }
             ],
             "plugin": {
@@ -87,7 +87,7 @@
                 "name": "View Memory Dashboard",
                 "tooltip": "Drill down to Memory dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/memory"
+                "url": "/projects/openshift-cnv/dashboards/infra-memory-glance"
               }
             ],
             "plugin": {
@@ -147,7 +147,7 @@
                 "name": "View Memory Dashboard",
                 "tooltip": "Drill down to Memory dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/memory"
+                "url": "/projects/openshift-cnv/dashboards/infra-memory-glance"
               }
             ],
             "plugin": {
@@ -211,7 +211,7 @@
                 "name": "View Memory Dashboard",
                 "tooltip": "Drill down to Memory dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/memory"
+                "url": "/projects/openshift-cnv/dashboards/infra-memory-glance"
               }
             ],
             "plugin": {
@@ -271,7 +271,7 @@
                 "name": "View CPU Dashboard",
                 "tooltip": "Drill down to CPU dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/cpu"
+                "url": "/projects/openshift-cnv/dashboards/infra-cpu-glance"
               }
             ],
             "plugin": {
@@ -331,7 +331,7 @@
                 "name": "View CPU Dashboard",
                 "tooltip": "Drill down to CPU dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/cpu"
+                "url": "/projects/openshift-cnv/dashboards/infra-cpu-glance"
               }
             ],
             "plugin": {
@@ -391,7 +391,7 @@
                 "name": "View CPU Dashboard",
                 "tooltip": "Drill down to CPU dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/cpu"
+                "url": "/projects/openshift-cnv/dashboards/infra-cpu-glance"
               }
             ],
             "plugin": {
@@ -455,7 +455,7 @@
                 "name": "View CPU Dashboard",
                 "tooltip": "Drill down to CPU dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/cpu"
+                "url": "/projects/openshift-cnv/dashboards/infra-cpu-glance"
               }
             ],
             "plugin": {
@@ -515,7 +515,7 @@
                 "name": "View I/O Dashboard",
                 "tooltip": "Drill down to I/O dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/io"
+                "url": "/projects/openshift-cnv/dashboards/infra-io-glance"
               }
             ],
             "plugin": {
@@ -575,7 +575,7 @@
                 "name": "View I/O Dashboard",
                 "tooltip": "Drill down to I/O dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/io"
+                "url": "/projects/openshift-cnv/dashboards/infra-io-glance"
               }
             ],
             "plugin": {
@@ -635,7 +635,7 @@
                 "name": "View I/O Dashboard",
                 "tooltip": "Drill down to I/O dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/io"
+                "url": "/projects/openshift-cnv/dashboards/infra-io-glance"
               }
             ],
             "plugin": {
@@ -699,7 +699,7 @@
                 "name": "View I/O Dashboard",
                 "tooltip": "Drill down to I/O dashboard",
                 "targetBlank": false,
-                "url": "/projects/openshift-cnv/dashboards/io"
+                "url": "/projects/openshift-cnv/dashboards/infra-io-glance"
               }
             ],
             "plugin": {
