@@ -224,7 +224,7 @@ Values > 1.0 indicate overcommit. Values > 2.0 may cause contention under load.
 Measures how evenly CPU pressure is distributed across nodes using p80 quantile of percentage point distance from mean:
 
 ```promql
-openshift:cluster:cpu:imbalance:p80distance{scope="workloads"}
+openshift:cluster:cpu:imbalance:distance:p80{scope="workloads"}
 ```
 
 Calculated as:
@@ -275,7 +275,7 @@ openshift:cluster:cpu:seconds{scope="system|workloads", utilized="true|false", u
 openshift:cluster:virtual:cpu:seconds{scope="workloads", unit="seconds"}
 openshift:cluster:cpu:utilization:ratio{scope="workloads", unit="ratio"}
 openshift:cluster:cpu:overcommit:ratio{scope="virtual", unit="ratio"}
-openshift:cluster:cpu:imbalance:p80distance{scope="workloads", unit="ratio"}
+openshift:cluster:cpu:imbalance:distance:p80{scope="workloads", unit="ratio"}
 openshift:cluster:cpu:pressure:ratio{severity="some", unit="ratio"}
 ```
 
@@ -305,7 +305,7 @@ VMs request physical CPU cores through the virt-launcher pod:
 
 ```promql
 # CPU cores requested by VM
-openshift:vm:cpu:requested:count
+openshift:vm:cpu:requests:count
 ```
 
 Calculated from:
@@ -327,7 +327,7 @@ Calculated as:
 ```
 openshift:vm:virtual:cpu:seconds
 /
-openshift:vm:cpu:requested:count
+openshift:vm:cpu:requests:count
 ```
 
 **Overcommit values > 1.0 are normal** for VMs. A VM with 4 vCPUs and 2 physical cores has overcommit ratio of 2.0.
@@ -338,7 +338,7 @@ VM-specific recording rules:
 
 ```
 openshift:vm:virtual:cpu:seconds{scope="workloads", unit="seconds"}
-openshift:vm:cpu:requested:count{unit="count"}
+openshift:vm:cpu:requests:count{unit="count"}
 openshift:vm:cpu:overcommit:ratio{unit="ratio"}
 ```
 
@@ -363,7 +363,7 @@ Track CPU allocation for specific VMs:
 openshift:vm:virtual:cpu:seconds{name="my-vm", namespace="default"}
 
 # Physical CPU requested
-openshift:vm:cpu:requested:count{name="my-vm", namespace="default"}
+openshift:vm:cpu:requests:count{name="my-vm", namespace="default"}
 ```
 
 #### VM Overcommit Tracking

@@ -190,7 +190,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:memory:imbalance:p80distance{scope=\"workloads\"}",
+                      "query": "openshift:cluster:memory:imbalance:distance:p80{scope=\"workloads\"}",
                       "seriesNameFormat": "p80 distance from mean"
                     }
                   }
@@ -434,7 +434,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:cpu:imbalance:p80distance{scope=\"workloads\"}",
+                      "query": "openshift:cluster:cpu:imbalance:distance:p80{scope=\"workloads\"}",
                       "seriesNameFormat": "p80 distance from mean"
                     }
                   }
@@ -678,7 +678,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:imbalance:p80distance",
+                      "query": "openshift:cluster:io:imbalance:distance:p80",
                       "seriesNameFormat": "p80 distance from mean"
                     }
                   }

@@ -214,7 +214,7 @@ spec:
 
             sum(kube_node_status_allocatable{resource="memory"})
 
-        - record: openshift:cluster:memory:imbalance:p80distance
+        - record: openshift:cluster:memory:imbalance:distance:p80
           labels:
             scope: "workloads"
             unit: ratio
@@ -339,7 +339,7 @@ spec:
             unit: bytes
           expr: |
             max by (name, namespace, node) (
-              openshift:vm:memory:requested:bytes
+              openshift:vm:memory:requests:bytes
 
               - on (name, namespace, node)
 
@@ -363,7 +363,7 @@ spec:
               )
             )
 
-        - record: openshift:vm:memory:requested:bytes
+        - record: openshift:vm:memory:requests:bytes
           labels:
             unit: bytes
           expr: |
@@ -397,8 +397,8 @@ spec:
 
               / on (name, namespace, node)
 
-              # VM memory requested (same as openshift:vm:memory:requested:bytes)
-              openshift:vm:memory:requested:bytes
+              # VM memory requested (same as openshift:vm:memory:requests:bytes)
+              openshift:vm:memory:requests:bytes
             )
 
         - record: openshift:vm:memory:overcommit:ratio
@@ -410,5 +410,5 @@ spec:
 
               / on (name, namespace, node)
 
-              openshift:vm:memory:requested:bytes
+              openshift:vm:memory:requests:bytes
             )

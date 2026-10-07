@@ -222,7 +222,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:cpu:imbalance:p80distance{scope=\"workloads\"}",
+                      "query": "openshift:cluster:cpu:imbalance:distance:p80{scope=\"workloads\"}",
                       "seriesNameFormat": "p80 distance from mean"
                     }
                   }

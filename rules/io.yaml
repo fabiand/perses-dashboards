@@ -43,7 +43,7 @@ spec:
             rate(kme_system_block_io_latency_seconds_bucket[2m])
 
         # Cluster-wide latency distribution: 0-10ms
-        - record: openshift:cluster:io:latency_bucket:ratio
+        - record: openshift:cluster:io:latency:bucket:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -55,7 +55,7 @@ spec:
             sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide latency distribution: 10-100ms
-        - record: openshift:cluster:io:latency_bucket:ratio
+        - record: openshift:cluster:io:latency:bucket:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -71,7 +71,7 @@ spec:
             sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide latency distribution: 100ms-1s
-        - record: openshift:cluster:io:latency_bucket:ratio
+        - record: openshift:cluster:io:latency:bucket:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -87,7 +87,7 @@ spec:
             sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide latency distribution: >1s
-        - record: openshift:cluster:io:latency_bucket:ratio
+        - record: openshift:cluster:io:latency:bucket:ratio
           labels:
             segment: "host_to_device"
             protocol: "block"
@@ -150,7 +150,7 @@ spec:
         # p80 quantile of percentage point distance from mean pressure
         # Shows the spread: 80% of nodes are within this many percentage points of the mean
         # Values: <0.11 (±11pp) = healthy balanced, 0.11-0.22 = unhealthy balance, 0.22-0.33 = severely unbalanced, >0.33 = critically unbalanced
-        - record: openshift:cluster:io:imbalance:p80distance
+        - record: openshift:cluster:io:imbalance:distance:p80
           labels:
             segment: "host_to_device"
             protocol: "block"

@@ -214,7 +214,7 @@ spec:
         # p80 quantile of percentage point distance from mean pressure
         # Shows the spread: 80% of nodes are within this many percentage points of the mean
         # Values: <0.11 (±11pp) = healthy balanced, 0.11-0.22 = unhealthy balance, 0.22-0.33 = severely unbalanced, >0.33 = critically unbalanced
-        - record: openshift:cluster:cpu:imbalance:p80distance
+        - record: openshift:cluster:cpu:imbalance:distance:p80
           labels:
             scope: "workloads"
             unit: ratio
@@ -257,7 +257,7 @@ spec:
           expr: |
             count by (name, namespace, node) (kubevirt_vmi_vcpu_seconds_total)
 
-        - record: openshift:vm:cpu:requested:count
+        - record: openshift:vm:cpu:requests:count
           labels:
             unit: count
           expr: |
@@ -279,5 +279,5 @@ spec:
             openshift:vm:virtual:cpu:seconds
 
             / on (name, namespace)
-            
-            openshift:vm:cpu:requested:count
+
+            openshift:vm:cpu:requests:count

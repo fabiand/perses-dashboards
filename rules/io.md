@@ -84,7 +84,7 @@ Shows the spread: 80% of nodes are within this many percentage points of the mea
 
 ```promql
 # Cluster I/O pressure imbalance
-openshift:cluster:io:imbalance:p80distance
+openshift:cluster:io:imbalance:distance:p80
 ```
 
 ## Recording Rule Structure
@@ -98,8 +98,8 @@ openshift:node:io:latency:p95{node}
 openshift:cluster:io:latency:p50
 openshift:cluster:io:latency:p95
 openshift:cluster:io:latency:p99
-openshift:cluster:io:imbalance:p80distance
-openshift:cluster:io:latency_bucket:ratio{le, g}
+openshift:cluster:io:imbalance:distance:p80
+openshift:cluster:io:latency:bucket:ratio{le, g}
 ```
 
 ### Label Dimensions
@@ -126,8 +126,8 @@ openshift:cluster:io:latency_bucket:ratio{le, g}
 | `openshift:cluster:io:latency:p50` | Cluster-wide median latency |
 | `openshift:cluster:io:latency:p95` | Cluster-wide 95th percentile latency |
 | `openshift:cluster:io:latency:p99` | Cluster-wide 99th percentile latency |
-| `openshift:cluster:io:imbalance:p80distance` | p80 quantile of percentage point distance from mean pressure across nodes |
-| `openshift:cluster:io:latency_bucket:ratio{le,g}` | Latency distribution by bucket |
+| `openshift:cluster:io:imbalance:distance:p80` | p80 quantile of percentage point distance from mean pressure across nodes |
+| `openshift:cluster:io:latency:bucket:ratio{le,g}` | Latency distribution by bucket |
 
 ## Latency Buckets
 
@@ -181,17 +181,17 @@ openshift:cluster:io:latency:p99
 
 ```promql
 # Detect unbalanced I/O pressure (>33pp spread indicates critical imbalance)
-openshift:cluster:io:imbalance:p80distance > 0.33
+openshift:cluster:io:imbalance:distance:p80 > 0.33
 ```
 
 ### Distribution Analysis
 
 ```promql
 # Fast operations (0-10ms)
-openshift:cluster:io:latency_bucket:ratio{le="0.01"}
+openshift:cluster:io:latency:bucket:ratio{le="0.01"}
 
 # Slow operations (>1s)
-openshift:cluster:io:latency_bucket:ratio{le="+Inf", g="1.0"}
+openshift:cluster:io:latency:bucket:ratio{le="+Inf", g="1.0"}
 ```
 
 ## Important Notes

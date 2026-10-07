@@ -711,7 +711,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "query": "openshift:cluster:memory:imbalance:p80distance{scope=\"workloads\"}",
+                    "query": "openshift:cluster:memory:imbalance:distance:p80{scope=\"workloads\"}",
                     "seriesNameFormat": "p80 distance from mean"
                   }
                 }

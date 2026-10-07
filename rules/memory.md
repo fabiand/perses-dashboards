@@ -165,7 +165,7 @@ openshift:node:memory:pressure:ratio
 openshift:vm:memory:overcommit:ratio
 
 # Cluster workload imbalance
-openshift:cluster:memory:imbalance:p80distance
+openshift:cluster:memory:imbalance:distance:p80
 ```
 
 ## Recording Rule Structure
@@ -176,7 +176,7 @@ All rules use **colon hierarchy** (Prometheus convention for recording rules):
 openshift:node:memory:bytes{scope, tier, utilized, temperature, usage}
 openshift:node:memory:utilization:ratio
 openshift:cluster:memory:utilization:ratio
-openshift:cluster:memory:imbalance:p80distance
+openshift:cluster:memory:imbalance:distance:p80
 openshift:vm:memory:overcommit:ratio
 ```
 
@@ -286,7 +286,7 @@ openshift:cluster:memory:overcommit:ratio
 
 ```promql
 # Cluster-wide memory pressure imbalance (p80 distance from mean)
-openshift:cluster:memory:imbalance:p80distance
+openshift:cluster:memory:imbalance:distance:p80
 ```
 
 **Why**: Detect uneven pressure distribution across nodes. Computed as p80 quantile of `abs(node_pressure - mean_pressure)`. Shows the spread: 80% of nodes are within this many percentage points of the mean pressure. Values <0.11 (±11pp) indicate healthy balanced distribution, 0.11-0.22 unhealthy balance, 0.22-0.33 severely unbalanced, >0.33 critically unbalanced requiring investigation. Pressure imbalance is more actionable than utilization imbalance - high utilization without pressure is healthy, but pressure always indicates contention.
@@ -379,7 +379,7 @@ VM-specific recording rules follow the same colon hierarchy as node rules:
 
 ```
 openshift:vm:memory:bytes{name, namespace, node, tier, utilized, temperature}
-openshift:vm:memory:requested:bytes{name, namespace, node}
+openshift:vm:memory:requests:bytes{name, namespace, node}
 openshift:vm:virtual:memory:bytes{name, namespace, node}
 openshift:vm:memory:utilization:ratio{name, namespace, node}
 openshift:vm:memory:overcommit:ratio{name, namespace, node}
@@ -390,7 +390,7 @@ openshift:vm:memory:overcommit:ratio{name, namespace, node}
 | Rule | Purpose |
 |------|---------|
 | `openshift:vm:memory:bytes` | VM memory consumption across tiers and utilization states |
-| `openshift:vm:memory:requested:bytes` | VM capacity (pod memory requests for virt-launcher) |
+| `openshift:vm:memory:requests:bytes` | VM capacity (pod memory requests for virt-launcher) |
 | `openshift:vm:virtual:memory:bytes` | Virtual memory assigned to VM (domain bytes) |
 | `openshift:vm:memory:utilization:ratio` | Fraction of requested capacity in use |
 | `openshift:vm:memory:overcommit:ratio` | Virtual memory vs physical allocation |
@@ -460,7 +460,7 @@ Where `virtual:memory:bytes = kubevirt_vmi_memory_domain_bytes` (the virtual add
 sum by (name, namespace) (openshift:vm:memory:bytes{tier="0", utilized="true"})
 
 # VM capacity
-openshift:vm:memory:requested:bytes
+openshift:vm:memory:requests:bytes
 ```
 
 **Why**: Monitor individual VM resource consumption and identify VMs consuming excessive memory.

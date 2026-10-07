@@ -58,7 +58,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:imbalance:p80distance",
+                      "query": "openshift:cluster:io:imbalance:distance:p80",
                       "seriesNameFormat": "p80 distance from mean"
                     }
                   }
@@ -394,7 +394,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency_bucket:ratio{le=\"0.01\"}",
+                      "query": "openshift:cluster:io:latency:bucket:ratio{le=\"0.01\"}",
                       "seriesNameFormat": "0ms - 10ms"
                     }
                   }
@@ -406,7 +406,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency_bucket:ratio{le=\"0.1\",g=\"0.01\"}",
+                      "query": "openshift:cluster:io:latency:bucket:ratio{le=\"0.1\",g=\"0.01\"}",
                       "seriesNameFormat": "10ms - 100ms"
                     }
                   }
@@ -418,7 +418,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency_bucket:ratio{le=\"1.0\",g=\"0.1\"}",
+                      "query": "openshift:cluster:io:latency:bucket:ratio{le=\"1.0\",g=\"0.1\"}",
                       "seriesNameFormat": "100ms - 1s"
                     }
                   }
@@ -430,7 +430,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency_bucket:ratio{le=\"+Inf\",g=\"1.0\"}",
+                      "query": "openshift:cluster:io:latency:bucket:ratio{le=\"+Inf\",g=\"1.0\"}",
                       "seriesNameFormat": "> 1s"
                     }
                   }
