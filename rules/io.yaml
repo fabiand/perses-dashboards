@@ -103,8 +103,9 @@ spec:
             sum(rate(kme_system_block_io_latency_seconds_count[2m]))
 
         # Cluster-wide p50 (median) latency
-        - record: openshift:cluster:io:latency:p50
+        - record: openshift:cluster:io:latency
           labels:
+            quantile: "0.50"
             segment: "host_to_device"
             protocol: "block"
             unit: seconds
@@ -114,8 +115,9 @@ spec:
             )
 
         # Cluster-wide p95 latency
-        - record: openshift:cluster:io:latency:p95
+        - record: openshift:cluster:io:latency
           labels:
+            quantile: "0.95"
             segment: "host_to_device"
             protocol: "block"
             unit: seconds
@@ -125,8 +127,9 @@ spec:
             )
 
         # Cluster-wide p99 latency
-        - record: openshift:cluster:io:latency:p99
+        - record: openshift:cluster:io:latency
           labels:
+            quantile: "0.99"
             segment: "host_to_device"
             protocol: "block"
             unit: seconds
@@ -136,8 +139,9 @@ spec:
             )
 
         # Per-node p95 latency
-        - record: openshift:node:io:latency:p95
+        - record: openshift:node:io:latency
           labels:
+            quantile: "0.95"
             segment: "host_to_device"
             protocol: "block"
             unit: seconds
@@ -150,8 +154,9 @@ spec:
         # p80 quantile of percentage point distance from mean pressure
         # Shows the spread: 80% of nodes are within this many percentage points of the mean
         # Values: <0.11 (±11pp) = healthy balanced, 0.11-0.22 = unhealthy balance, 0.22-0.33 = severely unbalanced, >0.33 = critically unbalanced
-        - record: openshift:cluster:io:imbalance:distance:p80
+        - record: openshift:cluster:io:imbalance:distance
           labels:
+            quantile: "0.80"
             segment: "host_to_device"
             protocol: "block"
             unit: ratio

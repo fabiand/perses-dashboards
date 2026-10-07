@@ -54,13 +54,13 @@ I/O latency is measured as a histogram showing the distribution of operation com
 
 ```promql
 # Cluster-wide p50 (median) latency
-openshift:cluster:io:latency:p50
+openshift:cluster:io:latency{quantile="0.50"}
 
 # Cluster-wide p95 latency
-openshift:cluster:io:latency:p95
+openshift:cluster:io:latency{quantile="0.95"}
 
 # Cluster-wide p99 (tail) latency
-openshift:cluster:io:latency:p99
+openshift:cluster:io:latency{quantile="0.99"}
 ```
 
 ### Imbalance
@@ -84,7 +84,7 @@ Shows the spread: 80% of nodes are within this many percentage points of the mea
 
 ```promql
 # Cluster I/O pressure imbalance
-openshift:cluster:io:imbalance:distance:p80
+openshift:cluster:io:imbalance:distance{quantile="0.80"}
 ```
 
 ## Recording Rule Structure
@@ -94,11 +94,11 @@ All rules use **colon hierarchy** (Prometheus convention):
 ```
 openshift:node:io:utilization:ratio{node}
 openshift:cluster:io:utilization:ratio
-openshift:node:io:latency:p95{node}
-openshift:cluster:io:latency:p50
-openshift:cluster:io:latency:p95
-openshift:cluster:io:latency:p99
-openshift:cluster:io:imbalance:distance:p80
+openshift:node:io:latency{quantile="0.95"}{node}
+openshift:cluster:io:latency{quantile="0.50"}
+openshift:cluster:io:latency{quantile="0.95"}
+openshift:cluster:io:latency{quantile="0.99"}
+openshift:cluster:io:imbalance:distance{quantile="0.80"}
 openshift:cluster:io:latency:bucket:ratio{le, g}
 ```
 
@@ -116,17 +116,17 @@ openshift:cluster:io:latency:bucket:ratio{le, g}
 |--------|-------------|
 | `openshift:node:io:utilization:ratio` | Per-device busy time (max across devices on node) |
 | `openshift:node:io:latency:rate` | Per-node latency histogram rate |
-| `openshift:node:io:latency:p95` | Per-node 95th percentile latency |
+| `openshift:node:io:latency{quantile="0.95"}` | Per-node 95th percentile latency |
 
 ### Cluster-level Metrics
 
 | Metric | Description |
 |--------|-------------|
 | `openshift:cluster:io:utilization:ratio` | Max device utilization across all nodes |
-| `openshift:cluster:io:latency:p50` | Cluster-wide median latency |
-| `openshift:cluster:io:latency:p95` | Cluster-wide 95th percentile latency |
-| `openshift:cluster:io:latency:p99` | Cluster-wide 99th percentile latency |
-| `openshift:cluster:io:imbalance:distance:p80` | p80 quantile of percentage point distance from mean pressure across nodes |
+| `openshift:cluster:io:latency{quantile="0.50"}` | Cluster-wide median latency |
+| `openshift:cluster:io:latency{quantile="0.95"}` | Cluster-wide 95th percentile latency |
+| `openshift:cluster:io:latency{quantile="0.99"}` | Cluster-wide 99th percentile latency |
+| `openshift:cluster:io:imbalance:distance{quantile="0.80"}` | p80 quantile of percentage point distance from mean pressure across nodes |
 | `openshift:cluster:io:latency:bucket:ratio{le,g}` | Latency distribution by bucket |
 
 ## Latency Buckets
@@ -168,20 +168,20 @@ openshift:cluster:io:utilization:ratio
 
 ```promql
 # Typical latency (p50)
-openshift:cluster:io:latency:p50
+openshift:cluster:io:latency{quantile="0.50"}
 
 # SLA latency (p95)
-openshift:cluster:io:latency:p95
+openshift:cluster:io:latency{quantile="0.95"}
 
 # Tail latency (p99)
-openshift:cluster:io:latency:p99
+openshift:cluster:io:latency{quantile="0.99"}
 ```
 
 ### Imbalance Detection
 
 ```promql
 # Detect unbalanced I/O pressure (>33pp spread indicates critical imbalance)
-openshift:cluster:io:imbalance:distance:p80 > 0.33
+openshift:cluster:io:imbalance:distance{quantile="0.80"} > 0.33
 ```
 
 ### Distribution Analysis

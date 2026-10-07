@@ -224,7 +224,7 @@ Values > 1.0 indicate overcommit. Values > 2.0 may cause contention under load.
 Measures how evenly CPU pressure is distributed across nodes using p80 quantile of percentage point distance from mean:
 
 ```promql
-openshift:cluster:cpu:imbalance:distance:p80{scope="workloads"}
+openshift:cluster:cpu:imbalance:distance{quantile="0.80"}{scope="workloads"}
 ```
 
 Calculated as:
@@ -275,7 +275,7 @@ openshift:cluster:cpu:seconds{scope="system|workloads", utilized="true|false", u
 openshift:cluster:virtual:cpu:seconds{scope="workloads", unit="seconds"}
 openshift:cluster:cpu:utilization:ratio{scope="workloads", unit="ratio"}
 openshift:cluster:cpu:overcommit:ratio{scope="virtual", unit="ratio"}
-openshift:cluster:cpu:imbalance:distance:p80{scope="workloads", unit="ratio"}
+openshift:cluster:cpu:imbalance:distance{quantile="0.80"}{scope="workloads", unit="ratio"}
 openshift:cluster:cpu:pressure:ratio{severity="some", unit="ratio"}
 ```
 

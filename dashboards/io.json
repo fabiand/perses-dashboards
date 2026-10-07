@@ -58,7 +58,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:imbalance:distance:p80",
+                      "query": "openshift:cluster:io:imbalance:distance{quantile="0.80"}",
                       "seriesNameFormat": "p80 distance from mean"
                     }
                   }
@@ -157,7 +157,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:p50",
+                      "query": "openshift:cluster:io:latency{quantile="0.50"}",
                       "seriesNameFormat": "p50 (median)"
                     }
                   }
@@ -169,7 +169,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:p95",
+                      "query": "openshift:cluster:io:latency{quantile="0.95"}",
                       "seriesNameFormat": "p95"
                     }
                   }
@@ -181,7 +181,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:p99",
+                      "query": "openshift:cluster:io:latency{quantile="0.99"}",
                       "seriesNameFormat": "p99"
                     }
                   }
@@ -323,7 +323,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:p95",
+                      "query": "openshift:cluster:io:latency{quantile="0.95"}",
                       "seriesNameFormat": "Latency p95"
                     }
                   }
@@ -492,7 +492,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:p50",
+                      "query": "openshift:cluster:io:latency{quantile="0.50"}",
                       "seriesNameFormat": "p50 (median)"
                     }
                   }
@@ -504,7 +504,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:p95",
+                      "query": "openshift:cluster:io:latency{quantile="0.95"}",
                       "seriesNameFormat": "p95"
                     }
                   }
@@ -516,7 +516,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "openshift:cluster:io:latency:p99",
+                      "query": "openshift:cluster:io:latency{quantile="0.99"}",
                       "seriesNameFormat": "p99"
                     }
                   }

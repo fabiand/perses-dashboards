@@ -214,8 +214,9 @@ spec:
 
             sum(kube_node_status_allocatable{resource="memory"})
 
-        - record: openshift:cluster:memory:imbalance:distance:p80
+        - record: openshift:cluster:memory:imbalance:distance
           labels:
+            quantile: "0.80"
             scope: "workloads"
             unit: ratio
           expr: |
